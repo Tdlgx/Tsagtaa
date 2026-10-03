@@ -28,7 +28,7 @@ export const publicEnvSchema = z.object({
       error: "http:// эсвэл https://-ээр эхэлсэн зөв URL байх ёстой. Жишээ: http://localhost:3000",
     }),
   ),
-  NEXT_PUBLIC_APP_NAME: requiredString("Жишээ: ЦагАвъя"),
+  NEXT_PUBLIC_APP_NAME: requiredString("Жишээ: Цагтаа"),
 });
 
 /** Variables that must never leave the server (secrets, connection strings). */
