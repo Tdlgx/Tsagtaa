@@ -1,0 +1,155 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Dark mode is opt-in via a `.dark` class on <html> (not wired up yet). */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens.
+ * Colors use OKLCH: oklch(lightness chroma hue). Brand hue ≈ 168 (deep jade green):
+ * calm and trustworthy, fitting for salons. All text/background pairs meet WCAG AA.
+ */
+:root {
+  --radius: 0.75rem;
+
+  --background: oklch(0.985 0.004 165);
+  --foreground: oklch(0.2 0.02 170);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.02 170);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.02 170);
+  --primary: oklch(0.45 0.09 168);
+  --primary-foreground: oklch(0.985 0.01 165);
+  --secondary: oklch(0.955 0.015 165);
+  --secondary-foreground: oklch(0.3 0.05 168);
+  --muted: oklch(0.96 0.006 165);
+  --muted-foreground: oklch(0.5 0.02 170);
+  --accent: oklch(0.95 0.025 165);
+  --accent-foreground: oklch(0.32 0.06 168);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.91 0.01 165);
+  --input: oklch(0.88 0.012 165);
+  --ring: oklch(0.55 0.1 168);
+
+  --chart-1: oklch(0.45 0.09 168);
+  --chart-2: oklch(0.62 0.11 165);
+  --chart-3: oklch(0.75 0.1 160);
+  --chart-4: oklch(0.55 0.08 200);
+  --chart-5: oklch(0.7 0.12 75);
+
+  --sidebar: oklch(0.975 0.006 165);
+  --sidebar-foreground: oklch(0.2 0.02 170);
+  --sidebar-primary: oklch(0.45 0.09 168);
+  --sidebar-primary-foreground: oklch(0.985 0.01 165);
+  --sidebar-accent: oklch(0.95 0.025 165);
+  --sidebar-accent-foreground: oklch(0.32 0.06 168);
+  --sidebar-border: oklch(0.91 0.01 165);
+  --sidebar-ring: oklch(0.55 0.1 168);
+
+  /* Brand-tinted shadow color; used by the shadow-soft / shadow-lifted utilities. */
+  --shadow-tint: oklch(0.3 0.05 170 / 0.08);
+}
+
+.dark {
+  --background: oklch(0.17 0.012 170);
+  --foreground: oklch(0.96 0.008 165);
+  --card: oklch(0.21 0.014 170);
+  --card-foreground: oklch(0.96 0.008 165);
+  --popover: oklch(0.21 0.014 170);
+  --popover-foreground: oklch(0.96 0.008 165);
+  --primary: oklch(0.72 0.12 165);
+  --primary-foreground: oklch(0.18 0.03 170);
+  --secondary: oklch(0.27 0.02 170);
+  --secondary-foreground: oklch(0.96 0.008 165);
+  --muted: oklch(0.26 0.015 170);
+  --muted-foreground: oklch(0.7 0.02 165);
+  --accent: oklch(0.29 0.03 168);
+  --accent-foreground: oklch(0.96 0.008 165);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.6 0.1 165);
+
+  --chart-1: oklch(0.72 0.12 165);
+  --chart-2: oklch(0.62 0.11 165);
+  --chart-3: oklch(0.5 0.09 168);
+  --chart-4: oklch(0.65 0.08 200);
+  --chart-5: oklch(0.75 0.12 75);
+
+  --sidebar: oklch(0.2 0.014 170);
+  --sidebar-foreground: oklch(0.96 0.008 165);
+  --sidebar-primary: oklch(0.72 0.12 165);
+  --sidebar-primary-foreground: oklch(0.18 0.03 170);
+  --sidebar-accent: oklch(0.29 0.03 168);
+  --sidebar-accent-foreground: oklch(0.96 0.008 165);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.6 0.1 165);
+
+  --shadow-tint: oklch(0 0 0 / 0.35);
+}
+
+/* Map the CSS variables above to Tailwind utilities (bg-primary, rounded-lg, shadow-soft, …). */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --shadow-soft: 0 1px 2px var(--shadow-tint), 0 4px 16px -4px var(--shadow-tint);
+  --shadow-lifted: 0 2px 4px var(--shadow-tint), 0 12px 32px -8px var(--shadow-tint);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,10 @@
+# Store text files with LF line endings in Git, even on Windows.
+# Prevents "every line changed" diffs and Prettier end-of-line errors.
+* text=auto eol=lf
+
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff2 binary
