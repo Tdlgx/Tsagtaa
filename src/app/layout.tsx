@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Onest, Unbounded } from "next/font/google";
 import type { JSX } from "react";
@@ -73,6 +74,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">): Promis
           <ThemeProvider>
             <StorageScope accountId={account?.id ?? null}>{children}</StorageScope>
             <Toaster />
+            {/* Vercel Web Analytics: page views, no cookies; does nothing outside Vercel. */}
+            <Analytics />
           </ThemeProvider>
         </LocaleProvider>
       </body>
