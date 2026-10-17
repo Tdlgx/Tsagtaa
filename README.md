@@ -25,6 +25,8 @@
 | Zod 4                                         | Environment variable болон оролтын шалгалт    |
 | PostgreSQL 18 (Docker Compose)                | Өгөгдлийн сан                                 |
 | ESLint 9 (flat config) + Prettier             | Кодын чанар ба нэгэн хэвийн формат            |
+| next-themes, sonner                           | Light/dark горим, toast мэдэгдэл              |
+| Unbounded + Onest (next/font, cyrillic-ext)   | Гарчиг ба үндсэн текст, Монгол Ө/Ү бүрэн      |
 
 ## Шаардлагатай програмууд
 
@@ -76,6 +78,21 @@ npm run dev
 | `npm run db:up`        | PostgreSQL контейнерийг асааж, healthy болтол хүлээнэ             |
 | `npm run db:down`      | Контейнерийг зогсооно (өгөгдөл volume-д хадгалагдана)             |
 | `npm run db:logs`      | Өгөгдлийн сангийн логийг харна (`Ctrl+C`-ээр гарна)               |
+
+## Дизайн систем «Хөх цаг»
+
+`npm run dev` ажиллуулаад <http://localhost:3000/design-system> хуудсыг нээнэ. Production
+горимд энэ хуудас 404 буцаадаг.
+
+- **Token-ууд:** `src/app/globals.css`. Өнгө, фонтын хэмжээ, radius, сүүдэр, хөдөлгөөн бүгд
+  энд тодорхойлогдоно. Tailwind-ийн default палитрыг санаатай устгасан тул `text-gray-500`
+  мэт утга ажиллахгүй.
+- **Суурь компонентууд:** `src/components/ui/`. Button, Card, Input, Select, Textarea, Field,
+  Badge, Skeleton, Toaster.
+- **Аппын компонентууд:** `src/features/*/components/`. TimeSlot, BookingStepper,
+  ServiceCard, BusinessCard.
+- **Layout:** `src/components/layout/`. Header, гар утасны доод навигаци, footer, горим солигч.
+- Текст ба дэвсгэрийн бүх хослол light, dark хоёр горимд WCAG AA (≥ 4.5:1) хангана.
 
 ## Хавтасны бүтэц
 

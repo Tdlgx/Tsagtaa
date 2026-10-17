@@ -1,8 +1,10 @@
 "use client"; // Error boundaries must be Client Components.
 
+import { CircleAlert, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, type JSX } from "react";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 
 type ErrorPageProps = {
@@ -17,25 +19,30 @@ export default function ErrorPage({ error, retry }: ErrorPageProps): JSX.Element
   }, [error]);
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-4 py-24 text-center">
-      <p className="text-sm font-semibold text-destructive">Алдаа</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-        Уучлаарай, алдаа гарлаа
-      </h1>
-      <p className="mt-4 max-w-md text-muted-foreground">
-        Түр зуурын асуудал байж магадгүй. Дахин оролдоно уу, эсвэл нүүр хуудас руу буцна уу.
-      </p>
-      {error.digest ? (
-        <p className="mt-2 text-xs text-muted-foreground">Алдааны код: {error.digest}</p>
-      ) : null}
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Button type="button" size="lg" onClick={() => retry()}>
-          Дахин оролдох
-        </Button>
-        <Button asChild size="lg" variant="outline">
-          <Link href="/">Нүүр хуудас руу буцах</Link>
-        </Button>
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 px-5 py-16">
+      <div className="w-full max-w-md rounded-xl border border-border bg-surface shadow-sm">
+        <EmptyState
+          icon={CircleAlert}
+          title="Уучлаарай, алдаа гарлаа"
+          description="Түр зуурын асуудал байж магадгүй. Дахин оролдоно уу, эсвэл нүүр хуудас руу буцна уу."
+          action={
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button onClick={() => retry()}>
+                <RotateCcw data-icon="start" />
+                Дахин оролдох
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/">Нүүр хуудас руу буцах</Link>
+              </Button>
+            </div>
+          }
+        />
       </div>
+      {error.digest ? (
+        <p className="text-sm text-muted-foreground">
+          Алдааны код: <span className="tabular-nums">{error.digest}</span>
+        </p>
+      ) : null}
     </main>
   );
 }

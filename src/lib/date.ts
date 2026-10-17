@@ -117,3 +117,17 @@ export function toDateKey(input: DateInput): string {
   const { year, month, day } = getZonedParts(input);
   return `${year}-${pad2(month)}-${pad2(day)}`;
 }
+
+/** Service length for display: 45 → "45 мин", 60 → "1 цаг", 90 → "1 цаг 30 мин". */
+export function formatDuration(totalMinutes: number): string {
+  if (!Number.isInteger(totalMinutes) || totalMinutes <= 0) {
+    throw new RangeError(`Invalid duration: ${totalMinutes}`);
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) return `${minutes} мин`;
+  if (minutes === 0) return `${hours} цаг`;
+  return `${hours} цаг ${minutes} мин`;
+}

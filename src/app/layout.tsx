@@ -1,17 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Onest, Unbounded } from "next/font/google";
 import type { JSX } from "react";
 
+import { ThemeProvider } from "@/components/shared/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { APP_DESCRIPTION, APP_NAME, APP_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
 
-// Mongolian needs "cyrillic-ext" for Ө ө Ү ү, and "latin-ext" covers the ₮ sign.
-// With only "cyrillic" those letters would fall back to a different system font.
-const inter = Inter({
+// Mongolian Ө ө Ү ү live in the "cyrillic-ext" subset; "latin-ext" carries ₮.
+// Body + UI: Onest, a calm grotesque drawn with Cyrillic as a first-class script.
+const onest = Onest({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
-  variable: "--font-inter",
+  variable: "--font-onest",
+  display: "swap",
+});
+
+// Display: Unbounded, a wide geometric face. Its round, clock-like numerals
+// carry the brand's big moments (headlines, the live time); never body text.
+const unbounded = Unbounded({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "500", "600"],
+  variable: "--font-unbounded",
   display: "swap",
 });
 
@@ -33,13 +44,26 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04654c",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f3f4fa" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d1030" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">): JSX.Element {
   return (
-    <html lang="mn" className={cn(inter.variable, "h-full antialiased")}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    // next-themes sets the theme class on <html> before React hydrates.
+    <html
+      lang="mn"
+      suppressHydrationWarning
+      className={cn(onest.variable, unbounded.variable, "h-full antialiased")}
+    >
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

@@ -1,24 +1,26 @@
-import { CalendarClock } from "lucide-react";
-import Link from "next/link";
 import type { JSX } from "react";
 
 import { Container } from "@/components/layout/container";
-import { APP_NAME } from "@/lib/constants";
+import { DesktopNav } from "@/components/layout/desktop-nav";
+import { HeaderShell } from "@/components/layout/header-shell";
+import { Logo } from "@/components/layout/logo";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
-export function SiteHeader(): JSX.Element {
+type SiteHeaderProps = {
+  forceScrolled?: boolean;
+  sticky?: boolean;
+};
+
+export function SiteHeader({ forceScrolled, sticky }: SiteHeaderProps): JSX.Element {
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
-      <Container className="flex h-16 items-center">
-        <Link
-          href="/"
-          className="flex items-center gap-2 rounded-md font-semibold tracking-tight focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-        >
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <CalendarClock className="size-4" aria-hidden />
-          </span>
-          <span className="text-lg">{APP_NAME}</span>
-        </Link>
+    <HeaderShell forceScrolled={forceScrolled} sticky={sticky}>
+      <Container className="flex h-16 items-center justify-between gap-6">
+        <Logo />
+        <div className="flex items-center gap-4">
+          <DesktopNav className="hidden md:block" />
+          <ThemeToggle />
+        </div>
       </Container>
-    </header>
+    </HeaderShell>
   );
 }

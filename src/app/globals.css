@@ -2,116 +2,288 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Dark mode is opt-in via a `.dark` class on <html> (not wired up yet). */
+/* ==========================================================================
+   Цагтаа design system — "Хөх цаг" (blue hour)
+   Every color, size, radius, shadow and easing used in the app comes from
+   the tokens below. Tailwind's default palette and scales are removed on
+   purpose, so a stray `text-gray-500` or `rounded-2xl` simply does not exist.
+   ========================================================================== */
+
+/* Dark mode is driven by a `.dark` class on <html> (set by next-themes). */
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design tokens.
- * Colors use OKLCH: oklch(lightness chroma hue). Brand hue ≈ 168 (deep jade green):
- * calm and trustworthy, fitting for salons. All text/background pairs meet WCAG AA.
+ * Interaction state variants. They react to the real interaction, and can also
+ * be forced with `data-force="hover active focus"` so the /design-system
+ * artboards can show every state side by side without a mouse.
  */
+@custom-variant is-hover {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+  &[data-force~="hover"] {
+    @slot;
+  }
+}
+@custom-variant is-active {
+  &:active {
+    @slot;
+  }
+  &[data-force~="active"] {
+    @slot;
+  }
+}
+@custom-variant is-focus {
+  &:focus-visible {
+    @slot;
+  }
+  &[data-force~="focus"] {
+    @slot;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1. Raw color tokens (light). Hex values are hand-picked; every text/background
+      pair is checked against WCAG AA (≥ 4.5:1) — see /design-system.
+      Palette: porcelain paper, night-indigo ink, "хөх тэнгэр" ultramarine for
+      every action, and saffron "нар" reserved for time: the now-line, ratings.
+   -------------------------------------------------------------------------- */
 :root {
-  --radius: 0.75rem;
+  /* Surfaces */
+  --background: #f3f4fa; /* cool porcelain */
+  --surface: #ffffff; /* cards, schedule board */
+  --surface-muted: #e7e9f4; /* wells, skeletons, past time */
 
-  --background: oklch(0.985 0.004 165);
-  --foreground: oklch(0.2 0.02 170);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 170);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 170);
-  --primary: oklch(0.45 0.09 168);
-  --primary-foreground: oklch(0.985 0.01 165);
-  --secondary: oklch(0.955 0.015 165);
-  --secondary-foreground: oklch(0.3 0.05 168);
-  --muted: oklch(0.96 0.006 165);
-  --muted-foreground: oklch(0.5 0.02 170);
-  --accent: oklch(0.95 0.025 165);
-  --accent-foreground: oklch(0.32 0.06 168);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.91 0.01 165);
-  --input: oklch(0.88 0.012 165);
-  --ring: oklch(0.55 0.1 168);
+  /* Ink */
+  --foreground: #151a3b; /* night indigo, never pure black */
+  --muted-foreground: #545a80;
 
-  --chart-1: oklch(0.45 0.09 168);
-  --chart-2: oklch(0.62 0.11 165);
-  --chart-3: oklch(0.75 0.1 160);
-  --chart-4: oklch(0.55 0.08 200);
-  --chart-5: oklch(0.7 0.12 75);
+  /* Lines */
+  --border: #dcdfee; /* 1px hairline, decorative */
+  --input: #868bae; /* form control outline, ≥ 3:1 so empty fields stay visible */
 
-  --sidebar: oklch(0.975 0.006 165);
-  --sidebar-foreground: oklch(0.2 0.02 170);
-  --sidebar-primary: oklch(0.45 0.09 168);
-  --sidebar-primary-foreground: oklch(0.985 0.01 165);
-  --sidebar-accent: oklch(0.95 0.025 165);
-  --sidebar-accent-foreground: oklch(0.32 0.06 168);
-  --sidebar-border: oklch(0.91 0.01 165);
-  --sidebar-ring: oklch(0.55 0.1 168);
+  /* Brand */
+  --primary: #2b38d6; /* ultramarine "хөх тэнгэр" */
+  --primary-hover: #212caf;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e3e6ff;
 
-  /* Brand-tinted shadow color; used by the shadow-soft / shadow-lifted utilities. */
-  --shadow-tint: oklch(0.3 0.05 170 / 0.08);
+  /* Saffron sun: the current-time line, ratings, rare highlights */
+  --sun: #f2ae1c;
+  --sun-foreground: #151a3b; /* text on a sun fill */
+  --sun-strong: #835400; /* saffron-colored text on light surfaces */
+  --sun-soft: #fdf0cc;
+
+  /* Status */
+  --success: #1d7a54;
+  --success-foreground: #1d7a54;
+  --success-soft: #e3f3eb;
+  --warning: #b7791f;
+  --warning-foreground: #7f5000;
+  --warning-soft: #fbebcb;
+  --danger: #c0392b;
+  --danger-foreground: #b3352a;
+  --danger-soft: #fce9e6;
+
+  /* Focus ring: primary at 40% */
+  --ring: color-mix(in srgb, var(--primary) 40%, transparent);
+
+  /* Elevation: indigo-tinted shadows, two layers each (contact + ambient) */
+  --shadow-tint: 21 26 59;
+  --elevation-1:
+    0 1px 1px rgb(var(--shadow-tint) / 0.04), 0 2px 8px -2px rgb(var(--shadow-tint) / 0.06);
+  --elevation-2:
+    0 1px 2px rgb(var(--shadow-tint) / 0.05), 0 12px 28px -8px rgb(var(--shadow-tint) / 0.12);
+  --elevation-3:
+    0 2px 4px rgb(var(--shadow-tint) / 0.05), 0 28px 64px -16px rgb(var(--shadow-tint) / 0.2);
+
+  /* Aliases for shadcn/ui components (keep their class names working) */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --accent: var(--surface-muted); /* shadcn "accent" = subtle hover fill, not the brand sun */
+  --accent-foreground: var(--foreground);
+  --destructive: var(--danger);
+  --chart-1: var(--primary);
+  --chart-2: var(--sun);
+  --chart-3: var(--success);
+  --chart-4: var(--warning);
+  --chart-5: var(--muted-foreground);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--surface-muted);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
+/* Dark: Ulaanbaatar night sky, never #000; brand colors lifted so they stay legible. */
 .dark {
-  --background: oklch(0.17 0.012 170);
-  --foreground: oklch(0.96 0.008 165);
-  --card: oklch(0.21 0.014 170);
-  --card-foreground: oklch(0.96 0.008 165);
-  --popover: oklch(0.21 0.014 170);
-  --popover-foreground: oklch(0.96 0.008 165);
-  --primary: oklch(0.72 0.12 165);
-  --primary-foreground: oklch(0.18 0.03 170);
-  --secondary: oklch(0.27 0.02 170);
-  --secondary-foreground: oklch(0.96 0.008 165);
-  --muted: oklch(0.26 0.015 170);
-  --muted-foreground: oklch(0.7 0.02 165);
-  --accent: oklch(0.29 0.03 168);
-  --accent-foreground: oklch(0.96 0.008 165);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.6 0.1 165);
-
-  --chart-1: oklch(0.72 0.12 165);
-  --chart-2: oklch(0.62 0.11 165);
-  --chart-3: oklch(0.5 0.09 168);
-  --chart-4: oklch(0.65 0.08 200);
-  --chart-5: oklch(0.75 0.12 75);
-
-  --sidebar: oklch(0.2 0.014 170);
-  --sidebar-foreground: oklch(0.96 0.008 165);
-  --sidebar-primary: oklch(0.72 0.12 165);
-  --sidebar-primary-foreground: oklch(0.18 0.03 170);
-  --sidebar-accent: oklch(0.29 0.03 168);
-  --sidebar-accent-foreground: oklch(0.96 0.008 165);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.6 0.1 165);
-
-  --shadow-tint: oklch(0 0 0 / 0.35);
+  --background: #0d1030;
+  --surface: #151a3b;
+  --surface-muted: #1e2450;
+  --foreground: #eef0fa;
+  --muted-foreground: #a4a9cf;
+  --border: #2a3060;
+  --input: #6e74a6;
+  --primary: #9ba5ff;
+  --primary-hover: #b5bcff;
+  --primary-foreground: #0d1030;
+  --primary-soft: #232b6b;
+  --sun: #ffc53d;
+  --sun-foreground: #0d1030;
+  --sun-strong: #ffd066;
+  --sun-soft: #3a3218;
+  --success: #6fcf9f;
+  --success-foreground: #6fcf9f;
+  --success-soft: #12302a;
+  --warning: #e9b65a;
+  --warning-foreground: #f0c77d;
+  --warning-soft: #352b16;
+  --danger: #ff8f7d;
+  --danger-foreground: #ff8f7d;
+  --danger-soft: #3d1e22;
+  --shadow-tint: 3 4 15;
+  --elevation-1:
+    0 1px 1px rgb(var(--shadow-tint) / 0.3), 0 2px 8px -2px rgb(var(--shadow-tint) / 0.3);
+  --elevation-2:
+    0 1px 2px rgb(var(--shadow-tint) / 0.35), 0 12px 28px -8px rgb(var(--shadow-tint) / 0.45);
+  --elevation-3:
+    0 2px 4px rgb(var(--shadow-tint) / 0.4), 0 28px 64px -16px rgb(var(--shadow-tint) / 0.6);
 }
 
-/* Map the CSS variables above to Tailwind utilities (bg-primary, rounded-lg, shadow-soft, …). */
+/* --------------------------------------------------------------------------
+   2. Static scales. `initial` wipes Tailwind's defaults so only these exist.
+   -------------------------------------------------------------------------- */
+@theme {
+  --color-*: initial;
+  --font-weight-*: initial;
+  --text-*: initial;
+  --shadow-*: initial;
+  --radius-*: initial;
+  --tracking-*: initial;
+  --leading-*: initial;
+  --ease-*: initial;
+
+  /* Weights: 400 body, 500 UI + display headings, 600 emphasis. Nothing else. */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Modular scale, ratio 1.25: 12 / 14 / 16 / 20 / 25 / 31 / 39 / 49 px */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.5625rem;
+  --text-xl--line-height: 1.25;
+  --text-2xl: 1.9375rem;
+  --text-2xl--line-height: 1.2;
+  --text-2xl--letter-spacing: -0.02em;
+  --text-3xl: 2.4375rem;
+  --text-3xl--line-height: 1.15;
+  --text-3xl--letter-spacing: -0.02em;
+  --text-4xl: 3.0625rem;
+  --text-4xl--line-height: 1.15;
+  --text-4xl--letter-spacing: -0.02em;
+
+  /* Fluid headings: grow smoothly from a 360px phone to a 1280px desktop. */
+  --text-heading: clamp(1.5625rem, 1.22rem + 1.52vw, 2.4375rem); /* 25 → 39px */
+  --text-heading--line-height: 1.2;
+  --text-heading--letter-spacing: -0.02em;
+  /* Display is set in wide Unbounded, so it stops growing at 61px. */
+  --text-display: clamp(2rem, 1.2rem + 3.4vw, 3.8125rem); /* 32 → 61px */
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.035em;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.06em;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.25;
+  --leading-normal: 1.6;
+
+  /* Radius: 6 small · 10 controls · 16 cards · 24 panels · 40 device frame */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-device: 2.5rem;
+  --radius-device-inner: 2rem; /* device radius − 8px frame padding */
+
+  /* Motion: one easing curve; durations 150 / 250 / 400 ms via duration-* */
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Layout */
+  --container-page: 75rem; /* 1200px */
+
+  --animate-shimmer: shimmer 1.6s var(--ease-soft) infinite;
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* 3. Map tokens to utilities (bg-surface, text-primary, shadow-md, …). */
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-unbounded), var(--font-onest), ui-sans-serif, sans-serif;
 
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-sun: var(--sun);
+  --color-sun-foreground: var(--sun-foreground);
+  --color-sun-strong: var(--sun-strong);
+  --color-sun-soft: var(--sun-soft);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-soft: var(--danger-soft);
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -126,30 +298,119 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-
-  --shadow-soft: 0 1px 2px var(--shadow-tint), 0 4px 16px -4px var(--shadow-tint);
-  --shadow-lifted: 0 2px 4px var(--shadow-tint), 0 12px 32px -8px var(--shadow-tint);
+  --shadow-sm: var(--elevation-1);
+  --shadow-md: var(--elevation-2);
+  --shadow-lg: var(--elevation-3);
 }
 
+/* --------------------------------------------------------------------------
+   4. Custom utilities
+   -------------------------------------------------------------------------- */
+
+/* 4 / 8 / 12-column layout grid (phone / tablet / desktop). */
+@utility layout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: --spacing(4);
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: --spacing(6);
+  }
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+/* Film grain: SVG noise at ~2.5% opacity, for hero and large backgrounds only. */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Diagonal hatching for "booked" time slots. */
+@utility bg-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 --spacing(1.5),
+    var(--border) --spacing(1.5) --spacing(2)
+  );
+}
+
+/* Hour lines on a schedule track; the element sets --hour (one hour's width). */
+@utility bg-hours {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--border) 0 1px,
+    transparent 1px var(--hour)
+  );
+}
+
+/* Dotted canvas behind design-system artboards (like a design tool). */
+@utility bg-canvas {
+  background-color: var(--surface-muted);
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: --spacing(4) --spacing(4);
+}
+
+/* Keeps fixed bottom bars clear of the iPhone home indicator. */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* --------------------------------------------------------------------------
+   5. Base styles
+   -------------------------------------------------------------------------- */
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   html {
     @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
   }
   body {
     @apply bg-background text-foreground;
   }
+  h1,
+  h2,
+  h3 {
+    @apply text-balance;
+  }
+  p {
+    @apply text-pretty;
+  }
+  ::selection {
+    @apply bg-primary-soft text-foreground;
+  }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+
+  /* lucide-react icons: one stroke weight across the whole app. */
+  .lucide {
+    stroke-width: 1.5;
+  }
+
+  /* Respect "reduce motion": keep state changes, drop the movement. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
