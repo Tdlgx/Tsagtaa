@@ -54,10 +54,10 @@ export function BusinessCard({
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-primary-soft to-sun-soft">
             <UlziiPattern
-              className="absolute inset-0 size-full text-primary opacity-10"
+              className="absolute inset-0 size-full text-primary-strong opacity-10"
               tile={56}
             />
-            <span className="relative flex size-14 items-center justify-center rounded-full bg-surface text-primary shadow-sm">
+            <span className="relative flex size-14 items-center justify-center rounded-full bg-surface text-primary-strong shadow-sm">
               <CategoryIcon className="size-6" />
             </span>
           </div>

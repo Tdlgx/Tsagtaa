@@ -26,7 +26,7 @@ const buttonVariants = cva(
         ghost: "text-foreground after:bg-surface-muted",
         destructive: "bg-danger text-surface shadow-sm after:bg-foreground/10",
         /** On a primary-colored band: the colors swap. */
-        inverse: "bg-primary-foreground text-primary after:bg-primary-soft",
+        inverse: "bg-primary-foreground text-primary after:bg-primary/15",
       },
       size: {
         // Icons sit 4px closer to the edge than text does: optically the padding then looks equal.

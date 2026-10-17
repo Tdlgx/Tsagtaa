@@ -1,12 +1,12 @@
 "use client";
 
-import { LayoutGrid, Search, type LucideIcon } from "lucide-react";
+import { Search, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOptimistic, useState, useTransition, type JSX, type ReactNode } from "react";
 
+import { CategoryPicker } from "@/app/(public)/search/_components/category-picker";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { BUSINESS_CATEGORIES } from "@/features/business/categories";
 import { DISTRICTS } from "@/features/business/districts";
 import {
   SEARCH_DAYS,
@@ -16,6 +16,7 @@ import {
   toSearchHref,
   type SearchFilters,
 } from "@/features/business/search";
+import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 type Choice = { value: string; label: string; hint?: string; icon?: LucideIcon };
@@ -91,20 +92,6 @@ function ChoiceGroup({
   );
 }
 
-const CATEGORY_CHOICES: readonly Choice[] = [
-  { value: "", label: "Бүгд", icon: LayoutGrid },
-  ...BUSINESS_CATEGORIES.map(({ slug, label, icon }) => ({ value: slug, label, icon })),
-];
-
-const TIME_CHOICES: readonly Choice[] = [
-  { value: "", label: "Бүх цаг" },
-  ...TIMES_OF_DAY.map(({ value, label, from, to }) => ({
-    value,
-    label,
-    hint: `${toClock(from).slice(0, 2)}–${toClock(to).slice(0, 2)}`,
-  })),
-];
-
 type SearchShellProps = {
   filters: SearchFilters;
   /** Server-rendered results; dimmed while the next search loads. */
@@ -117,6 +104,7 @@ type SearchShellProps = {
  * `useOptimistic` shows the new choice immediately while results load.
  */
 export function SearchShell({ filters, children }: SearchShellProps): JSX.Element {
+  const t = useT();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [current, setCurrent] = useOptimistic(filters);
@@ -137,6 +125,19 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
     });
   };
 
+  const dayChoices: Choice[] = SEARCH_DAYS.map(({ value }) => ({
+    value,
+    label: value === "today" ? t.common.today : t.common.tomorrow,
+  }));
+  const timeChoices: Choice[] = [
+    { value: "", label: t.search.anyTime },
+    ...TIMES_OF_DAY.map(({ value, from, to }) => ({
+      value,
+      label: t.search.parts[value],
+      hint: `${toClock(from).slice(0, 2)}–${toClock(to).slice(0, 2)}`,
+    })),
+  ];
+
   const update = (key: keyof SearchFilters, value: string): void => {
     navigate({ ...current, q: draft.trim(), [key]: value });
   };
@@ -154,9 +155,9 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
         className="flex flex-col gap-4"
       >
         <div className="flex gap-2">
-          <div className="relative min-w-0 flex-1">
+          <div data-tour="search" className="relative min-w-0 flex-1">
             <label htmlFor="search-q" className="sr-only">
-              Үйлчилгээ эсвэл газрын нэр
+              {t.search.queryLabel}
             </label>
             <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -168,46 +169,42 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
               maxLength={60}
               enterKeyHint="search"
               autoComplete="off"
-              placeholder="Жишээ нь: маникюр"
-              className="h-13 w-full min-w-0 rounded-full border border-input bg-surface pr-5 pl-12 text-base text-foreground outline-none placeholder:text-muted-foreground is-hover:border-muted-foreground is-focus:border-primary is-focus:ring-3 is-focus:ring-ring"
+              placeholder={t.search.placeholder}
+              className="h-13 w-full min-w-0 rounded-full border border-input bg-surface pr-5 pl-12 text-base text-foreground outline-none placeholder:text-muted-foreground is-hover:border-muted-foreground is-focus:border-primary-strong is-focus:ring-3 is-focus:ring-ring"
             />
           </div>
           <Button type="submit" size="lg" className="max-sm:px-5">
-            Хайх
+            {t.search.submit}
           </Button>
         </div>
 
-        <ChoiceGroup
-          legend="Ангилал"
-          name="cat"
-          look="chips"
-          value={current.cat}
-          choices={CATEGORY_CHOICES}
-          onChange={(value) => update("cat", value)}
-        />
+        <CategoryPicker value={current.cat} onChange={(value) => update("cat", value)} />
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-[auto_1fr] lg:flex lg:items-center">
+        <div
+          data-tour="filters"
+          className="grid grid-cols-2 gap-3 md:grid-cols-[auto_1fr] lg:flex lg:items-center"
+        >
           <ChoiceGroup
-            legend="Өдөр"
+            legend={t.search.dayLegend}
             name="day"
             look="segmented"
             value={current.day}
-            choices={SEARCH_DAYS}
+            choices={dayChoices}
             onChange={(value) => update("day", value)}
             className="col-span-2 md:col-span-1"
           />
           <ChoiceGroup
-            legend="Өдрийн аль хэсэг"
+            legend={t.search.partLegend}
             name="time"
             look="segmented"
             value={current.time}
-            choices={TIME_CHOICES}
+            choices={timeChoices}
             onChange={(value) => update("time", value)}
             className="col-span-2 md:col-span-1"
           />
           <div className="col-span-2 sm:col-span-1 lg:ml-auto lg:w-52">
             <label htmlFor="search-district" className="sr-only">
-              Дүүрэг
+              {t.search.district}
             </label>
             <Select
               id="search-district"
@@ -216,17 +213,17 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
               onChange={(event) => update("district", event.target.value)}
               className="rounded-full"
             >
-              <option value="">Бүх дүүрэг</option>
-              {DISTRICTS.map(({ slug, label }) => (
+              <option value="">{t.search.allDistricts}</option>
+              {DISTRICTS.map(({ slug }) => (
                 <option key={slug} value={slug}>
-                  {label}
+                  {t.districts[slug]}
                 </option>
               ))}
             </Select>
           </div>
           <div className="col-span-2 sm:col-span-1 lg:w-52">
             <label htmlFor="search-sort" className="sr-only">
-              Эрэмбэлэх
+              {t.search.sort}
             </label>
             <Select
               id="search-sort"
@@ -235,9 +232,9 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
               onChange={(event) => update("sort", event.target.value)}
               className="rounded-full"
             >
-              {SEARCH_SORTS.map(({ value, label }) => (
+              {SEARCH_SORTS.map(({ value }) => (
                 <option key={value} value={value}>
-                  {label}
+                  {t.search.sorts[value]}
                 </option>
               ))}
             </Select>

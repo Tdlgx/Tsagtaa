@@ -4,7 +4,7 @@ import { publicEnv } from "@/lib/public-env";
 export const APP_NAME = publicEnv.NEXT_PUBLIC_APP_NAME;
 export const APP_URL = publicEnv.NEXT_PUBLIC_APP_URL;
 export const APP_DESCRIPTION =
-  "Үсчин, гоо сайхны салон, барбершоп, маникюр, массажны цагаа онлайнаар хэдхэн алхмаар захиалаарай.";
+  "Салон, эмнэлэг, шүдний эмнэлэг, авто засвар, мал эмнэлгийн цагаа онлайнаар хэдхэн алхмаар захиалаарай.";
 
 /** Mongolia uses a single IANA time zone (UTC+8, no daylight saving time). */
 export const TIME_ZONE = "Asia/Ulaanbaatar";

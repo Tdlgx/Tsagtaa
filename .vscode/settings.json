@@ -22,5 +22,6 @@
 
   "[markdown]": {
     "files.trimTrailingWhitespace": false
-  }
+  },
+  "python.terminal.useEnvFile": true
 }

@@ -18,7 +18,7 @@ export const timeSlotVariants = cva(
     variants: {
       state: {
         available:
-          "cursor-pointer border-border bg-surface text-foreground is-hover:border-primary is-active:scale-96",
+          "cursor-pointer border-border bg-surface text-foreground is-hover:border-primary-strong is-active:scale-96",
         selected: "border-primary bg-primary text-primary-foreground shadow-sm",
         booked:
           "cursor-not-allowed border-border bg-hatch text-muted-foreground line-through decoration-1",
@@ -40,6 +40,8 @@ type TimeSlotProps = Omit<ComponentProps<"input">, "type" | "value" | "children"
   /** Display time, e.g. "10:30". Also used as the radio value. */
   time: string;
   status?: TimeSlotStatus;
+  /** Screen-reader word for a slot that can't be chosen; defaults to Mongolian. */
+  unavailableLabel?: string;
 };
 
 /**
@@ -50,6 +52,7 @@ type TimeSlotProps = Omit<ComponentProps<"input">, "type" | "value" | "children"
 export function TimeSlot({
   time,
   status = "available",
+  unavailableLabel,
   className,
   disabled,
   ...inputProps
@@ -74,7 +77,9 @@ export function TimeSlot({
       >
         {time}
       </span>
-      {unavailable ? <span className="sr-only">{STATUS_LABEL[status]}</span> : null}
+      {unavailable ? (
+        <span className="sr-only">{unavailableLabel ?? STATUS_LABEL[status]}</span>
+      ) : null}
     </label>
   );
 }

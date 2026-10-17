@@ -108,7 +108,7 @@ const BOARDS = [
 
 const BRIEF = [
   { label: "Мэдрэмж", value: "Хөх цаг: цэвэр, тодорхой, цагийг мэдэрдэг" },
-  { label: "Өнгө", value: "#F3F4FA шаазан, #2B38D6 ultramarine, #F2AE1C гүргэм" },
+  { label: "Өнгө", value: "#0E1014 бэх, #C2F41E лайм, #4A6100 чидун, #F2AE1C гүргэм" },
   { label: "Фонт", value: "Unbounded 500 гарчиг, Onest 400/500/600 текст" },
   { label: "Grid", value: "4pt · 4/8/12 багана · 1200px · 20/32px зах" },
 ] as const;
@@ -131,7 +131,7 @@ export default function DesignSystemPage(): JSX.Element {
       <main className="flex-1 bg-canvas">
         <Container className="py-10 md:py-16">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium text-primary">Цагтаа, дизайн систем v2</p>
+            <p className="text-sm font-medium text-primary-strong">Цагтаа, дизайн систем v2</p>
             <h1 className="mt-3 font-heading text-display font-medium text-foreground">Хөх цаг</h1>
             <p className="mt-4 max-w-prose text-lg text-muted-foreground">
               Аппын бүх хуудас эндээс эхэлнэ: өнгө, зай, хэмжээ бүр token-оос гарч, компонент бүр

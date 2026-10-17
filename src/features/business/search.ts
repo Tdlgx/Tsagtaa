@@ -1,13 +1,19 @@
 import { z } from "zod";
 
 import {
-  BUSINESS_CATEGORIES,
+  CATEGORY_FILTER_SLUGS,
   getBusinessCategory,
-  type BusinessCategorySlug,
+  matchesCategoryFilter,
+  type CategoryFilterSlug,
 } from "@/features/business/categories";
-import { DISTRICT_SLUGS, getDistrictLabel, type DistrictSlug } from "@/features/business/districts";
+import { DISTRICT_SLUGS, type DistrictSlug } from "@/features/business/districts";
+import { getSearchableText } from "@/features/business/localize";
 import { SAMPLE_BUSINESSES, type SampleBusiness } from "@/features/business/sample-businesses";
-import { formatWeekday, getZonedParts } from "@/lib/date";
+import type { Locale } from "@/i18n/config";
+import { en } from "@/i18n/dictionaries/en";
+import { mn } from "@/i18n/dictionaries/mn";
+import { formatDayLabel } from "@/i18n/format";
+import { getZonedParts } from "@/lib/date";
 
 /** Businesses are listed for one working day, 09:00–21:00 Ulaanbaatar time. */
 export const DAY_START = 9 * 60;
@@ -19,7 +25,8 @@ export type SearchSort = "soonest" | "rating" | "price";
 
 export type SearchFilters = {
   q: string;
-  cat: BusinessCategorySlug | "";
+  /** A group ("salon") or one category inside it ("nails"). */
+  cat: CategoryFilterSlug | "";
   district: DistrictSlug | "";
   day: SearchDay;
   time: TimeOfDay | "";
@@ -59,11 +66,6 @@ export const SEARCH_SORTS: readonly { value: SearchSort; label: string }[] = [
 
 const MAX_QUERY_LENGTH = 60;
 
-const CATEGORY_SLUGS = BUSINESS_CATEGORIES.map((category) => category.slug) as [
-  BusinessCategorySlug,
-  ...BusinessCategorySlug[],
-];
-
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
 /** `?a=1&a=2` arrives as an array; only the first value counts. */
@@ -79,7 +81,7 @@ const searchParamsSchema = z.object({
     .trim()
     .transform((value) => value.slice(0, MAX_QUERY_LENGTH))
     .catch(DEFAULT_FILTERS.q),
-  cat: z.union([z.enum(CATEGORY_SLUGS), z.literal("")]).catch(DEFAULT_FILTERS.cat),
+  cat: z.union([z.enum(CATEGORY_FILTER_SLUGS), z.literal("")]).catch(DEFAULT_FILTERS.cat),
   district: z.union([z.enum(DISTRICT_SLUGS), z.literal("")]).catch(DEFAULT_FILTERS.district),
   day: z.enum(["today", "tomorrow"]).catch(DEFAULT_FILTERS.day),
   time: z.enum(["morning", "afternoon", "evening", ""]).catch(DEFAULT_FILTERS.time),
@@ -132,21 +134,20 @@ export function toClock(totalMinutes: number): string {
 export type SearchClock = {
   /** Minutes since midnight in Ulaanbaatar. */
   nowMinutes: number;
-  /** "Мягмар, 10-р сарын 7" */
+  /** "Мягмар, 10-р сарын 7" / "Tuesday, October 7" */
   todayLabel: string;
   tomorrowLabel: string;
 };
 
-export function getSearchClock(now: Date): SearchClock {
+export function getSearchClock(now: Date, locale: Locale): SearchClock {
   const { hour, minute } = getZonedParts(now);
   const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-  const label = (date: Date): string => {
-    const { month, day } = getZonedParts(date);
-    return `${formatWeekday(date)}, ${month}-р сарын ${day}`;
+  return {
+    nowMinutes: hour * 60 + minute,
+    todayLabel: formatDayLabel(now, locale),
+    tomorrowLabel: formatDayLabel(tomorrow, locale),
   };
-
-  return { nowMinutes: hour * 60 + minute, todayLabel: label(now), tomorrowLabel: label(tomorrow) };
 }
 
 /** open: bookable · past: already gone today · outside: not in the chosen part of the day */
@@ -173,15 +174,19 @@ function matchesQuery(business: SampleBusiness, query: string): boolean {
   const words = normalize(query).split(" ").filter(Boolean);
   if (words.length === 0) return true;
 
+  const { group } = getBusinessCategory(business.category);
+  // Both languages, so "маникюр" and "manicure" find the same places.
   const haystack = normalize(
     [
-      business.name,
       business.slug,
       business.category,
-      getBusinessCategory(business.category).label,
-      getDistrictLabel(business.district),
-      business.area,
-      ...business.services.map((service) => service.name),
+      ...[mn, en].flatMap((words) => [
+        words.categories[business.category].label,
+        // "салон" / "salon" finds every salon type, not just places named "... салон".
+        group === "salon" ? words.groups.salon.label : "",
+        words.districts[business.district],
+      ]),
+      ...getSearchableText(business),
     ].join(" "),
   );
 
@@ -201,7 +206,7 @@ export function searchBusinesses(
 
   const results = SAMPLE_BUSINESSES.filter(
     (business) =>
-      (filters.cat === "" || business.category === filters.cat) &&
+      (filters.cat === "" || matchesCategoryFilter(business.category, filters.cat)) &&
       (filters.district === "" || business.district === filters.district) &&
       matchesQuery(business, filters.q),
   ).map((business): SearchResult => {

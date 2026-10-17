@@ -6,6 +6,7 @@ import { useEffect, type JSX } from "react";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/client";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
@@ -13,6 +14,7 @@ type ErrorPageProps = {
 };
 
 export default function ErrorPage({ error, retry }: ErrorPageProps): JSX.Element {
+  const t = useT();
   useEffect(() => {
     // Replace with an error reporting service (e.g. Sentry) in a later step.
     console.error(error);
@@ -23,16 +25,16 @@ export default function ErrorPage({ error, retry }: ErrorPageProps): JSX.Element
       <div className="w-full max-w-md rounded-xl border border-border bg-surface shadow-sm">
         <EmptyState
           icon={CircleAlert}
-          title="Уучлаарай, алдаа гарлаа"
-          description="Түр зуурын асуудал байж магадгүй. Дахин оролдоно уу, эсвэл нүүр хуудас руу буцна уу."
+          title={t.errors.title}
+          description={t.errors.text}
           action={
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button onClick={() => retry()}>
                 <RotateCcw data-icon="start" />
-                Дахин оролдох
+                {t.errors.retry}
               </Button>
               <Button asChild variant="outline">
-                <Link href="/">Нүүр хуудас руу буцах</Link>
+                <Link href="/">{t.common.backHome}</Link>
               </Button>
             </div>
           }
@@ -40,7 +42,7 @@ export default function ErrorPage({ error, retry }: ErrorPageProps): JSX.Element
       </div>
       {error.digest ? (
         <p className="text-sm text-muted-foreground">
-          Алдааны код: <span className="tabular-nums">{error.digest}</span>
+          {t.errors.code} <span className="tabular-nums">{error.digest}</span>
         </p>
       ) : null}
     </main>

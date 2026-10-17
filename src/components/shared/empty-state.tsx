@@ -25,8 +25,11 @@ export function EmptyState({
       {/* Illustration: a faint өлзий knot behind the icon, framed by a soft disc. */}
       <div aria-hidden className="relative flex size-24 items-center justify-center">
         <span className="absolute inset-2 rounded-full bg-surface-muted" />
-        <UlziiKnot className="absolute inset-0 size-24 text-primary opacity-15" strokeWidth={1} />
-        <span className="relative flex size-12 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-sm">
+        <UlziiKnot
+          className="absolute inset-0 size-24 text-primary-strong opacity-15"
+          strokeWidth={1}
+        />
+        <span className="relative flex size-12 items-center justify-center rounded-full border border-border bg-surface text-primary-strong shadow-sm">
           <Icon className="size-6" />
         </span>
       </div>

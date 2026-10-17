@@ -1,10 +1,11 @@
 import { SearchX } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { JSX } from "react";
+import { Suspense, type JSX } from "react";
 
 import { ResultRow } from "@/app/(public)/search/_components/result-row";
 import { SearchShell } from "@/app/(public)/search/_components/search-shell";
+import { getSearchTour } from "@/app/(public)/search/_components/search-tour";
 import { Container } from "@/components/layout/container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
@@ -14,17 +15,19 @@ import {
   parseSearchParams,
   searchBusinesses,
 } from "@/features/business/search";
+import { GuidedTour } from "@/features/onboarding/components/guided-tour";
+import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Сул цаг хайх",
-  description:
-    "Улаанбаатарын үсчин, барбершоп, маникюр, массаж, гоо сайхны газруудын өнөөдөр, маргаашийн сул цагийг нэг дороос хайна.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t.search.metaTitle, description: t.search.metaDescription };
+}
 
 export default async function SearchPage(props: PageProps<"/search">): Promise<JSX.Element> {
+  const { locale, t } = await getI18n();
   const filters = parseSearchParams(await props.searchParams);
-  const clock = getSearchClock(new Date());
+  const clock = getSearchClock(new Date(), locale);
   const nowMinutes = filters.day === "today" ? clock.nowMinutes : null;
 
   const results = searchBusinesses(filters, nowMinutes);
@@ -32,13 +35,13 @@ export default async function SearchPage(props: PageProps<"/search">): Promise<J
   const full = results.length - withTime;
   const activeFilters = countActiveFilters(filters);
   const dayLabel = filters.day === "today" ? clock.todayLabel : clock.tomorrowLabel;
-  const dayWord = filters.day === "today" ? "өнөөдөр" : "маргааш";
+  const dayWord = filters.day === "today" ? t.common.todayWord : t.common.tomorrowWord;
 
   return (
     <Container className="pt-8 pb-16 md:pt-12 md:pb-24">
       <div className="mb-6 flex flex-col gap-1 md:mb-8">
         <p className="text-sm text-muted-foreground">{dayLabel}</p>
-        <h1 className="font-heading text-heading font-medium text-foreground">Сул цаг хайх</h1>
+        <h1 className="font-heading text-heading font-medium text-foreground">{t.search.title}</h1>
       </div>
 
       <SearchShell filters={filters}>
@@ -50,21 +53,16 @@ export default async function SearchPage(props: PageProps<"/search">): Promise<J
               : "sr-only",
           )}
         >
-          <p aria-live="polite" className="text-base text-foreground">
+          <p aria-live="polite" className="text-base text-foreground tabular-nums">
             {results.length === 0 ? (
-              "Тохирох газар олдсонгүй"
+              t.search.noneFound
             ) : withTime === 0 ? (
-              <>
-                <span className="tabular-nums">{full}</span> газар олдсон ч {dayWord} сул цаг алга
-              </>
+              t.search.allFull(full, dayWord)
             ) : (
               <>
-                <span className="font-semibold tabular-nums">{withTime}</span> газарт {dayWord} сул
-                цаг байна
+                {t.search.withTime(withTime, dayWord)}
                 {full > 0 ? (
-                  <span className="text-muted-foreground">
-                    , <span className="tabular-nums">{full}</span> газрын цаг дүүрсэн
-                  </span>
+                  <span className="text-muted-foreground">{t.search.fullSuffix(full)}</span>
                 ) : null}
               </>
             )}
@@ -73,43 +71,47 @@ export default async function SearchPage(props: PageProps<"/search">): Promise<J
             <Link
               href="/search"
               scroll={false}
-              className="text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring"
+              className="text-sm font-medium text-primary-strong underline-offset-4 outline-none hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring"
             >
-              Шүүлтүүр арилгах
+              {t.search.clearFilters}
             </Link>
           ) : null}
         </div>
 
         {results.length > 0 ? (
           <ol>
-            {results.map((result) => (
+            {results.map((result, index) => (
               <ResultRow
                 key={result.business.slug}
+                tourAnchor={index === 0}
                 result={result}
                 filters={filters}
                 nowMinutes={nowMinutes}
+                locale={locale}
               />
             ))}
           </ol>
         ) : (
           <EmptyState
             icon={SearchX}
-            title="Энэ хайлтад газар олдсонгүй"
-            description="Өөр үгээр хайж үзээрэй, эсвэл ангилал, дүүргийн шүүлтүүрээ арилгаарай."
+            title={t.search.emptyTitle}
+            description={t.search.emptyText}
             action={
               <Button asChild variant="outline">
                 <Link href="/search" scroll={false}>
-                  Шүүлтүүр арилгах
+                  {t.search.clearFilters}
                 </Link>
               </Button>
             }
           />
         )}
 
-        <p className="mt-6 text-sm text-muted-foreground">
-          Жишээ өгөгдөл. Бодит газрууд удахгүй нэмэгдэнэ.
-        </p>
+        <p className="mt-6 text-sm text-muted-foreground">{t.common.demoData}</p>
       </SearchShell>
+
+      <Suspense fallback={null}>
+        <GuidedTour steps={getSearchTour(t)} />
+      </Suspense>
     </Container>
   );
 }

@@ -80,7 +80,10 @@ export function LayoutBoard(): JSX.Element {
               <span className="font-mono text-foreground">spacing-{step}</span>
               <span className="font-mono text-muted-foreground tabular-nums">{px}px</span>
               <span
-                className={cn("h-4 rounded-sm bg-primary-soft ring-1 ring-primary/30", className)}
+                className={cn(
+                  "h-4 rounded-sm bg-primary-soft ring-1 ring-primary-strong/30",
+                  className,
+                )}
               />
             </li>
           ))}
@@ -125,7 +128,10 @@ export function ShapeBoard(): JSX.Element {
           {RADII.map(({ token, px, use, className }) => (
             <li key={token} className="flex flex-col gap-3">
               <span
-                className={cn("h-20 w-full border border-primary/40 bg-primary-soft", className)}
+                className={cn(
+                  "h-20 w-full border border-primary-strong/40 bg-primary-soft",
+                  className,
+                )}
               />
               <div>
                 <p className="font-mono text-xs text-foreground">
@@ -165,11 +171,11 @@ export function ShapeBoard(): JSX.Element {
             <Spec>Grain · SVG noise · 2.5%</Spec>
           </div>
           <div className="relative flex h-36 items-end overflow-hidden rounded-lg border border-border bg-surface p-4">
-            <UlziiPattern className="absolute inset-0 size-full text-primary opacity-5" />
+            <UlziiPattern className="absolute inset-0 size-full text-primary-strong opacity-5" />
             <Spec className="relative">Өлзий хээ · 5% · зөвхөн hero</Spec>
           </div>
           <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-lg border border-border bg-surface p-4">
-            <UlziiKnot className="size-16 text-primary" />
+            <UlziiKnot className="size-16 text-primary-strong" />
             <Spec>Өлзий · 48px grid</Spec>
           </div>
         </div>
@@ -211,7 +217,7 @@ export function MotionBoard(): JSX.Element {
             <path d="M0 100 L100 0" className="stroke-border" strokeDasharray="2 3" fill="none" />
             <path
               d="M0 100 C20 20 20 0 100 0"
-              className="stroke-primary"
+              className="stroke-primary-strong"
               strokeWidth={2}
               fill="none"
             />

@@ -37,7 +37,7 @@ export function ServiceCard({
           "flex cursor-pointer items-start gap-4 rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5",
           "transition-transform duration-150 ease-soft is-active:scale-99",
           "is-hover:border-muted-foreground",
-          "group-has-checked/service:border-primary group-has-checked/service:ring-1 group-has-checked/service:ring-primary",
+          "group-has-checked/service:border-primary group-has-checked/service:ring-1 group-has-checked/service:ring-primary-strong",
           "group-has-focus-visible/service:ring-3 group-has-focus-visible/service:ring-ring",
           "group-has-disabled/service:cursor-not-allowed group-has-disabled/service:opacity-60",
         )}
@@ -55,7 +55,7 @@ export function ServiceCard({
 
         <span className="flex shrink-0 flex-col items-end gap-3">
           <span className="font-semibold text-foreground tabular-nums">{formatMNT(price)}</span>
-          <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-primary-strong">
             <span className="group-has-checked/service:hidden">Сонгох</span>
             <span className="hidden group-has-checked/service:inline">Сонгосон</span>
             <span

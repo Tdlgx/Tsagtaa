@@ -80,8 +80,8 @@ export const COLOR_GROUPS: readonly ColorGroup[] = [
         name: "primary",
         cssVar: "--primary",
         swatchClass: "bg-primary",
-        usage: "Гол үйлдэл, холбоос, идэвхтэй төлөв",
-        measuredOn: "--background",
+        usage: "Гол товч, сонгогдсон төлөв: зөвхөн дүүргэлт",
+        measuredOn: "--primary-foreground",
       },
       {
         name: "primary-hover",
@@ -95,6 +95,13 @@ export const COLOR_GROUPS: readonly ColorGroup[] = [
         cssVar: "--primary-soft",
         swatchClass: "bg-primary-soft",
         usage: "Сонгогдсон зүйлийн зөөлөн дэвсгэр",
+      },
+      {
+        name: "primary-strong",
+        cssVar: "--primary-strong",
+        swatchClass: "bg-primary-strong",
+        usage: "Холбоос, icon, хүрээ: цайвар дэвсгэр дээрх лайм",
+        measuredOn: "--background",
       },
       {
         name: "sun",
@@ -207,15 +214,15 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
   },
   {
     label: "Холбоос",
-    fg: "--primary",
+    fg: "--primary-strong",
     bg: "--background",
-    sampleClass: "bg-background text-primary",
+    sampleClass: "bg-background text-primary-strong",
   },
   {
     label: "Badge · primary",
-    fg: "--primary",
+    fg: "--primary-strong",
     bg: "--primary-soft",
-    sampleClass: "bg-primary-soft text-primary",
+    sampleClass: "bg-primary-soft text-primary-strong",
   },
   {
     label: "Badge · гүргэм",

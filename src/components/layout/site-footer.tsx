@@ -1,11 +1,14 @@
+import Link from "next/link";
 import type { JSX } from "react";
 
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
-import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
+import { getI18n } from "@/i18n/server";
+import { APP_NAME } from "@/lib/constants";
 import { getZonedParts } from "@/lib/date";
 
-export function SiteFooter(): JSX.Element {
+export async function SiteFooter(): Promise<JSX.Element> {
+  const { locale, t } = await getI18n();
   const { year } = getZonedParts(new Date());
 
   return (
@@ -13,11 +16,37 @@ export function SiteFooter(): JSX.Element {
       <Container className="flex flex-col gap-8 py-12 md:flex-row md:items-end md:justify-between">
         <div className="max-w-sm">
           <Logo />
-          <p className="mt-4 text-sm text-muted-foreground">{APP_DESCRIPTION}</p>
+          <p className="mt-4 text-sm text-muted-foreground">{t.meta.description}</p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          © <span className="tabular-nums">{year}</span> {APP_NAME}, Улаанбаатар
-        </p>
+        <div className="flex flex-col gap-2 text-sm text-muted-foreground md:items-end">
+          <Link
+            href="/business/register"
+            className="font-medium text-foreground underline-offset-4 outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring is-hover:underline"
+          >
+            {t.home.ownersCta}
+          </Link>
+          <Link
+            href="/help"
+            className="underline-offset-4 outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground is-hover:underline"
+          >
+            {t.help.title}
+          </Link>
+          <Link
+            href="/login"
+            className="underline-offset-4 outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground is-hover:underline"
+          >
+            {t.auth.footerLink}
+          </Link>
+          <Link
+            href="/privacy"
+            className="underline-offset-4 outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground is-hover:underline"
+          >
+            {t.footer.privacy}
+          </Link>
+          <p className="tabular-nums">
+            {t.footer.copyright(year, locale === "mn" ? APP_NAME : t.brand)}
+          </p>
+        </div>
       </Container>
     </footer>
   );

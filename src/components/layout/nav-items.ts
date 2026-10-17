@@ -2,7 +2,8 @@ import { CalendarDays, House, Search, UserRound, type LucideIcon } from "lucide-
 
 export type NavItem = {
   href: string;
-  label: string;
+  /** Key into the `nav` dictionary section. */
+  labelKey: "home" | "search" | "bookings" | "profile";
   icon: LucideIcon;
 };
 
@@ -11,10 +12,10 @@ export type NavItem = {
  * mobile bottom bar. Pages other than "/" are built in later steps.
  */
 export const MAIN_NAV: readonly NavItem[] = [
-  { href: "/", label: "Нүүр", icon: House },
-  { href: "/search", label: "Хайх", icon: Search },
-  { href: "/bookings", label: "Захиалга", icon: CalendarDays },
-  { href: "/profile", label: "Профайл", icon: UserRound },
+  { href: "/", labelKey: "home", icon: House },
+  { href: "/search", labelKey: "search", icon: Search },
+  { href: "/bookings", labelKey: "bookings", icon: CalendarDays },
+  { href: "/profile", labelKey: "profile", icon: UserRound },
 ];
 
 export function isActivePath(pathname: string, href: string): boolean {

@@ -22,7 +22,7 @@ export function SectionHeading({
 }: SectionHeadingProps): JSX.Element {
   return (
     <div className={cn("flex max-w-2xl flex-col", className)}>
-      {eyebrow ? <p className="mb-3 text-sm font-medium text-primary">{eyebrow}</p> : null}
+      {eyebrow ? <p className="mb-3 text-sm font-medium text-primary-strong">{eyebrow}</p> : null}
       <Heading className="font-heading text-heading font-medium text-foreground">{title}</Heading>
       {description ? (
         <p className="mt-4 max-w-prose text-base text-muted-foreground">{description}</p>

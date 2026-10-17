@@ -2,13 +2,16 @@ import type { JSX } from "react";
 
 import { Container } from "@/components/layout/container";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getI18n } from "@/i18n/server";
 
 /** Skeleton shown while a public page loads; header and tab bar stay visible. */
-export default function PublicLoading(): JSX.Element {
+export default async function PublicLoading(): Promise<JSX.Element> {
+  const { t } = await getI18n();
+
   return (
     <Container className="py-16" aria-busy="true">
       <span className="sr-only" role="status">
-        Ачаалж байна…
+        {t.common.loading}
       </span>
       <div className="flex max-w-xl flex-col gap-4">
         <Skeleton className="h-4 w-40" />

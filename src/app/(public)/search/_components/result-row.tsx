@@ -4,7 +4,7 @@ import type { JSX } from "react";
 
 import { SlotButton } from "@/app/(public)/search/_components/slot-button";
 import { getBusinessCategory } from "@/features/business/categories";
-import { getDistrictLabel } from "@/features/business/districts";
+import { localizeBusiness } from "@/features/business/localize";
 import {
   DAY_END,
   DAY_START,
@@ -13,10 +13,12 @@ import {
   type SearchFilters,
   type SearchResult,
 } from "@/features/business/search";
+import type { Locale } from "@/i18n/config";
+import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import { formatMNT } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
-/** How many times are shown as buttons before "бас N цаг". */
+/** How many times are shown as buttons before "+N more". */
 const VISIBLE_SLOTS = 6;
 const RULER = ["09:00", "12:00", "15:00", "18:00", "21:00"] as const;
 
@@ -56,8 +58,8 @@ function DayStrip({ result, filters, nowMinutes }: DayStripProps): JSX.Element {
             key={slot.time}
             className={cn(
               "absolute inset-y-0.5 rounded-full",
-              slot.state === "open" && "bg-primary",
-              slot.state === "outside" && "bg-primary/30",
+              slot.state === "open" && "bg-primary-strong",
+              slot.state === "outside" && "bg-primary-strong/30",
               slot.state === "past" && "bg-muted-foreground/30",
             )}
             style={{ left: `${toPercent(slot.start)}%`, width: `max(${width}%, 0.375rem)` }}
@@ -90,19 +92,19 @@ function DayStrip({ result, filters, nowMinutes }: DayStripProps): JSX.Element {
   );
 }
 
-type EmptyDayNoteProps = { filters: SearchFilters; hasOutside: boolean };
+type EmptyDayNoteProps = { filters: SearchFilters; hasOutside: boolean; t: Dictionary };
 
 /** Why a place shows no times, plus the one change that would show some. */
-function EmptyDayNote({ filters, hasOutside }: EmptyDayNoteProps): JSX.Element {
+function EmptyDayNote({ filters, hasOutside, t }: EmptyDayNoteProps): JSX.Element {
   const linkClass =
-    "font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring";
+    "font-medium text-primary-strong underline-offset-4 outline-none hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring";
 
   if (hasOutside) {
     return (
       <p className="mt-4 text-sm">
-        Сонгосон хугацаанд сул цаг алга.{" "}
+        {t.search.noneInRange}{" "}
         <Link href={toSearchHref({ ...filters, time: "" })} scroll={false} className={linkClass}>
-          Бүх цагийг харах
+          {t.search.seeAllTimes}
         </Link>
       </p>
     );
@@ -111,29 +113,45 @@ function EmptyDayNote({ filters, hasOutside }: EmptyDayNoteProps): JSX.Element {
   if (filters.day === "today") {
     return (
       <p className="mt-4 text-sm">
-        Өнөөдрийн сул цаг дууссан.{" "}
+        {t.search.todayFull}{" "}
         <Link
           href={toSearchHref({ ...filters, day: "tomorrow" })}
           scroll={false}
           className={linkClass}
         >
-          Маргаашийн цагийг харах
+          {t.search.seeTomorrow}
         </Link>
       </p>
     );
   }
 
-  return <p className="mt-4 text-sm">Маргаашийн сул цаг дууссан.</p>;
+  return <p className="mt-4 text-sm">{t.search.tomorrowFull}</p>;
 }
 
-type ResultRowProps = { result: SearchResult; filters: SearchFilters; nowMinutes: number | null };
+type ResultRowProps = {
+  result: SearchResult;
+  filters: SearchFilters;
+  nowMinutes: number | null;
+  /** Marks this row's parts for the first-visit tour (only the first row). */
+  tourAnchor?: boolean;
+  locale: Locale;
+};
 
-export function ResultRow({ result, filters, nowMinutes }: ResultRowProps): JSX.Element {
-  const { business, slots, openCount, priceFrom } = result;
-  const { label: categoryLabel, icon: CategoryIcon } = getBusinessCategory(business.category);
+export function ResultRow({
+  result,
+  filters,
+  nowMinutes,
+  tourAnchor = false,
+  locale,
+}: ResultRowProps): JSX.Element {
+  const t = getDictionary(locale);
+  const { slots, openCount, priceFrom } = result;
+  const business = localizeBusiness(result.business, locale);
+  const { icon: CategoryIcon } = getBusinessCategory(business.category);
+  const categoryLabel = t.categories[business.category].label;
   const open = slots.filter((slot) => slot.state === "open");
   const hasOutside = slots.some((slot) => slot.state === "outside");
-  const dayWord = filters.day === "today" ? "Өнөөдөр" : "Маргааш";
+  const dayWord = filters.day === "today" ? t.common.todayWord : t.common.tomorrowWord;
 
   return (
     <li
@@ -145,15 +163,20 @@ export function ResultRow({ result, filters, nowMinutes }: ResultRowProps): JSX.
       <div className="min-w-0">
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-heading text-lg font-medium tracking-tight text-foreground">
-            {business.name}
+            <Link
+              href={`/book/${business.slug}?day=${filters.day}`}
+              className="rounded-sm underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring"
+            >
+              {business.name}
+            </Link>
           </h2>
           <p className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground tabular-nums">
-            <span className="sr-only">Үнэлгээ:</span>
+            <span className="sr-only">{t.common.ratingSr}</span>
             <Star className="size-4 fill-sun text-sun" />
             {business.rating.toFixed(1)}
             <span className="font-normal text-muted-foreground">
               ({business.reviewCount}
-              <span className="sr-only"> сэтгэгдэл</span>)
+              <span className="sr-only"> {t.common.reviewsSr}</span>)
             </span>
           </p>
         </div>
@@ -165,7 +188,7 @@ export function ResultRow({ result, filters, nowMinutes }: ResultRowProps): JSX.
           <li className="flex items-center gap-2">
             <MapPin className="size-4 shrink-0" />
             <span className="truncate">
-              {getDistrictLabel(business.district)}, {business.area}
+              {t.districts[business.district]}, {business.area}
             </span>
           </li>
         </ul>
@@ -173,33 +196,40 @@ export function ResultRow({ result, filters, nowMinutes }: ResultRowProps): JSX.
           {business.services.map((service) => service.name).join(", ")}
         </p>
         <p className="mt-1 text-sm font-semibold text-foreground tabular-nums">
-          {formatMNT(priceFrom)}-өөс
+          {t.common.priceFrom(formatMNT(priceFrom))}
         </p>
       </div>
 
       <div className="min-w-0">
-        <DayStrip result={result} filters={filters} nowMinutes={nowMinutes} />
+        <div data-tour={tourAnchor ? "day-strip" : undefined}>
+          <DayStrip result={result} filters={filters} nowMinutes={nowMinutes} />
+        </div>
 
         {openCount > 0 ? (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <ul
-              aria-label={`${business.name}, ${dayWord.toLowerCase()} сул цагууд`}
-              className="contents"
-            >
+          <div
+            data-tour={tourAnchor ? "slots" : undefined}
+            className="mt-4 flex flex-wrap items-center gap-2"
+          >
+            <ul aria-label={t.search.slotsLabel(business.name, dayWord)} className="contents">
               {open.slice(0, VISIBLE_SLOTS).map((slot) => (
                 <li key={slot.time}>
-                  <SlotButton time={slot.time} businessName={business.name} />
+                  <SlotButton
+                    time={slot.time}
+                    day={filters.day}
+                    businessSlug={business.slug}
+                    bookLabel={t.search.bookAtSr(business.name)}
+                  />
                 </li>
               ))}
             </ul>
             {openCount > VISIBLE_SLOTS ? (
               <span className="px-1 text-sm text-muted-foreground tabular-nums">
-                бас {openCount - VISIBLE_SLOTS} цаг
+                {t.search.moreSlots(openCount - VISIBLE_SLOTS)}
               </span>
             ) : null}
           </div>
         ) : (
-          <EmptyDayNote filters={filters} hasOutside={hasOutside} />
+          <EmptyDayNote filters={filters} hasOutside={hasOutside} t={t} />
         )}
       </div>
     </li>

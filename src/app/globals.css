@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 
 /* ==========================================================================
-   Цагтаа design system — "Хөх цаг" (blue hour)
+   Цагтаа design system — ink & lime
    Every color, size, radius, shadow and easing used in the app comes from
    the tokens below. Tailwind's default palette and scales are removed on
    purpose, so a stray `text-gray-500` or `rounded-2xl` simply does not exist.
@@ -47,28 +47,34 @@
 /* --------------------------------------------------------------------------
    1. Raw color tokens (light). Hex values are hand-picked; every text/background
       pair is checked against WCAG AA (≥ 4.5:1) — see /design-system.
-      Palette: porcelain paper, night-indigo ink, "хөх тэнгэр" ultramarine for
+      Palette (from the logo): cool paper, ink black, an electric lime fill for
       every action, and saffron "нар" reserved for time: the now-line, ratings.
+      Lime is a FILL color: on light surfaces, text, icons and borders use
+      `primary-strong` (deep olive) instead, because lime on white is ~1.2:1.
    -------------------------------------------------------------------------- */
 :root {
   /* Surfaces */
-  --background: #f3f4fa; /* cool porcelain */
+  --background: #f2f3f5; /* cool paper */
   --surface: #ffffff; /* cards, schedule board */
-  --surface-muted: #e7e9f4; /* wells, skeletons, past time */
+  --surface-muted: #e8e9ed; /* wells, skeletons, past time */
 
   /* Ink */
-  --foreground: #151a3b; /* night indigo, never pure black */
-  --muted-foreground: #545a80;
+  --foreground: #0e1014; /* logo ink, never pure black */
+  --muted-foreground: #565b66;
 
   /* Lines */
-  --border: #dcdfee; /* 1px hairline, decorative */
-  --input: #868bae; /* form control outline, ≥ 3:1 so empty fields stay visible */
+  --border: #dfe1e6; /* 1px hairline, decorative */
+  --input: #868b96; /* form control outline, ≥ 3:1 so empty fields stay visible */
 
   /* Brand */
-  --primary: #2b38d6; /* ultramarine "хөх тэнгэр" */
-  --primary-hover: #212caf;
-  --primary-foreground: #ffffff;
-  --primary-soft: #e3e6ff;
+  --brand-ink: #0b0c0f; /* the logo tile and booking tickets; the same in both themes */
+  --brand-ink-foreground: #f1f2f4;
+  --brand-ink-muted: #9da2ad; /* 7:1 on brand-ink */
+  --primary: #c2f41e; /* electric lime, fills only */
+  --primary-hover: #b2e60c;
+  --primary-foreground: #0e1014;
+  --primary-soft: #eefbc8;
+  --primary-strong: #4a6100; /* lime's legible twin: links, icons, borders */
 
   /* Saffron sun: the current-time line, ratings, rare highlights */
   --sun: #f2ae1c;
@@ -87,11 +93,11 @@
   --danger-foreground: #b3352a;
   --danger-soft: #fce9e6;
 
-  /* Focus ring: primary at 40% */
-  --ring: color-mix(in srgb, var(--primary) 40%, transparent);
+  /* Focus ring: primary-strong at 45% (lime itself would vanish on white) */
+  --ring: color-mix(in srgb, var(--primary-strong) 45%, transparent);
 
-  /* Elevation: indigo-tinted shadows, two layers each (contact + ambient) */
-  --shadow-tint: 21 26 59;
+  /* Elevation: ink-tinted shadows, two layers each (contact + ambient) */
+  --shadow-tint: 14 16 20;
   --elevation-1:
     0 1px 1px rgb(var(--shadow-tint) / 0.04), 0 2px 8px -2px rgb(var(--shadow-tint) / 0.06);
   --elevation-2:
@@ -125,19 +131,20 @@
   --sidebar-ring: var(--ring);
 }
 
-/* Dark: Ulaanbaatar night sky, never #000; brand colors lifted so they stay legible. */
+/* Dark: ink, never #000. Lime glows on it, so primary-strong is lime itself. */
 .dark {
-  --background: #0d1030;
-  --surface: #151a3b;
-  --surface-muted: #1e2450;
-  --foreground: #eef0fa;
-  --muted-foreground: #a4a9cf;
-  --border: #2a3060;
-  --input: #6e74a6;
-  --primary: #9ba5ff;
-  --primary-hover: #b5bcff;
-  --primary-foreground: #0d1030;
-  --primary-soft: #232b6b;
+  --background: #0b0c0f;
+  --surface: #15171c;
+  --surface-muted: #1f2228;
+  --foreground: #f1f2f4;
+  --muted-foreground: #a2a7b2;
+  --border: #2a2d35;
+  --input: #6c717d;
+  --primary: #c6f432;
+  --primary-hover: #d4f862;
+  --primary-foreground: #0b0c0f;
+  --primary-soft: #252e0e;
+  --primary-strong: #c6f432;
   --sun: #ffc53d;
   --sun-foreground: #0d1030;
   --sun-strong: #ffd066;
@@ -230,6 +237,146 @@
   /* Layout */
   --container-page: 75rem; /* 1200px */
 
+  /* The logo's hourglass turns over, rests, turns again. */
+  --animate-flip: flip 3.2s var(--ease-soft) infinite;
+  @keyframes flip {
+    0%,
+    62% {
+      transform: rotate(0deg);
+    }
+    80%,
+    100% {
+      transform: rotate(180deg);
+    }
+  }
+
+  /* Tour spotlight: a lime ring breathes out from the highlighted element. */
+  --animate-beacon: beacon 1.8s var(--ease-soft) infinite;
+  @keyframes beacon {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 70%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+
+  /* Splash: the logo sequence, large, once per visit (see SplashScreen).
+     0–0.7s halves slide in · 0.6–1.25s flip · 1.0–1.8s letters · 1.8–2.4s
+     glow + shine · 2.6–3.05s the screen lifts away. Delays are built in so
+     it all runs from the first paint, before any JavaScript. */
+  --animate-splash-top: splash-from-left 700ms var(--ease-soft) both;
+  --animate-splash-bottom: splash-from-right 700ms var(--ease-soft) both;
+  --animate-splash-mark:
+    splash-flip 650ms var(--ease-soft) 600ms both, splash-glow 600ms var(--ease-soft) 1800ms both;
+  --animate-splash-letter: splash-letter 400ms var(--ease-soft) both;
+  --animate-splash-shine: splash-shine 700ms ease-in-out 1750ms;
+  --animate-splash-halo: splash-halo 2400ms var(--ease-soft) both;
+  --animate-splash-zoom: splash-zoom 450ms var(--ease-soft) 2600ms forwards;
+  --animate-splash-exit: splash-exit 450ms var(--ease-soft) 2600ms forwards;
+  @keyframes splash-from-left {
+    from {
+      transform: translateX(-64px);
+      opacity: 0;
+    }
+    78% {
+      transform: translateX(3px);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes splash-from-right {
+    from {
+      transform: translateX(64px);
+      opacity: 0;
+    }
+    78% {
+      transform: translateX(-3px);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes splash-flip {
+    from {
+      transform: rotate(0deg);
+    }
+    68% {
+      transform: rotate(198deg);
+    }
+    86% {
+      transform: rotate(175deg);
+    }
+    to {
+      transform: rotate(180deg);
+    }
+  }
+  @keyframes splash-glow {
+    from,
+    to {
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    40% {
+      filter: drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 85%, transparent));
+    }
+  }
+  @keyframes splash-letter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes splash-shine {
+    from {
+      mask-position: 100% 0;
+      opacity: 1;
+    }
+    to {
+      mask-position: 0% 0;
+      opacity: 1;
+    }
+  }
+  @keyframes splash-halo {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    30% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    75% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    85% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    to {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+  }
+  @keyframes splash-zoom {
+    to {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes splash-exit {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
   --animate-shimmer: shimmer 1.6s var(--ease-soft) infinite;
   @keyframes shimmer {
     from {
@@ -259,6 +406,10 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-soft: var(--primary-soft);
+  --color-primary-strong: var(--primary-strong);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-ink-foreground: var(--brand-ink-foreground);
+  --color-brand-ink-muted: var(--brand-ink-muted);
   --color-sun: var(--sun);
   --color-sun-foreground: var(--sun-foreground);
   --color-sun-strong: var(--sun-strong);
@@ -359,6 +510,59 @@
   background-color: var(--surface-muted);
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: --spacing(4) --spacing(4);
+}
+
+/* 3D tilt toward the pointer, with a light that follows it. `useTilt` sets
+   the variables; the element needs `relative` and `overflow-hidden`. Moves
+   track the pointer quickly; letting go springs back with a small overshoot. */
+@utility tilt-3d {
+  transform: perspective(60rem) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg))
+    scale(var(--tilt-scale, 1));
+  transition:
+    transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 300ms var(--ease-soft),
+    opacity 250ms var(--ease-soft),
+    filter 250ms var(--ease-soft);
+  will-change: transform;
+  &[data-tilt] {
+    transition-duration: 150ms, 300ms, 250ms, 250ms;
+    transition-timing-function: var(--ease-soft);
+  }
+  /* Light: a soft spot under the pointer, a sheen across the card, and shade
+     toward the far edges. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      radial-gradient(
+        circle at var(--glare-x, 50%) var(--glare-y, 50%),
+        rgb(255 255 255 / 0.3),
+        transparent 45%
+      ),
+      linear-gradient(
+        115deg,
+        transparent calc(var(--glare-x, 50%) - 25%),
+        color-mix(in oklab, var(--primary) 18%, transparent) var(--glare-x, 50%),
+        transparent calc(var(--glare-x, 50%) + 25%)
+      ),
+      radial-gradient(
+        circle at var(--glare-x, 50%) var(--glare-y, 50%),
+        transparent 40%,
+        rgb(var(--shadow-tint) / 0.12) 120%
+      );
+    opacity: 0;
+    transition: opacity 400ms var(--ease-soft);
+  }
+  &[data-tilt]::after {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+  }
 }
 
 /* Keeps fixed bottom bars clear of the iPhone home indicator. */

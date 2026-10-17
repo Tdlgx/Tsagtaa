@@ -19,7 +19,7 @@ function Toaster(props: ToasterProps): JSX.Element {
       className="toaster group [--border-radius:var(--radius-lg)] [--normal-bg:var(--surface)] [--normal-border:var(--border)] [--normal-text:var(--foreground)]"
       icons={{
         success: <CircleCheck className="size-5 text-success" />,
-        info: <Info className="size-5 text-primary" />,
+        info: <Info className="size-5 text-primary-strong" />,
         warning: <TriangleAlert className="size-5 text-warning" />,
         error: <CircleAlert className="size-5 text-danger" />,
         loading: <LoaderCircle className="size-5 animate-spin text-muted-foreground" />,

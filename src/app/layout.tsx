@@ -2,9 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { Onest, Unbounded } from "next/font/google";
 import type { JSX } from "react";
 
+import { StorageScope } from "@/components/shared/storage-scope";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { APP_DESCRIPTION, APP_NAME, APP_URL } from "@/lib/constants";
+import { LocaleProvider } from "@/i18n/client";
+import { getI18n, getLocale } from "@/i18n/server";
+import { getCurrentAccount } from "@/lib/auth/session";
+import { APP_NAME, APP_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
@@ -26,43 +30,51 @@ const unbounded = Unbounded({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
-  title: {
-    default: `${APP_NAME} — Онлайн цаг захиалга`,
-    template: `%s | ${APP_NAME}`,
-  },
-  description: APP_DESCRIPTION,
-  applicationName: APP_NAME,
-  openGraph: {
-    type: "website",
-    locale: "mn_MN",
-    siteName: APP_NAME,
-    title: `${APP_NAME} — Онлайн цаг захиалга`,
-    description: APP_DESCRIPTION,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, t } = await getI18n();
+  // The env name labels staging/demo builds; in English the brand is spelled in Latin.
+  const brand = locale === "mn" ? APP_NAME : t.brand;
+  const title = `${brand} — ${t.meta.tagline}`;
+
+  return {
+    metadataBase: new URL(APP_URL),
+    title: { default: title, template: `%s | ${brand}` },
+    description: t.meta.description,
+    applicationName: brand,
+    openGraph: {
+      type: "website",
+      locale: locale === "mn" ? "mn_MN" : "en_US",
+      siteName: brand,
+      title,
+      description: t.meta.description,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f3f4fa" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d1030" },
+    { media: "(prefers-color-scheme: light)", color: "#f2f3f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0c0f" },
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">): JSX.Element {
+export default async function RootLayout({ children }: LayoutProps<"/">): Promise<JSX.Element> {
+  const [locale, account] = await Promise.all([getLocale(), getCurrentAccount()]);
+
   return (
     // next-themes sets the theme class on <html> before React hydrates.
     <html
-      lang="mn"
+      lang={locale}
       suppressHydrationWarning
       className={cn(onest.variable, unbounded.variable, "h-full antialiased")}
     >
       <body className="flex min-h-full flex-col">
-        <ThemeProvider>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <LocaleProvider locale={locale}>
+          <ThemeProvider>
+            <StorageScope accountId={account?.id ?? null}>{children}</StorageScope>
+            <Toaster />
+          </ThemeProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
