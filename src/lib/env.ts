@@ -10,4 +10,10 @@ import { envSchema, parseEnv, type Env } from "@/lib/env-schema";
  * Client Component into a build error, so secrets like DATABASE_URL can never
  * end up in the browser bundle. In client code use `publicEnv` instead.
  */
-export const env: Env = parseEnv(envSchema, process.env);
+export const env: Env = parseEnv(envSchema, {
+  ...process.env,
+  // Named one by one so the build inlines them, defaults included (see
+  // next.config.ts). On Vercel they are not in the runtime environment.
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
+});

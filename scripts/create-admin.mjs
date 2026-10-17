@@ -28,6 +28,8 @@ const passwordHash = `scrypt$${N}$${r}$${p}$${salt.toString("base64")}$${hash.to
 
 const url = new URL(process.env.DATABASE_URL);
 url.searchParams.delete("schema");
+// Neon adds this; the driver does not support it (see src/lib/db.ts).
+url.searchParams.delete("channel_binding");
 const sql = postgres(url.toString(), { max: 1, onnotice: () => {} });
 
 try {

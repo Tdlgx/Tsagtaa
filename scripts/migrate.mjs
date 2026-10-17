@@ -13,6 +13,8 @@ if (!process.env.DATABASE_URL) {
 const url = new URL(process.env.DATABASE_URL);
 // `?schema=public` is a Prisma-style option; PostgreSQL itself rejects it.
 url.searchParams.delete("schema");
+// Neon adds this; the driver does not support it (see src/lib/db.ts).
+url.searchParams.delete("channel_binding");
 const sql = postgres(url.toString(), { max: 1, onnotice: () => {} });
 const dir = new URL("../db/migrations/", import.meta.url);
 

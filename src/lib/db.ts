@@ -6,8 +6,11 @@ import { env } from "@/lib/env";
 
 function connect(): postgres.Sql {
   const url = new URL(env.DATABASE_URL);
-  // `?schema=public` is a Prisma-style option; PostgreSQL itself rejects it.
+  // Options PostgreSQL itself rejects: `?schema=public` is Prisma-style, and
+  // Neon adds `channel_binding=require`, which this driver does not support
+  // and would send to the server as an unknown setting. TLS still comes from `sslmode`.
   url.searchParams.delete("schema");
+  url.searchParams.delete("channel_binding");
   return postgres(url.toString(), {
     max: 10,
     idle_timeout: 20,
