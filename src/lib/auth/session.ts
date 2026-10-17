@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
 import { settleEarnedPoints } from "@/features/points/points-db";
-import { sql } from "@/lib/db";
+import { sql, withDeadline } from "@/lib/db";
 import { env } from "@/lib/env";
 
 /**
@@ -70,35 +70,39 @@ export async function endSession(): Promise<void> {
 export const getCurrentAccount = cache(async (): Promise<Account | null> => {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
-
   try {
-    const [account] = await sql<Omit<Account, "memberships">[]>`
-      SELECT a.id, a.name, a.phone, a.is_platform_admin AS "isPlatformAdmin",
-        a.points_balance AS "pointsBalance"
-      FROM sessions s JOIN accounts a ON a.id = s.account_id
-      WHERE s.token_hash = ${hashToken(token)} AND s.expires_at > now()
-    `;
-    if (!account) return null;
-    // Credit visits that are due before anything shows a balance, so the
-    // header and the page agree. A failure here only delays the points.
-    try {
-      account.pointsBalance += await settleEarnedPoints(account.id);
-    } catch (error) {
-      console.error("Could not settle points", error);
-    }
-    const memberships = await sql<Membership[]>`
-      SELECT b.id AS "businessId", b.slug, b.name, b.category, b.status, m.role
-      FROM memberships m JOIN businesses b ON b.id = m.business_id
-      WHERE m.account_id = ${account.id}
-      ORDER BY b.name
-    `;
-    return { ...account, memberships };
+    return await withDeadline(readAccount(token));
   } catch (error) {
-    // No database: treat as signed out rather than breaking every page.
+    // No database: treat as signed out rather than breaking (or stalling) every page.
     console.error("Could not read the session", error);
     return null;
   }
 });
+
+/** The account behind a session token, with its memberships. */
+async function readAccount(token: string): Promise<Account | null> {
+  const [account] = await sql<Omit<Account, "memberships">[]>`
+    SELECT a.id, a.name, a.phone, a.is_platform_admin AS "isPlatformAdmin",
+        a.points_balance AS "pointsBalance"
+    FROM sessions s JOIN accounts a ON a.id = s.account_id
+    WHERE s.token_hash = ${hashToken(token)} AND s.expires_at > now()
+  `;
+  if (!account) return null;
+  // Credit visits that are due before anything shows a balance, so the
+  // header and the page agree. A failure here only delays the points.
+  try {
+    account.pointsBalance += await settleEarnedPoints(account.id);
+  } catch (error) {
+    console.error("Could not settle points", error);
+  }
+  const memberships = await sql<Membership[]>`
+    SELECT b.id AS "businessId", b.slug, b.name, b.category, b.status, m.role
+    FROM memberships m JOIN businesses b ON b.id = m.business_id
+    WHERE m.account_id = ${account.id}
+    ORDER BY b.name
+  `;
+  return { ...account, memberships };
+}
 
 /** Only a same-site path, so `?next=` cannot send people to another site. */
 export function safeNext(next: unknown, fallback: string): string {

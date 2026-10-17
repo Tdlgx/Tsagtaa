@@ -52,3 +52,18 @@ export function isPgError(
     fields.code === code && (constraint === undefined || fields.constraint_name === constraint)
   );
 }
+
+/**
+ * Gives up on a read after `ms`. For reads a page can do without (it then
+ * shows the plain schedule, or treats the visitor as signed out): when the
+ * database host accepts the connection but never answers (a stopped Docker
+ * container, a network hiccup), the driver would otherwise wait forever and
+ * the page with it. The connect timeout only covers opening the socket.
+ */
+export function withDeadline<T>(work: PromiseLike<T>, ms = 4000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Database did not answer within ${ms} ms`)), ms);
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+}

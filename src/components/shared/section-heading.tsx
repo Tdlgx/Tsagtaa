@@ -7,6 +7,8 @@ type SectionHeadingProps = {
   eyebrow?: string;
   title: ReactNode;
   description?: string;
+  /** E.g. hide the description on phones. */
+  descriptionClassName?: string;
   /** Heading level for correct document outline; looks the same. */
   as?: "h1" | "h2" | "h3";
   className?: string;
@@ -17,6 +19,7 @@ export function SectionHeading({
   eyebrow,
   title,
   description,
+  descriptionClassName,
   as: Heading = "h2",
   className,
 }: SectionHeadingProps): JSX.Element {
@@ -25,7 +28,9 @@ export function SectionHeading({
       {eyebrow ? <p className="mb-3 text-sm font-medium text-primary-strong">{eyebrow}</p> : null}
       <Heading className="font-heading text-heading font-medium text-foreground">{title}</Heading>
       {description ? (
-        <p className="mt-4 max-w-prose text-base text-muted-foreground">{description}</p>
+        <p className={cn("mt-4 max-w-prose text-base text-muted-foreground", descriptionClassName)}>
+          {description}
+        </p>
       ) : null}
     </div>
   );

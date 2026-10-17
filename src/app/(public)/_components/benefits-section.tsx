@@ -32,6 +32,9 @@ export function BenefitsSection({
       aria-labelledby={titleId}
       className={cn(
         "scroll-mt-16 border-t",
+        // Still empty: the placeholder boxes stay on wide screens, where the
+        // layout is being planned, but are not worth a phone screen of scrolling.
+        items.length === 0 && "max-md:hidden",
         ink
           ? "border-brand-ink bg-brand-ink text-brand-ink-foreground"
           : "border-border text-foreground",

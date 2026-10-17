@@ -170,10 +170,10 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
               enterKeyHint="search"
               autoComplete="off"
               placeholder={t.search.placeholder}
-              className="h-13 w-full min-w-0 rounded-full border border-input bg-surface pr-5 pl-12 text-base text-foreground outline-none placeholder:text-muted-foreground is-hover:border-muted-foreground is-focus:border-primary-strong is-focus:ring-3 is-focus:ring-ring"
+              className="h-11 w-full min-w-0 rounded-full border border-input bg-surface pr-5 pl-12 text-base text-foreground outline-none placeholder:text-muted-foreground sm:h-13 is-hover:border-muted-foreground is-focus:border-primary-strong is-focus:ring-3 is-focus:ring-ring"
             />
           </div>
-          <Button type="submit" size="lg" className="max-sm:px-5">
+          <Button type="submit" size="lg" className="max-sm:h-11 max-sm:px-5">
             {t.search.submit}
           </Button>
         </div>
@@ -202,7 +202,7 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
             onChange={(value) => update("time", value)}
             className="col-span-2 md:col-span-1"
           />
-          <div className="col-span-2 sm:col-span-1 lg:ml-auto lg:w-52">
+          <div className="col-span-1 lg:ml-auto lg:w-52">
             <label htmlFor="search-district" className="sr-only">
               {t.search.district}
             </label>
@@ -221,7 +221,7 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
               ))}
             </Select>
           </div>
-          <div className="col-span-2 sm:col-span-1 lg:w-52">
+          <div className="col-span-1 lg:w-52">
             <label htmlFor="search-sort" className="sr-only">
               {t.search.sort}
             </label>

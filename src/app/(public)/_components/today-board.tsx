@@ -41,6 +41,8 @@ const HOURS = Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, i) => 9 + i
 const FLIP_TO_TOMORROW = 20 * 60 + 30;
 /** Rows shown at once; the rest are a link to search. */
 const MAX_ROWS = 6;
+/** Phones show fewer places; the rest are one tap away in search. */
+const PHONE_ROWS = 4;
 const MINUTE = 60_000;
 
 type GroupFilter = CategoryGroupSlug | "all";
@@ -124,6 +126,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
   );
   const visible = sorted.slice(0, MAX_ROWS);
   const hiddenCount = sorted.length - visible.length;
+  const hiddenOnPhone = sorted.length - Math.min(visible.length, PHONE_ROWS);
   const openCount = freeIn(group);
 
   // The soonest free time among the shown places gets a pulse.
@@ -305,7 +308,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
               </Button>
             ))}
           </div>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 max-sm:hidden">
             <span className="sr-only">{t.board.sortLabel}</span>
             <Select
               value={sort}
@@ -364,6 +367,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
               <BoardRowView
                 key={row.slug}
                 row={row}
+                phoneHidden={rowIndex >= PHONE_ROWS}
                 day={day}
                 trackRef={rowIndex === 0 ? trackRef : undefined}
                 nowMinutes={nowMinutes}
@@ -392,13 +396,17 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
         </div>
       </fieldset>
 
-      {hiddenCount > 0 ? (
+      {hiddenOnPhone > 0 ? (
         <Link
           href={searchHref}
-          className="flex items-center justify-between gap-3 border-t border-border px-5 py-3 text-sm font-medium text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-inset sm:px-6 is-hover:bg-surface-muted"
+          className={cn(
+            hiddenCount === 0 && "sm:hidden",
+            "flex items-center justify-between gap-3 border-t border-border px-5 py-3 text-sm font-medium text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-inset sm:px-6 is-hover:bg-surface-muted",
+          )}
         >
           <span>
-            {t.board.more(hiddenCount)}{" "}
+            <span className="sm:hidden">{t.board.more(hiddenOnPhone)}</span>
+            <span className="max-sm:hidden">{t.board.more(hiddenCount)}</span>{" "}
             <span className="font-normal text-muted-foreground">· {t.board.seeAll}</span>
           </span>
           <ArrowRight className="size-4" />
@@ -469,10 +477,13 @@ type BoardRowViewProps = {
   soonestId: string | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  /** Beyond the phone's row limit. */
+  phoneHidden?: boolean;
 };
 
 function BoardRowView({
   row,
+  phoneHidden = false,
   day,
   trackRef,
   nowMinutes,
@@ -493,7 +504,9 @@ function BoardRowView({
   const next = free[0];
 
   return (
-    <div className="flex border-b border-border last:border-b-0">
+    <div
+      className={cn("flex border-b border-border last:border-b-0", phoneHidden && "max-sm:hidden")}
+    >
       <div className="sticky left-0 z-20 flex w-(--names) shrink-0 flex-col justify-center gap-0.5 border-r border-border bg-surface py-2.5 pr-2 pl-4 sm:pr-3 sm:pl-6">
         <span className="flex min-w-0 items-center gap-1.5">
           <span className="truncate text-sm font-medium text-foreground">{row.name}</span>
@@ -502,7 +515,7 @@ function BoardRowView({
             {row.rating.toFixed(1)}
           </span>
         </span>
-        <span className="truncate text-xs text-muted-foreground">
+        <span className="truncate text-xs text-muted-foreground max-sm:hidden">
           {row.service} · <span className="tabular-nums">{formatMNT(row.price)}</span>
         </span>
         <span
@@ -515,7 +528,7 @@ function BoardRowView({
         </span>
         <span
           title={t.board.load(load)}
-          className="mt-1 flex h-1 w-full max-w-28 overflow-hidden rounded-full bg-surface-muted"
+          className="mt-1 flex h-1 w-full max-w-28 overflow-hidden rounded-full bg-surface-muted max-sm:hidden"
         >
           <span
             className={cn("h-full rounded-full", load >= 80 ? "bg-sun" : "bg-primary-strong/60")}
@@ -567,7 +580,7 @@ function BoardRowView({
                     : slot.taken
                       ? "border-border bg-hatch text-muted-foreground"
                       : "cursor-pointer border-primary-strong/35 bg-primary-soft text-primary-strong is-hover:border-primary-strong",
-                  isSoonest && "animate-beacon border-primary-strong",
+                  isSoonest && "border-primary-strong sm:animate-beacon",
                   "peer-checked:animate-none peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:shadow-sm",
                   "peer-focus-visible:ring-3 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-surface",
                 )}

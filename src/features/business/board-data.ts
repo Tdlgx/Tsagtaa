@@ -13,6 +13,7 @@ import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
 import { toMinutes, type SearchDay } from "@/features/business/search";
 import { getSampleStaff } from "@/features/staff/sample-staff";
 import type { Locale } from "@/i18n/config";
+import { withDeadline } from "@/lib/db";
 
 /** A start time on the board; `taken` = someone booked it since the schedule was made. */
 export type BoardSlot = { time: string; taken: boolean };
@@ -46,10 +47,12 @@ export async function getBoardRows(locale: Locale, now: Date): Promise<BoardRow[
   const { from, to } = getBookableWindow(now);
   let ranges: Awaited<ReturnType<typeof getTakenRangesForMany>> = [];
   try {
-    ranges = await getTakenRangesForMany(
-      SAMPLE_BUSINESSES.map((business) => business.slug),
-      from,
-      to,
+    ranges = await withDeadline(
+      getTakenRangesForMany(
+        SAMPLE_BUSINESSES.map((business) => business.slug),
+        from,
+        to,
+      ),
     );
   } catch (error) {
     console.error("Could not load booked times for the board", error);

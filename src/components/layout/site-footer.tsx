@@ -16,7 +16,7 @@ export async function SiteFooter(): Promise<JSX.Element> {
       <Container className="flex flex-col gap-8 py-12 md:flex-row md:items-end md:justify-between">
         <div className="max-w-sm">
           <Logo />
-          <p className="mt-4 text-sm text-muted-foreground">{t.meta.description}</p>
+          <p className="mt-4 text-sm text-muted-foreground max-sm:hidden">{t.meta.description}</p>
         </div>
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:items-end">
           <Link

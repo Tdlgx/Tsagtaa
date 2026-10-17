@@ -18,6 +18,7 @@ import { getSearchClock } from "@/features/business/search";
 import { getLoyaltySettings, getSpendableBalance } from "@/features/points/points-db";
 import { getI18n } from "@/i18n/server";
 import { getCurrentAccount } from "@/lib/auth/session";
+import { withDeadline } from "@/lib/db";
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -31,7 +32,7 @@ function first(value: string | string[] | undefined): string | undefined {
 async function loadTakenSlots(slug: string, now: Date): Promise<TakenSlot[]> {
   const { from, to } = getBookableWindow(now);
   try {
-    return toTakenSlots(await getTakenRanges(slug, from, to), now);
+    return toTakenSlots(await withDeadline(getTakenRanges(slug, from, to)), now);
   } catch (error) {
     console.error("Could not load booked times", error);
     return [];
@@ -45,7 +46,7 @@ async function loadTakenSlots(slug: string, now: Date): Promise<TakenSlot[]> {
  */
 async function loadPoints(): Promise<BookingPoints | null> {
   try {
-    const settings = await getLoyaltySettings();
+    const settings = await withDeadline(getLoyaltySettings());
     if (!settings.enabled) return null;
     const account = await getCurrentAccount();
     if (!account) return { settings, customer: null };
@@ -54,7 +55,7 @@ async function loadPoints(): Promise<BookingPoints | null> {
       customer: {
         name: account.name,
         phone: account.phone,
-        balance: await getSpendableBalance(account.id),
+        balance: await withDeadline(getSpendableBalance(account.id)),
       },
     };
   } catch (error) {
@@ -66,7 +67,7 @@ async function loadPoints(): Promise<BookingPoints | null> {
 /** A stored place the Цагтаа team suspended (or has not approved) takes no bookings. */
 async function loadBookable(slug: string): Promise<boolean> {
   try {
-    return await isBookable(slug);
+    return await withDeadline(isBookable(slug));
   } catch {
     return true;
   }

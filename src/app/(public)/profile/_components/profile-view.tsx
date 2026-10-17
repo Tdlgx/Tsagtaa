@@ -166,7 +166,8 @@ export function ProfileView({ account }: { account: ProfileAccount | null }): JS
       {/* Right: what you've done ----------------------------------------------- */}
       <div className="flex min-w-0 flex-col gap-10">
         <PointsSection account={account} />
-        <StatGrid stats={stats} t={t} />
+        {/* Four zeros say nothing: the numbers appear with the first booking. */}
+        {stats.total > 0 ? <StatGrid stats={stats} t={t} /> : null}
         {stats.byGroup.length > 0 ? <Breakdown stats={stats} t={t} /> : null}
         <Places stats={stats} now={now} t={t} locale={locale} />
         <Badges stats={stats} t={t} />
@@ -311,7 +312,7 @@ function StatGrid({ stats, t }: { stats: ProfileStats; t: Dictionary }): JSX.Ele
           <div
             key={label}
             className={cn(
-              "flex animate-in flex-col gap-3 rounded-xl border p-5 duration-500 ease-soft fill-mode-both fade-in slide-in-from-bottom-2",
+              "flex animate-in flex-col gap-2 rounded-xl border p-3.5 duration-500 ease-soft fill-mode-both fade-in slide-in-from-bottom-2 sm:gap-3 sm:p-5",
               accent
                 ? "border-transparent bg-brand-ink text-brand-ink-foreground"
                 : "border-border bg-surface",
@@ -323,7 +324,7 @@ function StatGrid({ stats, t }: { stats: ProfileStats; t: Dictionary }): JSX.Ele
               <dd
                 className={cn(
                   "font-heading leading-none font-medium tabular-nums",
-                  compact ? "text-xl" : "text-2xl",
+                  compact ? "text-lg sm:text-xl" : "text-xl sm:text-2xl",
                   accent ? "text-primary" : "text-foreground",
                 )}
               >
@@ -331,7 +332,7 @@ function StatGrid({ stats, t }: { stats: ProfileStats; t: Dictionary }): JSX.Ele
               </dd>
               <dt
                 className={cn(
-                  "mt-2 text-sm",
+                  "mt-1.5 text-xs sm:mt-2 sm:text-sm",
                   accent ? "text-brand-ink-muted" : "text-muted-foreground",
                 )}
               >

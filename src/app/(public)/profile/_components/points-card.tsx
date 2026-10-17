@@ -317,7 +317,7 @@ function SignedOut({ t }: { t: Dictionary }): JSX.Element {
             <h2 id="points-title" className="font-heading text-xl font-medium">
               {words.signedOutTitle}
             </h2>
-            <p className="mt-1 text-sm text-brand-ink-muted">{words.signedOutText}</p>
+            <p className="mt-1 text-sm text-brand-ink-muted max-sm:hidden">{words.signedOutText}</p>
           </div>
         </div>
         <div className="relative flex shrink-0 gap-2">

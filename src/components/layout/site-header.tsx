@@ -55,11 +55,12 @@ export async function SiteHeader({ forceScrolled, sticky }: SiteHeaderProps): Pr
               <span className="sr-only">{t.points.unit}</span>
             </Link>
           ) : null}
-          {/* Phones with the points pill: the tour and language stay one tap away in Profile. */}
-          <div className={account && !manageHref ? "contents max-sm:hidden" : "contents"}>
+          {/* Phones keep the header to the essentials: the tour and the language
+              switch are one tap away in Profile. */}
+          <div className="contents max-sm:hidden">
             <TourButton />
           </div>
-          <LanguageToggle className={account && !manageHref ? "max-sm:hidden" : undefined} />
+          <LanguageToggle className="max-sm:hidden" />
           {/* Phones get a one-tap switch; the three-way control needs more room. */}
           <ThemeSwitch className="sm:hidden" />
           <ThemeToggle className="max-sm:hidden" />

@@ -55,7 +55,7 @@ export const en: Dictionary = {
 
   home: {
     title: "Pick your time, arrive on time.",
-    lead: "See open times at salons, clinics, dentists and auto repair shops across Ulaanbaatar in one place, and book in a few taps.",
+    lead: "See open times at salons, clinics and garages, and book in a few taps.",
     seeTimes: "See open times",
     howItWorks: "How it works",
     sampleSchedule: "Sample schedule. Real places are coming soon.",
@@ -570,6 +570,17 @@ export const en: Dictionary = {
   },
 
   calendar: { code: "Booking code" },
+
+  ticket: {
+    role: "turnable ticket",
+    label: (code) => `Booking ticket ${code}`,
+    howTo:
+      "Drag sideways with a finger or the mouse to turn it. Press Enter or double-tap to see the back.",
+    flip: "Show the back",
+    flipBack: "Show the front",
+    codeLabel: "Booking code",
+    backHint: "Just tell them this code when you arrive.",
+  },
 
   privacy: {
     metaTitle: "Privacy policy",

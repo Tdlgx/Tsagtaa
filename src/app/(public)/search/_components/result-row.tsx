@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 
 /** How many times are shown as buttons before "+N more". */
 const VISIBLE_SLOTS = 6;
+/** Phones show fewer times per place, so the list stays scannable. */
+const VISIBLE_SLOTS_PHONE = 4;
 const RULER = ["09:00", "12:00", "15:00", "18:00", "21:00"] as const;
 
 function toPercent(minutes: number): number {
@@ -156,7 +158,7 @@ export function ResultRow({
   return (
     <li
       className={cn(
-        "grid gap-x-12 gap-y-5 border-b border-border py-7 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)]",
+        "grid gap-x-12 gap-y-3 border-b border-border py-5 sm:gap-y-5 sm:py-7 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)]",
         openCount === 0 && "text-muted-foreground",
       )}
     >
@@ -180,7 +182,14 @@ export function ResultRow({
             </span>
           </p>
         </div>
-        <ul className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground">
+        {/* Phones: one quiet line instead of two icon rows. */}
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">
+          <MapPin className="size-3.5 shrink-0" />
+          <span className="truncate">
+            {categoryLabel} · {t.districts[business.district]}
+          </span>
+        </p>
+        <ul className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground max-sm:hidden">
           <li className="flex items-center gap-2">
             <CategoryIcon className="size-4 shrink-0" />
             {categoryLabel}
@@ -192,7 +201,7 @@ export function ResultRow({
             </span>
           </li>
         </ul>
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="mt-3 text-sm text-muted-foreground max-sm:hidden">
           {business.services.map((service) => service.name).join(", ")}
         </p>
         <p className="mt-1 text-sm font-semibold text-foreground tabular-nums">
@@ -201,18 +210,21 @@ export function ResultRow({
       </div>
 
       <div className="min-w-0">
-        <div data-tour={tourAnchor ? "day-strip" : undefined}>
+        <div data-tour={tourAnchor ? "day-strip" : undefined} className="max-sm:hidden">
           <DayStrip result={result} filters={filters} nowMinutes={nowMinutes} />
         </div>
 
         {openCount > 0 ? (
           <div
             data-tour={tourAnchor ? "slots" : undefined}
-            className="mt-4 flex flex-wrap items-center gap-2"
+            className="flex flex-wrap items-center gap-2 sm:mt-4"
           >
             <ul aria-label={t.search.slotsLabel(business.name, dayWord)} className="contents">
-              {open.slice(0, VISIBLE_SLOTS).map((slot) => (
-                <li key={slot.time}>
+              {open.slice(0, VISIBLE_SLOTS).map((slot, index) => (
+                <li
+                  key={slot.time}
+                  className={index >= VISIBLE_SLOTS_PHONE ? "max-sm:hidden" : undefined}
+                >
                   <SlotButton
                     time={slot.time}
                     day={filters.day}
@@ -222,8 +234,13 @@ export function ResultRow({
                 </li>
               ))}
             </ul>
+            {openCount > VISIBLE_SLOTS_PHONE ? (
+              <span className="px-1 text-sm text-muted-foreground tabular-nums sm:hidden">
+                {t.search.moreSlots(openCount - VISIBLE_SLOTS_PHONE)}
+              </span>
+            ) : null}
             {openCount > VISIBLE_SLOTS ? (
-              <span className="px-1 text-sm text-muted-foreground tabular-nums">
+              <span className="px-1 text-sm text-muted-foreground tabular-nums max-sm:hidden">
                 {t.search.moreSlots(openCount - VISIBLE_SLOTS)}
               </span>
             ) : null}
