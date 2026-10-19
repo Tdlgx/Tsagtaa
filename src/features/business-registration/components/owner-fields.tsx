@@ -74,7 +74,6 @@ export function OwnerSignIn({ owner, errors, phone, t, onChange }: OwnerSignInPr
             onChange={(event) => onChange({ name: event.target.value })}
             aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? "reg-owner-name-error" : undefined}
-            placeholder={words.ownerNamePlaceholder}
           />
           <FieldError id="reg-owner-name-error">{errors.name}</FieldError>
         </Field>

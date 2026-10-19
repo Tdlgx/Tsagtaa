@@ -95,7 +95,6 @@ export function BasicsStep({ draft, errors, t }: BasicsStepProps): JSX.Element {
           }}
           aria-invalid={Boolean(errors.name)}
           aria-describedby={errors.name ? "reg-name-error" : undefined}
-          placeholder={words.namePlaceholder}
         />
         <FieldError id="reg-name-error">{error("name")}</FieldError>
       </Field>

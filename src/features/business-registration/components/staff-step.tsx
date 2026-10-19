@@ -12,8 +12,7 @@ import {
   type RegistrationDraft,
   type StepErrors,
 } from "@/features/business-registration/registration";
-import { getInitial, getStaffExample } from "@/features/staff/sample-staff";
-import type { Locale } from "@/i18n/config";
+import { getInitial } from "@/features/staff/sample-staff";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,6 @@ type StaffStepProps = {
   draft: RegistrationDraft;
   errors: StepErrors;
   t: Dictionary;
-  locale: Locale;
 };
 
 /** Avatar tints, cycled so people are told apart at a glance. */
@@ -57,7 +55,7 @@ export function nextBayName(draft: RegistrationDraft, t: Dictionary): string {
   }
 }
 
-export function StaffStep({ draft, errors, t, locale }: StaffStepProps): JSX.Element {
+export function StaffStep({ draft, errors, t }: StaffStepProps): JSX.Element {
   const words = t.register;
   const category = draft.category ?? "hair";
   const role = t.staff[category].role;
@@ -109,9 +107,10 @@ export function StaffStep({ draft, errors, t, locale }: StaffStepProps): JSX.Ele
                   maxLength={60}
                   onChange={(event) => setStaffName(member.id, event.target.value)}
                   aria-invalid={Boolean(error)}
-                  placeholder={words.staffPlaceholder(
-                    isWash ? words.bayName(index + 1) : getStaffExample(category, locale),
-                  )}
+                  // Bays get a numbered hint; people's names are left blank.
+                  placeholder={
+                    isWash ? words.staffPlaceholder(words.bayName(index + 1)) : undefined
+                  }
                   className="h-10 flex-1 border-transparent bg-transparent px-1 is-hover:border-transparent"
                 />
                 <span className="text-sm text-muted-foreground max-sm:hidden">{role}</span>

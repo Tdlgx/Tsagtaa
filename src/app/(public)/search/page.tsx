@@ -15,6 +15,7 @@ import {
   parseSearchParams,
   searchBusinesses,
 } from "@/features/business/search";
+import { getListings } from "@/features/business/listings";
 import { GuidedTour } from "@/features/onboarding/components/guided-tour";
 import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,8 @@ export default async function SearchPage(props: PageProps<"/search">): Promise<J
   const clock = getSearchClock(new Date(), locale);
   const nowMinutes = filters.day === "today" ? clock.nowMinutes : null;
 
-  const results = searchBusinesses(filters, nowMinutes);
+  // The samples and every approved registered place.
+  const results = searchBusinesses(filters, nowMinutes, await getListings());
   const withTime = results.filter((result) => result.openCount > 0).length;
   const full = results.length - withTime;
   const activeFilters = countActiveFilters(filters);

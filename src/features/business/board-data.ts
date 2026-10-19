@@ -9,9 +9,9 @@ import {
 } from "@/features/business/categories";
 import type { DistrictSlug } from "@/features/business/districts";
 import { localizeBusiness } from "@/features/business/localize";
-import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
+import { getListings } from "@/features/business/listings";
 import { toMinutes, type SearchDay } from "@/features/business/search";
-import { getSampleStaff } from "@/features/staff/sample-staff";
+import { getStaff } from "@/features/staff/sample-staff";
 import type { Locale } from "@/i18n/config";
 import { withDeadline } from "@/lib/db";
 
@@ -44,12 +44,14 @@ export type BoardRow = {
  * If the database cannot be reached, the plain schedule is shown.
  */
 export async function getBoardRows(locale: Locale, now: Date): Promise<BoardRow[]> {
+  // The samples and every approved registered place.
+  const listings = await getListings();
   const { from, to } = getBookableWindow(now);
   let ranges: Awaited<ReturnType<typeof getTakenRangesForMany>> = [];
   try {
     ranges = await withDeadline(
       getTakenRangesForMany(
-        SAMPLE_BUSINESSES.map((business) => business.slug),
+        listings.map((business) => business.slug),
         from,
         to,
       ),
@@ -58,11 +60,11 @@ export async function getBoardRows(locale: Locale, now: Date): Promise<BoardRow[
     console.error("Could not load booked times for the board", error);
   }
 
-  return SAMPLE_BUSINESSES.flatMap((business): BoardRow[] => {
+  return listings.flatMap((business): BoardRow[] => {
     const service = business.services[0];
     if (!service) return [];
     const local = localizeBusiness(business, locale);
-    const staff = getSampleStaff(business, "mn");
+    const staff = getStaff(business, "mn");
     const taken = toTakenSlots(
       ranges.filter((range) => range.businessSlug === business.slug),
       now,

@@ -172,15 +172,21 @@ export function ResultRow({
               {business.name}
             </Link>
           </h2>
-          <p className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground tabular-nums">
-            <span className="sr-only">{t.common.ratingSr}</span>
-            <Star className="size-4 fill-sun text-sun" />
-            {business.rating.toFixed(1)}
-            <span className="font-normal text-muted-foreground">
-              ({business.reviewCount}
-              <span className="sr-only"> {t.common.reviewsSr}</span>)
-            </span>
-          </p>
+          {business.isNew ? (
+            <p className="mt-0.5 shrink-0 rounded-full bg-sun-soft px-2.5 py-0.5 text-xs font-semibold text-sun-strong">
+              {t.common.newPlace}
+            </p>
+          ) : (
+            <p className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground tabular-nums">
+              <span className="sr-only">{t.common.ratingSr}</span>
+              <Star className="size-4 fill-sun text-sun" />
+              {business.rating.toFixed(1)}
+              <span className="font-normal text-muted-foreground">
+                ({business.reviewCount}
+                <span className="sr-only"> {t.common.reviewsSr}</span>)
+              </span>
+            </p>
+          )}
         </div>
         {/* Phones: one quiet line instead of two icon rows. */}
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">

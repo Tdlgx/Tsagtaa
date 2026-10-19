@@ -20,6 +20,7 @@ import { TimeSlot, TimeSlotGroup } from "@/features/booking/components/time-slot
 import type { SampleBusiness } from "@/features/business/sample-businesses";
 import {
   DAY_END,
+  closingMinutes,
   DAY_START,
   TIMES_OF_DAY,
   toClock,
@@ -30,7 +31,7 @@ import {
 import { maxRedeemable, type LoyaltySettings } from "@/features/points/points";
 import { readProfile, saveProfile } from "@/features/profile/profile-store";
 import { localizeBusiness } from "@/features/business/localize";
-import { getInitial, getSampleStaff, type StaffMember } from "@/features/staff/sample-staff";
+import { getInitial, getStaff, type StaffMember } from "@/features/staff/sample-staff";
 import { useLocale, useT } from "@/i18n/client";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { formatMNT } from "@/lib/currency";
@@ -81,7 +82,7 @@ export function BookingFlow({
   const locale = useLocale();
   const t = useT();
   const business = localizeBusiness(canonical, locale);
-  const staff = getSampleStaff(canonical, locale);
+  const staff = getStaff(canonical, locale);
   const words = t.staff[business.category];
   const steps = [t.book.steps.service, words.stepLabel, t.book.steps.time, t.book.steps.confirm];
   const [step, setStep] = useState(0);
@@ -143,7 +144,8 @@ export function BookingFlow({
       .map((slotTime): DaySlot => {
         const start = toMinutes(slotTime);
         const isPast = forDay === "today" && start <= clock.nowMinutes;
-        const fits = start + duration <= DAY_END;
+        // The service must end by closing time (a registered place's own, or the schedule's end).
+        const fits = start + duration <= closingMinutes(canonical, forDay);
         const status: SlotStatus = isPast
           ? "past"
           : open.has(slotTime) && fits
@@ -460,7 +462,6 @@ export function BookingFlow({
                     onChange={(event) => setName(event.target.value)}
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={errors.name ? "booking-name-error" : undefined}
-                    placeholder={t.book.namePlaceholder}
                   />
                   <FieldError id="booking-name-error">{errors.name}</FieldError>
                 </Field>

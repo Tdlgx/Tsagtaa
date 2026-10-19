@@ -64,7 +64,6 @@ export function ProfileForm({ profile, onDone }: ProfileFormProps): JSX.Element 
           onChange={(event) => setName(event.target.value)}
           aria-invalid={Boolean(errors.name)}
           aria-describedby={errors.name ? "profile-name-error" : undefined}
-          placeholder={t.book.namePlaceholder}
         />
         <FieldError id="profile-name-error">{errors.name}</FieldError>
       </Field>
@@ -98,7 +97,6 @@ export function ProfileForm({ profile, onDone }: ProfileFormProps): JSX.Element 
           onChange={(event) => setEmail(event.target.value)}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "profile-email-error" : "profile-email-hint"}
-          placeholder={t.profile.emailPlaceholder}
         />
         {errors.email ? (
           <FieldError id="profile-email-error">{errors.email}</FieldError>

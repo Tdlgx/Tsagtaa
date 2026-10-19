@@ -32,7 +32,8 @@ async function loadEntries(): Promise<MapEntry[]> {
       lng: row.lng,
       logoUrl: row.logoId ? `/api/business-images/${row.logoId}` : null,
       photoUrl: row.photoId ? `/api/business-images/${row.photoId}` : null,
-      bookable: BOOKABLE.has(row.slug),
+      // Every active place takes bookings now, sample or registered.
+      bookable: true,
       isNew: !BOOKABLE.has(row.slug) && row.createdAt.getTime() > newSince,
     }));
   } catch (error) {

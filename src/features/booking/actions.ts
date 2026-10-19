@@ -4,10 +4,11 @@ import { z } from "zod";
 
 import { normalizePhone, toStartInstant, type Booking } from "@/features/booking/booking";
 import { cancelBookingRow, insertBooking, isBookable } from "@/features/booking/booking-db";
-import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
+import { findListing } from "@/features/business/listings";
+import { closingMinutes, toMinutes } from "@/features/business/search";
 import { isAllowedSpend, pointsToEarn } from "@/features/points/points";
 import { getLoyaltySettings } from "@/features/points/points-db";
-import { getSampleStaff } from "@/features/staff/sample-staff";
+import { getStaff } from "@/features/staff/sample-staff";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentAccount } from "@/lib/auth/session";
 
@@ -54,12 +55,13 @@ export async function createBookingAction(input: unknown): Promise<CreateBooking
   if (!parsed.success || !phone) return { ok: false, error: "invalid" };
   const data = parsed.data;
 
-  const business = SAMPLE_BUSINESSES.find((item) => item.slug === data.slug);
+  // A sample place or an approved registered one (from the database).
+  const business = await findListing(data.slug);
   const service = business?.services[data.serviceIndex];
   if (!business || !service) return { ok: false, error: "invalid" };
 
   // People on duty at that time; the database decides which of them is still free.
-  const staff = getSampleStaff(business, "mn");
+  const staff = getStaff(business, "mn");
   const candidates = staff.filter(
     (member) =>
       (data.staffId === ANY_STAFF || member.id === data.staffId) &&
@@ -67,7 +69,11 @@ export async function createBookingAction(input: unknown): Promise<CreateBooking
   );
   const now = new Date();
   const startsAt = toStartInstant(data.day, data.time, now);
-  if (candidates.length === 0 || startsAt <= now) return { ok: false, error: "unavailable" };
+  // The service has to end by closing time.
+  const endsBy = toMinutes(data.time) + service.duration <= closingMinutes(business, data.day);
+  if (candidates.length === 0 || startsAt <= now || !endsBy) {
+    return { ok: false, error: "unavailable" };
+  }
 
   try {
     // A place the Цагтаа team suspended (or has not approved) takes no bookings.

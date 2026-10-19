@@ -510,10 +510,16 @@ function BoardRowView({
       <div className="sticky left-0 z-20 flex w-(--names) shrink-0 flex-col justify-center gap-0.5 border-r border-border bg-surface py-2.5 pr-2 pl-4 sm:pr-3 sm:pl-6">
         <span className="flex min-w-0 items-center gap-1.5">
           <span className="truncate text-sm font-medium text-foreground">{row.name}</span>
-          <span className="flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground tabular-nums max-sm:hidden">
-            <Star className="size-3 fill-sun text-sun" />
-            {row.rating.toFixed(1)}
-          </span>
+          {row.reviewCount === 0 ? (
+            <span className="shrink-0 rounded-full bg-sun-soft px-1.5 text-[10px] font-semibold text-sun-strong max-sm:hidden">
+              {t.common.newPlace}
+            </span>
+          ) : (
+            <span className="flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground tabular-nums max-sm:hidden">
+              <Star className="size-3 fill-sun text-sun" />
+              {row.rating.toFixed(1)}
+            </span>
+          )}
         </span>
         <span className="truncate text-xs text-muted-foreground max-sm:hidden">
           {row.service} · <span className="tabular-nums">{formatMNT(row.price)}</span>
@@ -622,12 +628,18 @@ function SelectedDetails({
       <div className="min-w-0 animate-in duration-250 ease-soft fade-in">
         <p className="flex flex-wrap items-center gap-x-2 text-base font-medium text-foreground">
           {row.name}
-          <span className="inline-flex items-center gap-1 text-sm font-normal text-muted-foreground tabular-nums">
-            <Star className="size-4 fill-sun text-sun" />
-            <span className="sr-only">{t.common.ratingSr}</span>
-            {row.rating.toFixed(1)}
-            <span className="max-sm:hidden">· {t.board.reviews(row.reviewCount)}</span>
-          </span>
+          {row.reviewCount === 0 ? (
+            <span className="rounded-full bg-sun-soft px-2 py-0.5 text-xs font-semibold text-sun-strong">
+              {t.common.newPlace}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-sm font-normal text-muted-foreground tabular-nums">
+              <Star className="size-4 fill-sun text-sun" />
+              <span className="sr-only">{t.common.ratingSr}</span>
+              {row.rating.toFixed(1)}
+              <span className="max-sm:hidden">· {t.board.reviews(row.reviewCount)}</span>
+            </span>
+          )}
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground tabular-nums">

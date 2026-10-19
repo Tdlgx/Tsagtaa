@@ -66,10 +66,21 @@ export function getSampleStaff(business: SampleBusiness, locale: Locale): StaffM
   });
 }
 
-/** A typical name for this kind of place, as a form placeholder: "Др. Болормаа", "Сарнай". */
-export function getStaffExample(category: BusinessCategorySlug, locale: Locale): string {
-  const name = STAFF_NAMES[category][0] ?? "";
-  return locale === "en" ? transliterate(name) : name;
+/**
+ * Who can be booked at a place: its real staff for a registered place,
+ * generated sample staff for a sample one. Real staff can each take any of
+ * the open times; who is actually free is decided by the bookings.
+ */
+export function getStaff(business: SampleBusiness, locale: Locale): StaffMember[] {
+  if (!business.staff) return getSampleStaff(business, locale);
+  const { role } = getDictionary(locale).staff[business.category];
+  return business.staff.map((member) => ({
+    id: `${business.slug}-${member.position}`,
+    name: locale === "en" ? transliterate(member.name) : member.name,
+    canonicalName: member.name,
+    role,
+    open: business.open,
+  }));
 }
 
 /** "Др. Болормаа" → "Б", "Dr. Bolormaa" → "B", "Бокс 2" / "Bay 2" → "2". */

@@ -49,11 +49,35 @@ export const MAX_SERVICES = 30;
 export const MAX_STAFF = 20;
 export const DESCRIPTION_MAX = 300;
 
-/** Half-hour times from 06:00 to 23:30, for the hour pickers. */
+/** Half-hour times from 06:00 to 23:30: suggestions for the hour fields, which also take any typed time. */
 export const TIME_OPTIONS: readonly string[] = Array.from({ length: 36 }, (_, index) => {
   const minutes = 6 * 60 + index * 30;
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 });
+
+/**
+ * A typed time → "HH:MM", or null if it is not a time of day.
+ * Accepts what people type on a phone keypad or keyboard:
+ * "8" → 08:00, "845" / "0845" / "8:45" / "8.45" / "8 45" → 08:45, "21:5" → 21:05.
+ */
+export function parseTime(input: string): string | null {
+  const text = input.trim().replace(/[.,hч\s]+/gi, ":");
+  let hours: number;
+  let minutes: number;
+  const parts = /^(\d{1,2}):(\d{1,2})$/.exec(text);
+  if (parts) {
+    hours = Number(parts[1]);
+    minutes = Number(parts[2]);
+  } else if (/^\d{1,4}$/.test(text)) {
+    // Digits only: the last two are minutes once there are more than two.
+    hours = Number(text.length <= 2 ? text : text.slice(0, -2));
+    minutes = text.length <= 2 ? 0 : Number(text.slice(-2));
+  } else {
+    return null;
+  }
+  if (hours > 23 || minutes > 59) return null;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
 
 /* Smart defaults per kind of place -------------------------------------------- */
 

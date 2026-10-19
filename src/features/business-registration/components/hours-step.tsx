@@ -2,15 +2,15 @@
 
 import { Copy } from "lucide-react";
 import { Switch } from "radix-ui";
-import type { JSX } from "react";
+import { useState, type JSX } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FieldError, FieldHint } from "@/components/ui/field";
-import { Select } from "@/components/ui/select";
 import { updateDraft } from "@/features/business-registration/draft-store";
 import {
   CATEGORY_DEFAULTS,
   HOURS_PRESETS,
+  parseTime,
   SLOT_OPTIONS,
   TIME_OPTIONS,
   toMinutes,
@@ -90,6 +90,8 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
       <fieldset id="reg-hours" tabIndex={-1} className="outline-none">
         <legend className="sr-only">{words.headings.hours}</legend>
         <FieldError className="mb-3">{errors.hours ? words.errors.hoursNone : null}</FieldError>
+        <TimeSuggestions />
+        <FieldHint className="mb-2 text-xs">{words.timeHint}</FieldHint>
         <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
           {draft.hours.map((item, index) => {
             const dayName = words.weekdays[index] ?? "";
@@ -121,35 +123,23 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
 
                   {item.open ? (
                     <div className="flex flex-1 items-center gap-2">
-                      <Select
-                        aria-label={`${dayName}: ${words.opens}`}
+                      <TimeInput
+                        label={`${dayName}: ${words.opens}`}
                         value={item.opens}
-                        onChange={(event) => setDay(index, { opens: event.target.value })}
-                        className="h-10 min-w-[6.5rem] tabular-nums"
-                      >
-                        {TIME_OPTIONS.map((time) => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </Select>
+                        onCommit={(opens) => setDay(index, { opens })}
+                        t={t}
+                      />
                       <span aria-hidden className="text-muted-foreground">
                         –
                       </span>
-                      <Select
+                      <TimeInput
                         id={`reg-hours-${index}`}
-                        aria-label={`${dayName}: ${words.closes}`}
-                        aria-invalid={Boolean(rowError)}
+                        label={`${dayName}: ${words.closes}`}
                         value={item.closes}
-                        onChange={(event) => setDay(index, { closes: event.target.value })}
-                        className="h-10 min-w-[6.5rem] tabular-nums"
-                      >
-                        {TIME_OPTIONS.map((time) => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </Select>
+                        invalid={Boolean(rowError)}
+                        onCommit={(closes) => setDay(index, { closes })}
+                        t={t}
+                      />
                     </div>
                   ) : (
                     <span className="text-sm text-muted-foreground">{words.closedDay}</span>
@@ -233,5 +223,108 @@ function WeekChart({ hours, t }: { hours: readonly DayHours[]; t: Dictionary }):
         })}
       </ul>
     </div>
+  );
+}
+
+/** Suggestions shared by every hour field. */
+const TIME_LIST_ID = "reg-time-options";
+
+/** One shared list of suggested times; rendered once by the hours step. */
+function TimeSuggestions(): JSX.Element {
+  return (
+    <datalist id={TIME_LIST_ID}>
+      {TIME_OPTIONS.map((time) => (
+        <option key={time} value={time} />
+      ))}
+    </datalist>
+  );
+}
+
+type TimeInputProps = {
+  value: string;
+  onCommit: (time: string) => void;
+  label: string;
+  id?: string;
+  invalid?: boolean;
+  t: Dictionary;
+};
+
+/**
+ * A time of day: pick a suggestion or type any time. Typing is forgiving
+ * ("845", "8.45", "8:45" all become 08:45); only a real time is saved, so the
+ * autosaved draft never holds a half-typed value.
+ */
+function TimeInput({
+  value,
+  onCommit,
+  label,
+  id,
+  invalid = false,
+  t,
+}: TimeInputProps): JSX.Element {
+  const [text, setText] = useState(value);
+  const [shown, setShown] = useState(value);
+  const [bad, setBad] = useState(false);
+  // A preset or "copy Monday" changed the value from outside: show it.
+  if (value !== shown) {
+    setShown(value);
+    setText(value);
+    setBad(false);
+  }
+
+  const commit = (raw: string): void => {
+    const time = parseTime(raw);
+    if (!time) {
+      setBad(raw.trim() !== "");
+      if (raw.trim() === "") setText(value);
+      return;
+    }
+    setBad(false);
+    setText(time);
+    if (time !== value) {
+      setShown(time);
+      onCommit(time);
+    }
+  };
+
+  const errorId = id ? `${id}-format` : undefined;
+  return (
+    <span className="relative flex flex-col">
+      <input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
+        list={TIME_LIST_ID}
+        maxLength={5}
+        aria-label={label}
+        aria-invalid={bad || invalid}
+        aria-describedby={bad ? errorId : undefined}
+        value={text}
+        placeholder="09:00"
+        onChange={(event) => {
+          const raw = event.target.value;
+          setText(raw);
+          // A suggestion picked from the list arrives complete: save it straight away.
+          if (/^\d{2}:\d{2}$/.test(raw)) commit(raw);
+        }}
+        onBlur={(event) => commit(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commit(event.currentTarget.value);
+          }
+        }}
+        className={cn(
+          "h-10 w-[6.5rem] rounded-md border border-input bg-surface px-3 text-base text-foreground tabular-nums outline-none placeholder:text-muted-foreground is-hover:border-muted-foreground is-focus:border-primary-strong is-focus:ring-3 is-focus:ring-ring",
+          (bad || invalid) && "border-danger is-focus:border-danger",
+        )}
+      />
+      {bad ? (
+        <span id={errorId} role="alert" className="mt-1 text-xs text-danger-foreground">
+          {t.register.errors.timeFormat}
+        </span>
+      ) : null}
+    </span>
   );
 }

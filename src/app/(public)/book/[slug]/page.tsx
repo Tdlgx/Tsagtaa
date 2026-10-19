@@ -13,7 +13,7 @@ import { getBookableWindow, toTakenSlots, type TakenSlot } from "@/features/book
 import { getTakenRanges, isBookable } from "@/features/booking/booking-db";
 import { getBusinessCategory } from "@/features/business/categories";
 import { localizeBusiness } from "@/features/business/localize";
-import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
+import { findListing } from "@/features/business/listings";
 import { getSearchClock } from "@/features/business/search";
 import { getLoyaltySettings, getSpendableBalance } from "@/features/points/points-db";
 import { getI18n } from "@/i18n/server";
@@ -73,13 +73,9 @@ async function loadBookable(slug: string): Promise<boolean> {
   }
 }
 
-function findBusiness(slug: string): (typeof SAMPLE_BUSINESSES)[number] | undefined {
-  return SAMPLE_BUSINESSES.find((business) => business.slug === slug);
-}
-
 export async function generateMetadata(props: PageProps<"/book/[slug]">): Promise<Metadata> {
   const { locale, t } = await getI18n();
-  const business = findBusiness((await props.params).slug);
+  const business = await findListing((await props.params).slug);
   return {
     title: business ? t.book.metaTitle(localizeBusiness(business, locale).name) : t.book.notFound,
   };
@@ -87,7 +83,8 @@ export async function generateMetadata(props: PageProps<"/book/[slug]">): Promis
 
 export default async function BookPage(props: PageProps<"/book/[slug]">): Promise<JSX.Element> {
   const { locale, t } = await getI18n();
-  const canonical = findBusiness((await props.params).slug);
+  // A sample place or an approved registered one.
+  const canonical = await findListing((await props.params).slug);
   if (!canonical) notFound();
   const business = localizeBusiness(canonical, locale);
 
@@ -131,13 +128,19 @@ export default async function BookPage(props: PageProps<"/book/[slug]">): Promis
           </div>
         </div>
         <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
-          <li className="inline-flex items-center gap-1.5 font-medium text-foreground tabular-nums">
-            <Star className="size-4 fill-sun text-sun" />
-            {business.rating.toFixed(1)}
-            <span className="font-normal text-muted-foreground">
-              ({t.common.reviews(business.reviewCount)})
-            </span>
-          </li>
+          {business.isNew ? (
+            <li className="rounded-full bg-sun-soft px-2.5 py-0.5 text-xs font-semibold text-sun-strong">
+              {t.common.newPlace}
+            </li>
+          ) : (
+            <li className="inline-flex items-center gap-1.5 font-medium text-foreground tabular-nums">
+              <Star className="size-4 fill-sun text-sun" />
+              {business.rating.toFixed(1)}
+              <span className="font-normal text-muted-foreground">
+                ({t.common.reviews(business.reviewCount)})
+              </span>
+            </li>
+          )}
           <li className="inline-flex items-center gap-1.5">
             <MapPin className="size-4" />
             {t.districts[business.district]}, {business.area}

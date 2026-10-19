@@ -50,7 +50,6 @@ export function SignupForm({ next }: { next: string }): JSX.Element {
           defaultValue={state.name}
           maxLength={80}
           required
-          placeholder={t.book.namePlaceholder}
         />
       </Field>
       <Field>

@@ -32,41 +32,6 @@ export const SAMPLE_BUSINESSES_EN: Record<
     area: "West 4th Crossroads",
     services: ["Eyelash extensions", "Eyebrow shaping", "Facial"],
   },
-  "setgel-salon": {
-    name: "Setgel Salon",
-    area: "3rd and 4th Microdistricts",
-    services: ["Women's haircut", "Perm", "Children's haircut"],
-  },
-  "nomad-barber": {
-    name: "Nomad Barber",
-    area: "Seoul Street",
-    services: ["Men's haircut", "Hot towel beard trim"],
-  },
-  "tsetseg-nail": {
-    name: "Tsetseg Nail Studio",
-    area: "Yarmag",
-    services: ["Gel polish", "Nail extensions", "Manicure"],
-  },
-  "nar-spa": {
-    name: "Nar Spa",
-    area: "Nükhtiin Am",
-    services: ["Hot stone massage", "Back and neck massage"],
-  },
-  "sod-beauty": {
-    name: "Sod Beauty",
-    area: "Near Narantuul Market",
-    services: ["Eyebrow tattoo", "Eyebrow shaping", "Lash lift"],
-  },
-  "erdene-hair": {
-    name: "Erdene Hairdresser",
-    area: "Ulaankhuaran",
-    services: ["Men's haircut", "Women's haircut"],
-  },
-  "khurel-barber": {
-    name: "Khurel Barber",
-    area: "Tolgoit",
-    services: ["Men's haircut", "Beard trim"],
-  },
   "enkh-amgalan-clinic": {
     name: "Enkh-Amgalan Clinic",
     area: "13th Microdistrict",
@@ -77,20 +42,10 @@ export const SAMPLE_BUSINESSES_EN: Record<
     area: "Near Shangri-La",
     services: ["Dental check-up", "Scale and polish", "Filling"],
   },
-  "tsagaan-shud-dental": {
-    name: "Tsagaan Shud Dental",
-    area: "Yarmag",
-    services: ["Dental check-up", "Teeth whitening"],
-  },
   "khurdan-auto": {
     name: "Khurdan Auto Repair",
     area: "Airport Roundabout",
     services: ["Oil and filter change", "Computer diagnostics", "Tyre change and balancing"],
-  },
-  "bat-motor": {
-    name: "Bat Motor Service",
-    area: "West 4th Crossroads",
-    services: ["Oil and filter change", "Brake pad replacement", "Suspension check"],
   },
   "tunglag-car-wash": {
     name: "Tunglag Car Wash",

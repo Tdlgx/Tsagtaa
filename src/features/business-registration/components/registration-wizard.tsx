@@ -310,9 +310,7 @@ export function RegistrationWizard(): JSX.Element {
             {stepKey === "services" ? (
               <ServicesStep draft={draft} errors={shown} t={t} locale={locale} />
             ) : null}
-            {stepKey === "staff" ? (
-              <StaffStep draft={draft} errors={shown} t={t} locale={locale} />
-            ) : null}
+            {stepKey === "staff" ? <StaffStep draft={draft} errors={shown} t={t} /> : null}
             {stepKey === "review" ? (
               <ReviewStep
                 draft={draft}

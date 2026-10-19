@@ -195,39 +195,51 @@ function matchesQuery(business: SampleBusiness, query: string): boolean {
 }
 
 /**
- * Filters and sorts the sample businesses. `nowMinutes` hides today's past
- * times; pass null when searching tomorrow.
+ * When a service must end on `day`: the place's own closing time if it is a
+ * registered place, otherwise the end of the shared schedule.
+ */
+export function closingMinutes(business: SampleBusiness, day: SearchDay): number {
+  return business.closesAt?.[day] ?? DAY_END;
+}
+
+/**
+ * Filters and sorts businesses (the samples, plus registered places when the
+ * page passes them). `nowMinutes` hides today's past times; pass null when
+ * searching tomorrow.
  */
 export function searchBusinesses(
   filters: SearchFilters,
   nowMinutes: number | null,
+  businesses: readonly SampleBusiness[] = SAMPLE_BUSINESSES,
 ): SearchResult[] {
   const range = TIMES_OF_DAY.find((item) => item.value === filters.time);
 
-  const results = SAMPLE_BUSINESSES.filter(
-    (business) =>
-      (filters.cat === "" || matchesCategoryFilter(business.category, filters.cat)) &&
-      (filters.district === "" || business.district === filters.district) &&
-      matchesQuery(business, filters.q),
-  ).map((business): SearchResult => {
-    const slots = business.open[filters.day].map((time): ResultSlot => {
-      const start = toMinutes(time);
-      let state: SlotState = "open";
-      if (nowMinutes !== null && start < nowMinutes) state = "past";
-      else if (range && (start < range.from || start >= range.to)) state = "outside";
-      return { time, start, state };
-    });
-    const open = slots.filter((slot) => slot.state === "open");
+  const results = businesses
+    .filter(
+      (business) =>
+        (filters.cat === "" || matchesCategoryFilter(business.category, filters.cat)) &&
+        (filters.district === "" || business.district === filters.district) &&
+        matchesQuery(business, filters.q),
+    )
+    .map((business): SearchResult => {
+      const slots = business.open[filters.day].map((time): ResultSlot => {
+        const start = toMinutes(time);
+        let state: SlotState = "open";
+        if (nowMinutes !== null && start < nowMinutes) state = "past";
+        else if (range && (start < range.from || start >= range.to)) state = "outside";
+        return { time, start, state };
+      });
+      const open = slots.filter((slot) => slot.state === "open");
 
-    return {
-      business,
-      slots,
-      openCount: open.length,
-      firstOpen: open[0]?.start ?? null,
-      priceFrom: Math.min(...business.services.map((service) => service.price)),
-      shortestService: Math.min(...business.services.map((service) => service.duration)),
-    };
-  });
+      return {
+        business,
+        slots,
+        openCount: open.length,
+        firstOpen: open[0]?.start ?? null,
+        priceFrom: Math.min(...business.services.map((service) => service.price)),
+        shortestService: Math.min(...business.services.map((service) => service.duration)),
+      };
+    });
 
   const byRating = (a: SearchResult, b: SearchResult): number =>
     b.business.rating - a.business.rating || b.business.reviewCount - a.business.reviewCount;
