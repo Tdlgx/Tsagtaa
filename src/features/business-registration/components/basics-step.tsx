@@ -3,6 +3,7 @@
 import { BadgeCheck, CircleCheck, CircleX, LoaderCircle, Wand2 } from "lucide-react";
 import { useEffect, useState, type JSX } from "react";
 
+import { LocationPicker } from "@/components/shared/map/location-picker";
 import { Field, FieldError, FieldHint, Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -165,6 +166,19 @@ export function BasicsStep({ draft, errors, t }: BasicsStepProps): JSX.Element {
           <FieldError id="reg-address-error">{error("address")}</FieldError>
         </Field>
       </div>
+
+      {/* Optional, but a place with a pin shows up on the map. */}
+      <Field>
+        <Label id="reg-location-label">
+          {words.location}{" "}
+          <span className="font-normal text-muted-foreground">{t.common.optional}</span>
+        </Label>
+        <LocationPicker
+          value={draft.location}
+          onChange={(location) => set({ location })}
+          labelId="reg-location-label"
+        />
+      </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>

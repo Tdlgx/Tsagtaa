@@ -38,6 +38,12 @@ export async function SiteFooter(): Promise<JSX.Element> {
             {t.auth.footerLink}
           </Link>
           <Link
+            href="/map"
+            className="underline-offset-4 outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground is-hover:underline"
+          >
+            {t.footer.map}
+          </Link>
+          <Link
             href="/privacy"
             className="underline-offset-4 outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground is-hover:underline"
           >

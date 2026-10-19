@@ -40,7 +40,9 @@ export type ReviewCheck =
   | { id: "staff"; level: CheckLevel; count: number }
   | { id: "description"; level: CheckLevel; length: number }
   | { id: "email"; level: CheckLevel; email: string }
-  | { id: "waiting"; level: CheckLevel; hours: number };
+  | { id: "waiting"; level: CheckLevel; hours: number }
+  | { id: "location"; level: CheckLevel; set: boolean }
+  | { id: "images"; level: CheckLevel; logo: boolean; photos: number };
 
 export type ReviewReport = {
   checks: ReviewCheck[];
@@ -73,7 +75,7 @@ export async function getReviewReport(
   const owner = members.find((member) => member.role === "owner") ?? null;
   const ownerId = owner?.accountId ?? null;
 
-  const [matches, [prices]] = await Promise.all([
+  const [matches, [prices], [images]] = await Promise.all([
     sql<DuplicateMatch[]>`
       SELECT b.slug, b.name, b.status,
         round(similarity(lower(b.name), lower(${business.name}))::numeric, 2)::float AS similarity,
@@ -98,6 +100,11 @@ export async function getReviewReport(
       FROM services s JOIN businesses b ON b.id = s.business_id
       WHERE b.category = ${business.category} AND b.status = 'active'
         AND b.id <> ${business.id} AND s.price > 0
+    `,
+    sql<{ logo: boolean; photos: number }[]>`
+      SELECT coalesce(bool_or(kind = 'logo'), false) AS logo,
+        count(*) FILTER (WHERE kind = 'photo')::int AS photos
+      FROM business_images WHERE business_id = ${business.id}
     `,
   ]);
 
@@ -199,6 +206,14 @@ export async function getReviewReport(
     level: description >= 20 ? "pass" : "warn",
     length: description,
   });
+
+  // A pin and some pictures: not required, but they make a place easy to
+  // find and easy to check against reality.
+  const hasPin = business.latitude !== null;
+  checks.push({ id: "location", level: hasPin ? "pass" : "warn", set: hasPin });
+  const logo = images?.logo ?? false;
+  const photos = images?.photos ?? 0;
+  checks.push({ id: "images", level: logo || photos > 0 ? "pass" : "warn", logo, photos });
 
   if (business.email) {
     checks.push({

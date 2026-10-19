@@ -189,6 +189,7 @@ export function RegistrationWizard(): JSX.Element {
       hours: draft.hours,
       services: draft.services.map((service) => ({ ...service, name: service.name.trim() })),
       staff: draft.staff.map((member) => ({ ...member, name: member.name.trim() })),
+      location: draft.location,
       ownerName: owner.name.trim(),
       password: owner.password,
       consent: true,

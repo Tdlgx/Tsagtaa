@@ -25,6 +25,9 @@ export type ManagedBusiness = {
   createdAt: Date;
   reviewedAt: Date | null;
   reviewNote: string | null;
+  /** The map pin, if set. */
+  latitude: number | null;
+  longitude: number | null;
   hours: { weekday: number; opens: string; closes: string }[];
   services: { name: string; duration: number; price: number }[];
   staff: { position: number; name: string }[];
@@ -61,7 +64,7 @@ export async function getManagedBusiness(slug: string): Promise<ManagedBusiness 
     SELECT id, slug, name, category, district, address, phone, email,
       register_number AS "registerNumber", description, status,
       slot_minutes AS "slotMinutes", created_at AS "createdAt",
-      reviewed_at AS "reviewedAt", review_note AS "reviewNote"
+      reviewed_at AS "reviewedAt", review_note AS "reviewNote", latitude, longitude
     FROM businesses WHERE slug = ${slug}
   `;
   if (!business) return null;

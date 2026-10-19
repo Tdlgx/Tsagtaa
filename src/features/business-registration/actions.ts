@@ -15,6 +15,7 @@ import {
   registrationInput,
   type RegistrationDraft,
 } from "@/features/business-registration/registration";
+import { roundLatLng } from "@/features/business/locations";
 
 export type SlugCheck =
   | { slug: string; status: "available" }
@@ -77,6 +78,7 @@ export async function registerBusinessAction(input: unknown): Promise<RegisterBu
       phone,
       email: data.email || null,
       registerNumber: data.registerNumber ? normalizeRegisterNumber(data.registerNumber) : null,
+      location: data.location ? roundLatLng(data.location) : null,
       description: data.description,
       slotMinutes: data.slotMinutes,
       hours: data.hours.flatMap((item, index) =>

@@ -605,6 +605,90 @@
   transform: rotateY(180deg);
 }
 
+/* Map pins (Leaflet divIcons): a round head holding the logo or a letter,
+   with a point at the bottom that marks the spot. */
+@layer components {
+  .map-pin-wrap {
+    background: none;
+    border: 0;
+  }
+  .map-pin {
+    position: relative;
+    display: flex;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    border: 2px solid var(--surface);
+    border-radius: 9999px;
+    background: var(--brand-ink);
+    color: var(--primary);
+    font:
+      600 1rem/1 var(--font-onest),
+      sans-serif;
+    box-shadow: 0 4px 12px rgb(var(--shadow-tint) / 0.28);
+    transition:
+      transform 150ms var(--ease-soft),
+      border-color 150ms var(--ease-soft);
+    transform-origin: 50% 100%;
+  }
+  .map-pin::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    transform: translateX(-50%) rotate(45deg);
+    border-right: 2px solid var(--surface);
+    border-bottom: 2px solid var(--surface);
+    background: var(--brand-ink);
+    z-index: -1;
+  }
+  .map-pin img {
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    background: var(--surface);
+    object-fit: contain;
+  }
+  .map-pin.is-selected {
+    transform: scale(1.18);
+    border-color: var(--primary);
+  }
+  .map-pin.is-selected::after {
+    border-color: var(--primary);
+  }
+  /* On the dark map, a light ring keeps the ink pins visible. */
+  .dark .map-pin,
+  .dark .map-pin::after {
+    border-color: color-mix(in oklab, var(--foreground) 80%, transparent);
+  }
+  .dark .map-pin.is-selected,
+  .dark .map-pin.is-selected::after {
+    border-color: var(--primary);
+  }
+  /* Dark mode: OpenStreetMap has no dark style, so its tiles are inverted. */
+  .map-tiles-dark {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
+  }
+  /* Leaflet's own chrome, in the site's colors. */
+  .map-surface .leaflet-control-zoom a {
+    background: var(--surface);
+    color: var(--foreground);
+    border-color: var(--border);
+  }
+  .map-surface .leaflet-control-attribution {
+    background: color-mix(in oklab, var(--surface) 80%, transparent);
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+  .map-surface .leaflet-control-attribution a {
+    color: inherit;
+  }
+}
+
 /* Keeps fixed bottom bars clear of the iPhone home indicator. */
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);

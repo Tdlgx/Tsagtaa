@@ -134,6 +134,7 @@ export const en: Dictionary = {
   footer: {
     copyright: (year, brand) => `© ${year} ${brand}, Ulaanbaatar`,
     privacy: "Privacy policy",
+    map: "Map",
   },
 
   search: {
@@ -142,6 +143,7 @@ export const en: Dictionary = {
       "Search today's and tomorrow's open times at salons, clinics, dentists, auto repair shops and car washes in Ulaanbaatar.",
     title: "Find open times",
     queryLabel: "Service or place name",
+    mapLink: "Map",
     placeholder: "e.g. manicure, dental check-up",
     submit: "Search",
     categories: "Category",
@@ -570,6 +572,70 @@ export const en: Dictionary = {
   },
 
   calendar: { code: "Booking code" },
+
+  map: {
+    metaTitle: "Map",
+    metaDescription: "Where the places on Tsagtaa are, on a map.",
+    title: "Map",
+    lead: (count) => `${count} ${count === 1 ? "place" : "places"} on the map`,
+    empty: "No places on the map yet. Places that add their location show up here.",
+    mapLabel: "Where the places are",
+    listTitle: "Newest first",
+    new: "New",
+    book: "Book a time",
+    directions: "Directions",
+    notBookableYet: "This place will take online bookings soon. For now, please call.",
+  },
+
+  media: {
+    title: "Logo and photos",
+    lead: "Customers recognise your place on the map and in search by its logo and photos.",
+    logo: "Logo",
+    logoHint: "A square, clear image works best.",
+    logoAlt: "Business logo",
+    upload: "Upload",
+    replace: "Replace",
+    removeLogo: "Remove the logo",
+    photos: "Photos",
+    photosHint:
+      "Show the place, the work space and your work. Phone photos are shrunk automatically.",
+    photoAlt: (n) => `Business photo ${n}`,
+    removePhoto: (n) => `Remove photo ${n}`,
+    addPhoto: "Add a photo",
+    uploading: "Uploading…",
+    logoSaved: "Logo saved",
+    photosAdded: (count) => `${count} ${count === 1 ? "photo" : "photos"} added`,
+    removed: "Removed",
+    limitNote: (max) => `Up to ${max} photos.`,
+    errors: {
+      notImage: "Please choose an image (JPG, PNG, WebP, HEIC).",
+      tooLarge: "The image is too large (up to 15 MB).",
+      failed: "Couldn't read the image. Please choose another.",
+      image: "The image format isn't accepted.",
+      limit: "You've reached the photo limit.",
+      area: "The location must be in Ulaanbaatar.",
+      invalid: "Please check the details.",
+      not_found: "Not found.",
+    },
+  },
+
+  location: {
+    title: "Location",
+    lead: "This is where your place shows on the map.",
+    label: "Business location on the map",
+    pin: "Business location",
+    hint: "Tap the map to mark your location. Drag the pin to adjust it.",
+    chosen: (lat, lng) => `Chosen location: ${lat}, ${lng}`,
+    notes: {
+      outside: "That point is outside Ulaanbaatar. Please choose one in the city.",
+      denied: "Couldn't get your location. Please mark it on the map.",
+      unsupported: "This device can't find its location. Please mark it on the map.",
+    },
+    useMine: "My location",
+    clear: "Clear",
+    save: "Save location",
+    saved: "Location saved",
+  },
 
   ticket: {
     role: "turnable ticket",
@@ -1046,8 +1112,17 @@ export const en: Dictionary = {
         description: "Description",
         email: "Email",
         waiting: "Waiting time",
+        location: "Location",
+        images: "Logo and photos",
       },
       found: {
+        locationOk: "Location marked on the map.",
+        noLocation: "No location, so it won't show on the map.",
+        imagesOk: (photos, logo) =>
+          [logo ? "Has a logo" : "No logo", `${photos} ${photos === 1 ? "photo" : "photos"}`].join(
+            ", ",
+          ) + ".",
+        noImages: "No logo or photos, so there is nothing to check the place against.",
         owner: (name, phone) => `${name}, ${phone}, can sign in.`,
         noOwner: "No owner account. Assign someone before approving.",
         register: {
@@ -1298,6 +1373,7 @@ export const en: Dictionary = {
     districtPlaceholder: "Choose a district",
     address: "Address",
     addressPlaceholder: "e.g. 1st khoroo, Seoul Street 12, 2nd floor",
+    location: "Location on the map",
     phone: "Phone number",
     phoneHint: "Booking alerts and confirmations go to this number.",
     email: "Email",
@@ -1376,6 +1452,7 @@ export const en: Dictionary = {
       registerNumber: "Adding your registration number makes the check quicker.",
       email: "Add an email to get a daily summary.",
       moreStaff: "With two or more people you can take bookings side by side.",
+      location: "Mark your location on the map so customers can find you easily.",
     },
     draftSaved: "Saved automatically on this device",
     draftRestored: "Continuing your earlier registration",

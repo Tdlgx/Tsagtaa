@@ -11,6 +11,11 @@ function connect(): postgres.Sql {
   // and would send to the server as an unknown setting. TLS still comes from `sslmode`.
   url.searchParams.delete("schema");
   url.searchParams.delete("channel_binding");
+  // "localhost" makes Node try ::1 and 127.0.0.1 in turn; when that attempt
+  // is cut short (connect timeout, database down) Node can throw an
+  // uncatchable "object null is not iterable" from its AggregateError.
+  // One address, one attempt: the local Docker database listens on IPv4.
+  if (url.hostname === "localhost") url.hostname = "127.0.0.1";
   return postgres(url.toString(), {
     max: 10,
     idle_timeout: 20,

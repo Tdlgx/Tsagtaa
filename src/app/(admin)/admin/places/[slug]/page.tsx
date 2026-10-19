@@ -7,6 +7,8 @@ import type { JSX, ReactNode } from "react";
 import { AuditList } from "@/app/(admin)/admin/_components/admin-ui";
 import { CheckList, ScoreBadge } from "@/app/(admin)/admin/_components/review-report";
 import { Container } from "@/components/layout/container";
+import { BusinessMap } from "@/components/shared/map/business-map";
+import { listImages } from "@/features/business/media-db";
 import { listAudit } from "@/features/admin/admin-db";
 import { AssignMemberForm, ReviewActions } from "@/features/admin/components/admin-controls";
 import { getReviewReport } from "@/features/admin/review-checks";
@@ -20,6 +22,7 @@ import { getI18n } from "@/i18n/server";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { formatMNT } from "@/lib/currency";
 import { formatDateTime } from "@/lib/date";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(
   props: PageProps<"/admin/places/[slug]">,
@@ -40,11 +43,14 @@ export default async function PlaceReviewPage(
 
   const { t } = await getI18n();
   const members = await getMembers(business.id);
-  const [report, stats, history] = await Promise.all([
+  const [report, stats, history, images] = await Promise.all([
     getReviewReport(business, members),
     getBusinessStats(slug, getBookableWindow(new Date()).from),
     listAudit({ limit: 20, targetId: business.id }),
+    listImages(business.id),
   ]);
+  const logo = images.find((image) => image.kind === "logo") ?? null;
+  const photos = images.filter((image) => image.kind === "photo");
   const words = t.admin.place;
   const Icon = getBusinessCategory(business.category as BusinessCategorySlug)?.icon ?? Store;
 
@@ -159,6 +165,55 @@ export default async function PlaceReviewPage(
         </div>
 
         <div className="flex flex-col gap-8">
+          <section aria-labelledby="look-title">
+            <h2 id="look-title" className="font-heading text-xl font-medium text-foreground">
+              {t.media.title}
+            </h2>
+            {logo || photos.length > 0 ? (
+              <ul className="mt-4 grid grid-cols-3 gap-2">
+                {[...(logo ? [logo] : []), ...photos].map((image, index) => (
+                  <li
+                    key={image.id}
+                    className="aspect-square overflow-hidden rounded-lg border border-border bg-surface"
+                  >
+                    <a href={`/api/business-images/${image.id}`} target="_blank" rel="noreferrer">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- our own small, cached images */}
+                      <img
+                        src={`/api/business-images/${image.id}`}
+                        alt={image.kind === "logo" ? t.media.logoAlt : t.media.photoAlt(index)}
+                        className={cn(
+                          "size-full",
+                          image.kind === "logo" ? "object-contain p-2" : "object-cover",
+                        )}
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">{t.admin.review.found.noImages}</p>
+            )}
+            {business.latitude !== null && business.longitude !== null ? (
+              <BusinessMap
+                places={[
+                  {
+                    slug: business.slug,
+                    name: business.name,
+                    lat: business.latitude,
+                    lng: business.longitude,
+                    logoUrl: logo ? `/api/business-images/${logo.id}` : null,
+                  },
+                ]}
+                label={t.location.label}
+                className="mt-3 h-52"
+              />
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">
+                {t.admin.review.found.noLocation}
+              </p>
+            )}
+          </section>
+
           <section aria-labelledby="team-title">
             <h2 id="team-title" className="font-heading text-xl font-medium text-foreground">
               {t.dashboard.teamTitle}

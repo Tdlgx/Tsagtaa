@@ -26,6 +26,8 @@ export type NewBusiness = {
   hours: readonly { weekday: number; opens: string; closes: string }[];
   services: readonly { name: string; duration: number; price: number }[];
   staff: readonly string[];
+  /** Map pin, already checked to be in the city. */
+  location: { lat: number; lng: number } | null;
   consentedAt: Date;
   /** The person registering: they become the owner and can sign in with the business phone. */
   owner: { name: string; password: string };
@@ -53,12 +55,13 @@ export async function insertBusiness(business: NewBusiness): Promise<RegisterRes
         const [row] = await tx<{ id: string; slug: string; createdAt: Date }[]>`
           INSERT INTO businesses (
             request_id, slug, name, category, district, address, phone, email,
-            register_number, description, slot_minutes, owner_consented_at
+            register_number, description, slot_minutes, owner_consented_at,
+            latitude, longitude
           ) VALUES (
             ${business.requestId}, ${business.slug}, ${business.name}, ${business.category},
             ${business.district}, ${business.address}, ${business.phone}, ${business.email},
             ${business.registerNumber}, ${business.description}, ${business.slotMinutes},
-            ${business.consentedAt}
+            ${business.consentedAt}, ${business.location?.lat ?? null}, ${business.location?.lng ?? null}
           )
           ON CONFLICT (request_id) DO NOTHING
           RETURNING id, slug, created_at AS "createdAt"

@@ -26,6 +26,8 @@ import {
   CancelBookingButton,
   RemoveManagerButton,
 } from "@/features/manage/components/manage-controls";
+import { listImages, MAX_PHOTOS } from "@/features/business/media-db";
+import { LocationEditor, MediaManager } from "@/features/manage/components/media-controls";
 import { StatusBadge } from "@/features/manage/components/status-badge";
 import {
   ATTENDANCE_WINDOW_HOURS,
@@ -86,11 +88,14 @@ export default async function BusinessDashboard(
   const todayStart = getBookableWindow(now).from;
   const dayStart = day === "today" ? todayStart : new Date(todayStart.getTime() + DAY);
 
-  const [bookings, stats, members] = await Promise.all([
+  const [bookings, stats, members, images] = await Promise.all([
     getBusinessBookings(slug, dayStart, new Date(dayStart.getTime() + DAY)),
     getBusinessStats(slug, todayStart),
     getMembers(business.id),
+    listImages(business.id),
   ]);
+  const logo = images.find((image) => image.kind === "logo") ?? null;
+  const photos = images.filter((image) => image.kind === "photo");
   const isOwner = membership?.role === "owner";
   const Icon = getBusinessCategory(business.category as BusinessCategorySlug)?.icon ?? Store;
   const cancelRate = stats.total30 ? Math.round((stats.cancelled30 / stats.total30) * 100) : 0;
@@ -298,6 +303,34 @@ export default async function BusinessDashboard(
               ) : (
                 <p className="text-xs text-muted-foreground">{words.onlyOwner}</p>
               )}
+            </div>
+          </section>
+
+          {/* How the place looks, and where it is -------------------------- */}
+          <section aria-labelledby="media-title">
+            <h2 id="media-title" className="font-heading text-xl font-medium text-foreground">
+              {t.media.title}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t.media.lead}</p>
+            <div className="mt-4 rounded-xl border border-border bg-surface p-4">
+              <MediaManager slug={slug} logo={logo} photos={photos} maxPhotos={MAX_PHOTOS} />
+            </div>
+          </section>
+
+          <section aria-labelledby="location-title">
+            <h2 id="location-title" className="font-heading text-xl font-medium text-foreground">
+              {t.location.title}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t.location.lead}</p>
+            <div className="mt-4">
+              <LocationEditor
+                slug={slug}
+                initial={
+                  business.latitude !== null && business.longitude !== null
+                    ? { lat: business.latitude, lng: business.longitude }
+                    : null
+                }
+              />
             </div>
           </section>
 

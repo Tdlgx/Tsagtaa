@@ -3,6 +3,7 @@ import { z } from "zod";
 import { normalizePhone } from "@/features/booking/booking";
 import { BUSINESS_CATEGORIES, type BusinessCategorySlug } from "@/features/business/categories";
 import { DISTRICT_SLUGS, type DistrictSlug } from "@/features/business/districts";
+import { isInServiceArea, type LatLng } from "@/features/business/locations";
 import { transliterate } from "@/i18n/transliterate";
 
 /* Shape ---------------------------------------------------------------------- */
@@ -35,6 +36,8 @@ export type RegistrationDraft = {
   slotMinutes: SlotMinutes;
   services: ServiceDraft[];
   staff: StaffDraft[];
+  /** Map pin; optional, but a place with one shows up on the map. */
+  location: LatLng | null;
 };
 
 export const STEPS = ["category", "basics", "hours", "services", "staff", "review"] as const;
@@ -103,6 +106,7 @@ export const EMPTY_DRAFT: RegistrationDraft = {
   slotMinutes: 30,
   services: [],
   staff: [],
+  location: null,
 };
 
 /* Helpers ---------------------------------------------------------------------- */
@@ -263,7 +267,8 @@ export function firstInvalidStep(draft: RegistrationDraft): number {
 
 /* Completeness and gentle warnings ------------------------------------------------ */
 
-export type Tip = "description" | "moreServices" | "email" | "registerNumber" | "moreStaff";
+export type Tip =
+  "description" | "moreServices" | "email" | "registerNumber" | "moreStaff" | "location";
 
 /** 0–100, plus what would raise it. Required fields weigh most; extras make a listing stand out. */
 export function getCompleteness(draft: RegistrationDraft): { score: number; tips: Tip[] } {
@@ -275,9 +280,10 @@ export function getCompleteness(draft: RegistrationDraft): { score: number; tips
     [draft.hours.some((item) => item.open), 10, null],
     [draft.services.length > 0, 10, null],
     [draft.staff.length > 0, 10, null],
-    [draft.description.trim().length >= 40, 10, "description"],
-    [draft.services.length >= 3, 8, "moreServices"],
-    [detectRegisterNumber(draft.registerNumber) !== null, 6, "registerNumber"],
+    [draft.description.trim().length >= 40, 8, "description"],
+    [draft.location !== null, 6, "location"],
+    [draft.services.length >= 3, 6, "moreServices"],
+    [detectRegisterNumber(draft.registerNumber) !== null, 4, "registerNumber"],
     [EMAIL_PATTERN.test(draft.email.trim()), 3, "email"],
     [draft.staff.length >= 2, 3, "moreStaff"],
   ];
@@ -336,6 +342,10 @@ export const registrationInput = z.object({
     .array(z.object({ id: z.string().max(64), name: z.string().trim().min(2).max(60) }))
     .min(1)
     .max(MAX_STAFF),
+  location: z
+    .object({ lat: z.number(), lng: z.number() })
+    .nullable()
+    .refine((value) => value === null || isInServiceArea(value)),
   // Who is registering: they become the owner and sign in with the business phone.
   ownerName: z.string().trim().min(2).max(80),
   password: z.string().min(8).max(200),
@@ -370,4 +380,6 @@ export const draftSchema = z.object({
     z.object({ id: z.string(), name: z.string(), duration: z.number(), price: z.number() }),
   ),
   staff: z.array(z.object({ id: z.string(), name: z.string() })),
+  // Drafts saved before the map existed have no pin.
+  location: z.object({ lat: z.number(), lng: z.number() }).nullable().default(null),
 });

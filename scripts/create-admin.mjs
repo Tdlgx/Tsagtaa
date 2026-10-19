@@ -30,6 +30,8 @@ const url = new URL(process.env.DATABASE_URL);
 url.searchParams.delete("schema");
 // Neon adds this; the driver does not support it (see src/lib/db.ts).
 url.searchParams.delete("channel_binding");
+// One address instead of ::1 + 127.0.0.1 (see src/lib/db.ts).
+if (url.hostname === "localhost") url.hostname = "127.0.0.1";
 const sql = postgres(url.toString(), { max: 1, onnotice: () => {} });
 
 try {

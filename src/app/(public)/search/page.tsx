@@ -1,4 +1,4 @@
-import { SearchX } from "lucide-react";
+import { Map as MapIcon, SearchX } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense, type JSX } from "react";
@@ -39,9 +39,19 @@ export default async function SearchPage(props: PageProps<"/search">): Promise<J
 
   return (
     <Container className="pt-8 pb-16 md:pt-12 md:pb-24">
-      <div className="mb-6 flex flex-col gap-1 md:mb-8">
-        <p className="text-sm text-muted-foreground">{dayLabel}</p>
-        <h1 className="font-heading text-heading font-medium text-foreground">{t.search.title}</h1>
+      <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-muted-foreground">{dayLabel}</p>
+          <h1 className="font-heading text-heading font-medium text-foreground">
+            {t.search.title}
+          </h1>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/map">
+            <MapIcon data-icon="start" />
+            {t.search.mapLink}
+          </Link>
+        </Button>
       </div>
 
       <SearchShell filters={filters}>

@@ -180,5 +180,11 @@ function describe(check: ReviewCheck, t: Dictionary): string {
       return check.level === "pass" ? words.emailOk(check.email) : words.emailBad(check.email);
     case "waiting":
       return words.waiting(check.hours);
+    case "location":
+      return check.set ? words.locationOk : words.noLocation;
+    case "images":
+      return check.logo || check.photos > 0
+        ? words.imagesOk(check.photos, check.logo)
+        : words.noImages;
   }
 }

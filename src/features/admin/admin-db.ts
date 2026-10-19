@@ -5,6 +5,7 @@ import type postgres from "postgres";
 
 import { refundCancelled } from "@/features/booking/booking-db";
 import { getBusinessCategory } from "@/features/business/categories";
+import { SAMPLE_LOCATIONS } from "@/features/business/locations";
 import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
 import type { ManagedBooking } from "@/features/manage/manage-db";
 import type { LoyaltySettings } from "@/features/points/points";
@@ -202,21 +203,32 @@ export async function getRecentBookings(limit: number): Promise<ManagedBooking[]
 export async function importSampleBusinesses(actorId: string): Promise<number> {
   let added = 0;
   for (const business of SAMPLE_BUSINESSES) {
+    const pin = SAMPLE_LOCATIONS[business.slug] ?? null;
     await sql.begin(async (tx) => {
       const [row] = await tx<{ id: string }[]>`
         INSERT INTO businesses (
           request_id, slug, name, category, district, address, phone, description,
-          slot_minutes, status, owner_consented_at, reviewed_at, review_note
+          slot_minutes, status, owner_consented_at, reviewed_at, review_note, latitude, longitude
         ) VALUES (
           gen_random_uuid(), ${business.slug}, ${business.name}, ${business.category},
           ${business.district}, ${business.area}, '99000000',
           ${getBusinessCategory(business.category).description}, 30, 'active', now(), now(),
-          'Жишээ бизнес'
+          'Жишээ бизнес', ${pin?.lat ?? null}, ${pin?.lng ?? null}
         )
         ON CONFLICT (slug) DO NOTHING
         RETURNING id
       `;
-      if (!row) return;
+      if (!row) {
+        // Imported before the map existed: give it its pin now.
+        if (pin) {
+          await tx`
+            UPDATE businesses SET latitude = ${pin.lat}, longitude = ${pin.lng}
+            WHERE slug = ${business.slug} AND latitude IS NULL
+              AND review_note IN ('Жишээ бизнес', 'Жишээ газар')
+          `;
+        }
+        return;
+      }
       added += 1;
       // Every day 09:00–21:00: the board's working day.
       await tx`INSERT INTO business_hours ${tx(
