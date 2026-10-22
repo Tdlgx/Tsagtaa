@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import { Onest, Unbounded } from "next/font/google";
 import type { JSX } from "react";
@@ -76,6 +77,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">): Promis
             <Toaster />
             {/* Vercel Web Analytics: page views, no cookies; does nothing outside Vercel. */}
             <Analytics />
+            {/* Vercel Speed Insights: Core Web Vitals; also a no-op outside Vercel. */}
+            <SpeedInsights />
           </ThemeProvider>
         </LocaleProvider>
       </body>
