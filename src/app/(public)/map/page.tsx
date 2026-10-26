@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.map.metaTitle, description: t.map.metaDescription };
 }
 
-/** A real place joined in the last month gets a "new" badge. */
+/** Сүүлийн нэг сард нэгдсэн жинхэнэ газар "шинэ" тэмдэг авна. */
 const NEW_FOR_DAYS = 30;
 const BOOKABLE = new Set(SAMPLE_BUSINESSES.map((business) => business.slug));
 
@@ -32,7 +32,7 @@ async function loadEntries(): Promise<MapEntry[]> {
       lng: row.lng,
       logoUrl: row.logoId ? `/api/business-images/${row.logoId}` : null,
       photoUrl: row.photoId ? `/api/business-images/${row.photoId}` : null,
-      // Every active place takes bookings now, sample or registered.
+      // Идэвхтэй газар бүр одоо захиалга авна, жишээ ч бай, бүртгэлтэй ч бай.
       bookable: true,
       isNew: !BOOKABLE.has(row.slug) && row.createdAt.getTime() > newSince,
     }));
@@ -42,7 +42,7 @@ async function loadEntries(): Promise<MapEntry[]> {
   }
 }
 
-/** Every live place on a map of the city, newest first in the list. */
+/** Хотын газрын зураг дээрх бүх идэвхтэй газар, жагсаалтад шинэ нь эхэндээ. */
 export default async function MapPage(): Promise<JSX.Element> {
   const { t } = await getI18n();
   const entries = await loadEntries();

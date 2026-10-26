@@ -1,31 +1,31 @@
 /**
- * Loyalty points. 1 point = 1 ₮ off a booking. Shared by the server (which
- * decides) and the booking form (which only previews); the database has the
- * last word on the balance.
+ * Урамшууллын оноо. 1 оноо = захиалгаас 1 ₮ хямдрал. Сервер (шийддэг) болон
+ * захиалгын маягт (зөвхөн урьдчилан харуулдаг) хуваалцана; үлдэгдлийн эцсийн
+ * шийдвэрийг DB гаргана.
  */
 
 export type LoyaltySettings = {
   enabled: boolean;
-  /** Points per 100 ₮ paid. */
+  /** Төлсөн 100 ₮ тутамд олгох оноо. */
   earnPercent: number;
-  /** Smallest number of points that can be spent at once. */
+  /** Нэг удаад зарцуулж болох хамгийн бага оноо. */
   minRedeem: number;
-  /** Largest share of one booking's price payable in points. */
+  /** Нэг захиалгын үнийн оноогоор төлж болох хамгийн их хувь. */
   maxRedeemPercent: number;
 };
 
-/** Spending moves in whole hundreds, so totals stay round. */
+/** Зарцуулалт бүтэн зуугаар өөрчлөгдөнө, ингэснээр нийлбэрүүд тэгш байна. */
 export const REDEEM_STEP = 100;
 
-/** Points a booking earns, on what is actually paid (price minus points spent). */
+/** Захиалгаас олох оноо, бодитоор төлсөн дүнгээс (үнээс зарцуулсан оноог хассан). */
 export function pointsToEarn(price: number, pointsUsed: number, settings: LoyaltySettings): number {
   if (!settings.enabled) return 0;
   return Math.floor(((price - pointsUsed) * settings.earnPercent) / 100);
 }
 
 /**
- * The most points this booking can take, given the balance; 0 when that is
- * below the minimum spend (so nothing can be spent).
+ * Үлдэгдлийг харгалзан энэ захиалгад зарцуулж болох хамгийн их оноо; хамгийн бага
+ * зарцуулалтаас доош бол 0 (юу ч зарцуулж болохгүй).
  */
 export function maxRedeemable(price: number, balance: number, settings: LoyaltySettings): number {
   if (!settings.enabled) return 0;
@@ -34,7 +34,7 @@ export function maxRedeemable(price: number, balance: number, settings: LoyaltyS
   return most >= Math.max(settings.minRedeem, REDEEM_STEP) ? most : 0;
 }
 
-/** Whether `points` is a spend the rules allow for this price (the balance is checked by the database). */
+/** `points` нь энэ үнэд дүрмээр зөвшөөрөгдөх зарцуулалт мөн эсэх (үлдэгдлийг DB шалгана). */
 export function isAllowedSpend(points: number, price: number, settings: LoyaltySettings): boolean {
   if (points === 0) return true;
   return (
@@ -48,7 +48,7 @@ export function isAllowedSpend(points: number, price: number, settings: LoyaltyS
 
 const pointsFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
-/** 12500 → "12,500" (same grouping as prices). */
+/** 12500 → "12,500" (үнэтэй ижил бүлэглэл). */
 export function formatPoints(points: number): string {
   return pointsFormatter.format(points);
 }
@@ -61,18 +61,18 @@ export type LedgerEntry = {
   kind: LedgerKind;
   note: string | null;
   createdAt: string;
-  /** For booking entries: where, and what. */
+  /** Захиалгын бичлэгт: хаана, юу. */
   businessSlug: string | null;
-  /** Stored name of a registered place (sample places are named by the client, localized). */
+  /** Бүртгэлтэй газрын хадгалсан нэр (жишээ газрын нэрийг client орчуулж өгнө). */
   businessName: string | null;
   serviceName: string | null;
   code: string | null;
 };
 
-/** What the profile shows. Dates are ISO strings: it crosses to the client. */
+/** Профайлын харуулах зүйл. Огноонууд ISO string: client руу дамждаг учраас. */
 export type PointsSummary = {
   balance: number;
-  /** Promised by bookings not yet visited (or within a day of the visit). */
+  /** Хараахан очоогүй (эсвэл айлчлалаас хойш нэг өдөр болоогүй) захиалгуудын амласан оноо. */
   pending: number;
   earnedTotal: number;
   spentTotal: number;

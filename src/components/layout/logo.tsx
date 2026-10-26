@@ -8,26 +8,26 @@ import { useLocale, useT } from "@/i18n/client";
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-/* Timeline (ms) ------------------------------------------------------------ */
-const STROKES_MS = 700; // 0.0–0.7  halves slip out, then slide back in and snap
-const FLIP_AT = 600; // 0.6–1.25 hourglass turns over
+/* Цагийн хуваарь (ms) ------------------------------------------------------------ */
+const STROKES_MS = 700; // 0.0–0.7  хагаснууд гулсаж гараад буцаж орж ирээд нийлнэ
+const FLIP_AT = 600; // 0.6–1.25 элсэн цаг эргэнэ
 const FLIP_MS = 650;
-const LETTERS_AT = 1000; // 1.0–1.8 letters rise in, 60ms apart
+const LETTERS_AT = 1000; // 1.0–1.8 үсгүүд 60ms зайтай дээш гарч ирнэ
 const LETTER_STAGGER = 60;
 const LETTER_MS = 400;
-const GLOW_AT = 1800; // 1.8–2.4 lime glow pulse + shine across the wordmark
+const GLOW_AT = 1800; // 1.8–2.4 шар-ногоон гэрэлтэлт + нэрийн дээгүүр гялбаа
 const GLOW_MS = 600;
 const SHINE_AT = 1750;
 const SHINE_MS = 700;
-const IDLE_AT = 2200; // then breathe while the cursor stays
+const IDLE_AT = 2200; // дараа нь курсор байх хооронд амьсгална
 const BREATHE_MS = 2000;
 
-/** How far a half travels off the tile, in SVG units (the mark is a 48-unit grid). */
+/** Хагас нь хавтангаас хэр хол явах вэ, SVG нэгжээр (тэмдэг нь 48 нэгжийн тор). */
 const SLIDE = 64;
-const SOFT = "cubic-bezier(0.2, 0.8, 0.2, 1)"; // the app's --ease-soft
-const LIME = "rgb(194 244 30"; // --primary, as rgb() so it can fade in keyframes
+const SOFT = "cubic-bezier(0.2, 0.8, 0.2, 1)"; // аппын --ease-soft
+const LIME = "rgb(194 244 30"; // --primary, keyframe дотор бүдгэрэхийн тулд rgb() хэлбэрээр
 
-/** A half: leave towards `exit`, come back from the opposite side, overshoot a little, settle. */
+/** Хагас: `exit` тийш явж, эсрэг талаас буцаж ирээд бага зэрэг хэтэрч тогтоно. */
 function slideKeyframes(exit: 1 | -1): Keyframe[] {
   const x = (units: number): string => `translateX(${units}px)`;
   return [
@@ -40,17 +40,17 @@ function slideKeyframes(exit: 1 | -1): Keyframe[] {
 }
 
 /**
- * Brand mark (lime hourglass on an ink app tile) + Unbounded wordmark.
+ * Брэндийн тэмдэг (бэхэн хавтан дээрх шар-ногоон элсэн цаг) + Unbounded үсгэн тэмдэг.
  *
- * Pointing at it (or focusing it) plays a short sequence: the two halves slide
- * in from opposite sides and snap together, the hourglass flips over, the
- * letters rise in one by one, a lime glow pulses and a shine sweeps the name.
- * While the pointer stays, the tile breathes. Skipped for "reduce motion".
+ * Дээр нь заагч аваачих (эсвэл focus хийх) үед богино дараалал тоглоно: хоёр хагас
+ * эсрэг талаас гулсаж ирээд нийлж, элсэн цаг эргэж, үсгүүд нэг нэгээрээ дээш гарч,
+ * шар-ногоон гэрэлтэлт лугшиж, нэрийн дээгүүр гялбаа гүйнэ. Заагч байх хооронд
+ * хавтан амьсгална. "Reduce motion" үед алгасна.
  */
 export function Logo({ className }: { className?: string }): JSX.Element {
   const locale = useLocale();
   const t = useT();
-  // The env name labels staging/demo builds; in English the brand is spelled in Latin.
+  // Env-ийн нэр staging/demo build-ийг ялгана; англи хэл дээр брэндийг латинаар бичнэ.
   const brand = locale === "mn" ? APP_NAME : t.brand;
   const letters = Array.from(brand);
   const tileRef = useRef<HTMLSpanElement>(null);
@@ -78,7 +78,7 @@ export function Logo({ className }: { className?: string }): JSX.Element {
     const word = lettersRef.current;
     const shine = shineRef.current;
     if (!tile || !mark || !word || !shine) return;
-    // Let a running sequence finish; never stack a second one on top.
+    // Явж буй дарааллыг дуусгана; хоёр дахийг хэзээ ч давхарлахгүй.
     if (running.current.length > 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -87,12 +87,12 @@ export function Logo({ className }: { className?: string }): JSX.Element {
     const bottom = mark.querySelector<SVGPathElement>('[data-part="bottom"]');
     const animations: Animation[] = [];
 
-    // 1. Halves: top leaves right and returns from the left, bottom the other way.
+    // 1. Хагаснууд: дээд нь баруун тийш явж зүүнээс буцна, доод нь эсрэгээрээ.
     if (top) animations.push(top.animate(slideKeyframes(1), STROKES_MS));
     if (bottom) animations.push(bottom.animate(slideKeyframes(-1), STROKES_MS));
 
-    // 2. Flip 180°, swing a touch past, settle. 180° looks identical to 0°,
-    //    so the animation can end without holding its final frame.
+    // 2. 180° эргэж, бага зэрэг хэтрээд тогтоно. 180° нь 0°-тэй яг адилхан харагддаг
+    //    тул анимэйшн сүүлийн кадраа барихгүйгээр дуусч болно.
     animations.push(
       mark.animate(
         [
@@ -105,7 +105,7 @@ export function Logo({ className }: { className?: string }): JSX.Element {
       ),
     );
 
-    // 3. Letters: fade out quickly, wait their turn, rise 8px into place.
+    // 3. Үсгүүд: хурдан бүдгэрч, ээлжээ хүлээгээд 8px дээш байрандаа гарна.
     [...word.children].forEach((letter, index) => {
       const start = LETTERS_AT + index * LETTER_STAGGER;
       const total = start + LETTER_MS;
@@ -122,7 +122,7 @@ export function Logo({ className }: { className?: string }): JSX.Element {
       );
     });
 
-    // 4. Glow through the tile and the mark, and a shine across the name.
+    // 4. Хавтан болон тэмдгээр гэрэлтэлт, нэрийн дээгүүр гялбаа.
     animations.push(
       tile.animate(
         [
@@ -150,7 +150,7 @@ export function Logo({ className }: { className?: string }): JSX.Element {
     );
     running.current = animations;
 
-    // 5. Idle: breathe for as long as the pointer stays on the logo.
+    // 5. Сул үе: заагч логон дээр байх хооронд амьсгална.
     idleTimer.current = window.setTimeout(() => {
       running.current = [];
       if (!hovered.current) return;
@@ -180,7 +180,7 @@ export function Logo({ className }: { className?: string }): JSX.Element {
         className,
       )}
     >
-      {/* overflow-hidden: the halves slide in from beyond the tile's edges. */}
+      {/* overflow-hidden: хагаснууд хавтангийн ирмэгийн цаанаас гулсаж орж ирнэ. */}
       <span
         ref={tileRef}
         className="flex size-8 items-center justify-center overflow-hidden rounded-md bg-brand-ink text-primary"
@@ -196,8 +196,8 @@ export function Logo({ className }: { className?: string }): JSX.Element {
             </span>
           ))}
         </span>
-        {/* Shine: the same word in a lime tint, shown only through a narrow
-            moving band. Hidden (opacity 0) except while the sweep plays. */}
+        {/* Гялбаа: ижил үг шар-ногоон өнгөөр, зөвхөн хөдлөх нарийн туузаар харагдана.
+            Гялбаа гүйх үеэс бусад үед нуугдана (opacity 0). */}
         <span
           ref={shineRef}
           aria-hidden

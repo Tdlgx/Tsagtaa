@@ -1,4 +1,4 @@
-"use client"; // Error boundaries must be Client Components.
+"use client"; // Error boundary нь Client Component байх ёстой.
 
 import { useEffect, useSyncExternalStore, type JSX } from "react";
 
@@ -13,11 +13,11 @@ type GlobalErrorProps = {
 };
 
 /**
- * Last-resort boundary for errors thrown in the root layout itself.
- * It replaces the whole document, so it renders its own <html> and <body>,
- * and uses only plain elements (the app's providers may be what broke).
+ * Root layout өөрөө алдаа шидвэл барих сүүлчийн хамгаалалт.
+ * Бүх document-ийг орлодог тул өөрийн <html>, <body>-г render хийж, зөвхөн энгийн
+ * элементүүд ашиглана (аппын provider-ууд өөрсдөө эвдэрсэн байж магадгүй).
  */
-// The providers may be what broke, so the language comes straight from the cookie.
+// Provider-ууд эвдэрсэн байж магадгүй тул хэлийг cookie-ээс шууд авна.
 function readLocale(): Locale {
   const value = document.cookie.match(new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]*)`))?.[1];
   return isLocale(value) ? value : DEFAULT_LOCALE;
@@ -25,6 +25,7 @@ function readLocale(): Locale {
 
 const noSubscribe = (): (() => void) => () => {};
 
+/** Root layout өөрөө эвдэрсэн үеийн алдааны хуудас, хэлийг cookie-ээс уншина. */
 export default function GlobalError({ error, retry }: GlobalErrorProps): JSX.Element {
   const locale = useSyncExternalStore(noSubscribe, readLocale, () => DEFAULT_LOCALE);
   const t = getDictionary(locale);
@@ -46,7 +47,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps): JSX.Ele
           >
             {t.errors.retry}
           </button>
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- the root layout is broken here, so force a full page reload instead of client-side navigation */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- энд root layout эвдэрсэн тул client-side шилжилтийн оронд хуудсыг бүтэн дахин ачаална */}
           <a
             href="/"
             className="flex h-11 items-center rounded-md border border-border bg-surface px-5 text-sm font-medium"

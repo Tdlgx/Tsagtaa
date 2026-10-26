@@ -17,15 +17,15 @@ const OPTIONS: readonly ThemeOption[] = [
 ];
 
 /**
- * Segmented control built from native radio buttons: Tab focuses the group,
- * arrow keys switch the theme — no custom keyboard code needed.
+ * Native radio товчнуудаар хийсэн segmented control: Tab бүлэгт focus хийж, сумтай
+ * товч theme-ийг солино — тусгай гарын код хэрэггүй.
  */
 export function ThemeToggle({ className }: { className?: string }): JSX.Element {
   const { theme, setTheme } = useTheme();
   const t = useT();
-  // The saved theme is only known in the browser; render nothing selected until then.
+  // Хадгалсан theme зөвхөн browser-т мэдэгддэг; тэр болтол юуг ч сонгосон гэж харуулахгүй.
   const mounted = useMounted();
-  // Unique radio group name, so two toggles on one page never merge into one group.
+  // Radio бүлгийн давтагдашгүй нэр, ингэснээр нэг хуудсан дээрх хоёр солигч нэг бүлэг болж нийлэхгүй.
   const name = useId();
 
   return (
@@ -66,8 +66,8 @@ export function ThemeToggle({ className }: { className?: string }): JSX.Element 
 }
 
 /**
- * One-tap light/dark switch for the phone header, where the three-way
- * control does not fit. Shows the mode it switches to.
+ * Утасны header-т зориулсан нэг товшилтын light/dark солигч, тэнд гурван сонголттой
+ * удирдлага багтахгүй. Шилжих горимыг нь харуулна.
  */
 export function ThemeSwitch({ className }: { className?: string }): JSX.Element {
   const { resolvedTheme, setTheme } = useTheme();
@@ -87,7 +87,7 @@ export function ThemeSwitch({ className }: { className?: string }): JSX.Element 
         className,
       )}
     >
-      {/* Same size placeholder until the saved theme is known, so nothing jumps. */}
+      {/* Хадгалсан theme мэдэгдэх хүртэл ижил хэмжээтэй орлуулагч, ингэснээр юу ч үсрэхгүй. */}
       {mounted ? (
         <Icon className="size-4 animate-in duration-250 ease-soft fade-in spin-in-45" />
       ) : (

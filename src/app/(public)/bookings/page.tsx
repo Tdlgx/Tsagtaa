@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.bookings.metaTitle, description: t.bookings.metaDescription };
 }
 
-/** Bookings live in this browser for now, so the whole view renders on the client. */
+/** Захиалгууд одоогоор энэ browser-т хадгалагддаг тул бүх харагдацыг client дээр render хийнэ. */
 export default function BookingsPage(): JSX.Element {
   return (
     <Container className="pt-8 pb-16 md:pt-12 md:pb-24">

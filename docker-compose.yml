@@ -1,14 +1,14 @@
-# Local development services for Цагтаа.
-# Values come from the `.env` file next to this file (Docker Compose reads it automatically).
-#   Start:  npm run db:up     (docker compose up -d --wait)
-#   Stop:   npm run db:down   (docker compose down)
-#   Logs:   npm run db:logs   (docker compose logs -f db)
+# Цагтаагийн local хөгжүүлэлтийн үйлчилгээнүүд.
+# Утгууд энэ файлын хажууд байрлах `.env`-ээс ирнэ (Docker Compose автоматаар уншина).
+#   Асаах:   npm run db:up     (docker compose up -d --wait)
+#   Зогсоох: npm run db:down   (docker compose down)
+#   Лог:     npm run db:logs   (docker compose logs -f db)
 
 name: tsagtaa
 
 services:
   db:
-    # Pinned version: upgrade deliberately, never silently via `latest`.
+    # Тогтмол хувилбар: шинэчлэхдээ зориуд хийнэ, `latest`-ээр далдуур хэзээ ч биш.
     image: postgres:18.6-alpine
     container_name: tsagtaa-db
     restart: unless-stopped
@@ -16,14 +16,14 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is missing in .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is missing in .env}
       POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is missing in .env}
-      # Store and compare timestamps in UTC; convert to Asia/Ulaanbaatar only for display.
+      # Цагийг UTC-ээр хадгалж харьцуулна; зөвхөн харуулахдаа Asia/Ulaanbaatar руу хөрвүүлнэ.
       TZ: UTC
       PGTZ: UTC
     ports:
-      # Bind to localhost only so the database is not reachable from the local network.
+      # Зөвхөн localhost-д холбоно, ингэснээр DB дотоод сүлжээнээс хандагдахгүй.
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
-      # PostgreSQL 18+ images keep data under /var/lib/postgresql/<major>/docker.
+      # PostgreSQL 18+ image өгөгдлийг /var/lib/postgresql/<major>/docker дотор хадгалдаг.
       - postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]

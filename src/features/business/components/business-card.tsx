@@ -16,11 +16,12 @@ type BusinessCardProps = {
   rating?: number;
   reviewCount?: number;
   imageUrl?: string;
-  /** When set, the whole card becomes one link (stretched-link pattern). */
+  /** Өгвөл бүх карт нэг холбоос болно (stretched-link загвар). */
   href?: string;
   className?: string;
 };
 
+/** Бизнесийн карт: зураг, ангилал, нэр, байршил, үнэлгээ; `href` өгвөл бүхэлдээ холбоос. */
 export function BusinessCard({
   name,
   category,
@@ -41,7 +42,7 @@ export function BusinessCard({
         className,
       )}
     >
-      {/* Inner radius = card radius − 1px border, so the corners stay concentric. */}
+      {/* Дотор радиус = картын радиус − 1px хүрээ, ингэснээр булангууд төвлөрсөн хэвээр. */}
       <div className="relative aspect-4/3 overflow-hidden rounded-t-[calc(var(--radius-lg)-1px)] bg-surface-muted">
         {imageUrl ? (
           <Image

@@ -5,9 +5,9 @@ import { getCurrentAccount } from "@/lib/auth/session";
 import { sql } from "@/lib/db";
 
 /**
- * The section tabs, for admins only. This is not the access check: every
- * admin page and action calls `requirePlatformAdmin()` itself. Anyone else
- * gets just the page, which sends them to sign in or shows "not found".
+ * Хэсгийн табууд, зөвхөн админд. Энэ нь эрхийн шалгалт биш: админы хуудас, action
+ * бүр `requirePlatformAdmin()`-ийг өөрөө дуудна. Бусад хүмүүст зөвхөн хуудас
+ * ирэх бөгөөд тэр нь нэвтрэх рүү илгээх эсвэл "олдсонгүй" гэж харуулна.
  */
 export default async function AdminLayout({
   children,

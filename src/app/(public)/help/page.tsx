@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.help.metaTitle, description: t.help.metaDescription };
 }
 
-/** Frequently asked questions, searchable, with a way into the guided tour. */
+/** Түгээмэл асуултууд, хайлттай, танилцуулга аялал руу орох замтай. */
 export default async function HelpPage(): Promise<JSX.Element> {
   const { t } = await getI18n();
 

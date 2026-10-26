@@ -15,9 +15,9 @@ import type { BusinessStatus, Role } from "@/lib/auth/session";
 import { isPgError, PG, sql } from "@/lib/db";
 
 /*
- * The Цагтаа team's data access. Callers check `requirePlatformAdmin()`
- * first; every change here writes its audit entry in the same transaction,
- * so the log cannot miss a change or record one that did not happen.
+ * Цагтаагийн багийн өгөгдлийн хандалт. Дуудагч эхлээд `requirePlatformAdmin()`-ийг
+ * шалгана; энд хийгдэх өөрчлөлт бүр үйлдлийн түүхийн бичлэгээ нэг transaction-д
+ * бичдэг тул түүх өөрчлөлтийг алдах эсвэл болоогүй зүйлийг бичих боломжгүй.
  */
 
 type Db = postgres.Sql | postgres.TransactionSql;
@@ -39,6 +39,7 @@ export type AuditAction =
   | "booking.cancel"
   | "samples.import";
 
+/** Үйлдлийн түүхэд нэг бичлэг нэмнэ; өөрчлөлттэй нэг transaction-д (`db`) дуудна. */
 export async function audit(
   db: Db,
   actorId: string,
@@ -53,11 +54,11 @@ export async function audit(
   `;
 }
 
-/* Overview --------------------------------------------------------------------- */
+/* Тойм --------------------------------------------------------------------- */
 
 export type PlatformStats = {
   pending: number;
-  /** Pending for more than two days: someone is waiting on us. */
+  /** Хоёр хоногоос илүү хүлээгдэж байгаа: хэн нэгэн биднийг хүлээж байна. */
   overdue: number;
   active: number;
   suspended: number;
@@ -69,6 +70,7 @@ export type PlatformStats = {
   pointsOutstanding: number;
 };
 
+/** Админы нүүр хуудасны тоонууд: газрууд төлөвөөр, өнөөдрийн захиалга, хэрэглэгчид, оноо. */
 export async function getPlatformStats(dayStart: Date): Promise<PlatformStats> {
   const [stats] = await sql<PlatformStats[]>`
     SELECT
@@ -90,7 +92,7 @@ export async function getPlatformStats(dayStart: Date): Promise<PlatformStats> {
   return stats!;
 }
 
-/* Places ------------------------------------------------------------------------- */
+/* Газрууд ------------------------------------------------------------------------- */
 
 export type BusinessListItem = {
   id: string;
@@ -110,6 +112,7 @@ export type BusinessListItem = {
   bookings30: number;
 };
 
+/** Газруудыг төлөв болон текстээр (нэр, slug, утас, регистр) шүүж, тоон мэдээлэлтэйгээр буцаана. */
 export async function listBusinesses(
   status: BusinessStatus | "all",
   query = "",
@@ -139,9 +142,9 @@ export async function listBusinesses(
 }
 
 /**
- * Which status changes are allowed, and what each is called in the log.
- * Approve or turn down a new place; take a live one off and put it back;
- * look again at one that was turned down.
+ * Аль төлөвийн өөрчлөлтийг зөвшөөрөх, тус бүр түүхэнд ямар нэртэй байх вэ.
+ * Шинэ газрыг зөвшөөрөх эсвэл татгалзах; идэвхтэй газрыг түр хааж, буцааж нээх;
+ * татгалзсан газрыг дахин хянах.
  */
 const TRANSITIONS: Record<BusinessStatus, Partial<Record<BusinessStatus, AuditAction>>> = {
   active: { pending: "business.approve", suspended: "business.reinstate" },
@@ -153,18 +156,22 @@ const TRANSITIONS: Record<BusinessStatus, Partial<Record<BusinessStatus, AuditAc
 export type StatusChange =
   { ok: true } | { ok: false; reason: "not_found" | "transition" | "note" };
 
+/**
+ * Газрын төлөвийг өөрчилж, түүхэнд бичнэ. Зөвхөн `TRANSITIONS`-д зөвшөөрөгдсөн
+ * шилжилтийг хийнэ; татгалзах, түр хаахад шалтгаан заавал хэрэгтэй.
+ */
 export async function setBusinessStatus(
   actorId: string,
   businessId: string,
   status: BusinessStatus,
   note: string,
 ): Promise<StatusChange> {
-  // Turning down or taking off always says why: the owner sees it.
+  // Татгалзах эсвэл түр хаахад шалтгаанаа заавал бичнэ: эзэмшигч үүнийг харна.
   if ((status === "rejected" || status === "suspended") && note.length < 3) {
     return { ok: false, reason: "note" };
   }
   return sql.begin(async (tx): Promise<StatusChange> => {
-    // Locked, so two admins deciding at once are applied one after the other.
+    // Lock хийсэн тул хоёр админ зэрэг шийдвэр гаргавал нэг нэгээр нь хэрэгжинэ.
     const [current] = await tx<{ name: string; status: BusinessStatus }[]>`
       SELECT name, status FROM businesses WHERE id = ${businessId} FOR UPDATE
     `;
@@ -189,6 +196,7 @@ const BOOKING_COLUMNS = sql`
   phone, note, status, created_at AS "createdAt", points_used AS "pointsUsed", attendance
 `;
 
+/** Хамгийн сүүлд үүссэн захиалгууд, `limit` хүртэл. */
 export async function getRecentBookings(limit: number): Promise<ManagedBooking[]> {
   return sql<ManagedBooking[]>`
     SELECT ${BOOKING_COLUMNS} FROM bookings ORDER BY created_at DESC LIMIT ${limit}
@@ -196,9 +204,9 @@ export async function getRecentBookings(limit: number): Promise<ManagedBooking[]
 }
 
 /**
- * Copies the sample listings (which live in code) into the database as
- * active places, with their services and staff, so they can be given owners
- * and managed. Places already there are left alone.
+ * Жишээ газруудыг (кодонд байдаг) үйлчилгээ, ажилтантай нь идэвхтэй газар болгон
+ * DB руу хуулна, ингэснээр тэдэнд эзэмшигч өгч, удирдаж болно. Аль хэдийн
+ * байгаа газруудад хүрэхгүй.
  */
 export async function importSampleBusinesses(actorId: string): Promise<number> {
   let added = 0;
@@ -219,7 +227,7 @@ export async function importSampleBusinesses(actorId: string): Promise<number> {
         RETURNING id
       `;
       if (!row) {
-        // Imported before the map existed: give it its pin now.
+        // Газрын зураг гарахаас өмнө импортлогдсон: одоо цэгийг нь өгнө.
         if (pin) {
           await tx`
             UPDATE businesses SET latitude = ${pin.lat}, longitude = ${pin.lng}
@@ -230,7 +238,7 @@ export async function importSampleBusinesses(actorId: string): Promise<number> {
         return;
       }
       added += 1;
-      // Every day 09:00–21:00: the board's working day.
+      // Өдөр бүр 09:00–21:00: самбарын ажлын өдөр.
       await tx`INSERT INTO business_hours ${tx(
         [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
           business_id: row.id,
@@ -248,7 +256,7 @@ export async function importSampleBusinesses(actorId: string): Promise<number> {
           price: service.price,
         })),
       )}`;
-      // Same people, in the same order, as the bookings' "slug-0", "slug-1"… ids.
+      // Захиалгын "slug-0", "slug-1"… id-тай ижил хүмүүс, ижил дарааллаар.
       await tx`INSERT INTO staff ${tx(
         getSampleStaff(business, "mn").map((member, position) => ({
           business_id: row.id,
@@ -262,7 +270,7 @@ export async function importSampleBusinesses(actorId: string): Promise<number> {
   return added;
 }
 
-/* Accounts ------------------------------------------------------------------------- */
+/* Бүртгэлүүд ------------------------------------------------------------------------- */
 
 export type AccountFilter = "all" | "admins" | "staff" | "customers" | "locked";
 
@@ -281,6 +289,7 @@ export type AdminAccount = {
   lastSeen: Date | null;
 };
 
+/** Бүртгэлүүдийг төрлөөр (админ, ажилтан, үйлчлүүлэгч, түгжигдсэн) шүүж, нэр/утсаар хайна. */
 export async function listAccounts(filter: AccountFilter, query = ""): Promise<AdminAccount[]> {
   const text = query.trim().toLowerCase();
   const digits = text.replace(/\D/g, "");
@@ -324,6 +333,7 @@ async function accountLabel(db: Db, accountId: string): Promise<string | null> {
   return row?.label ?? null;
 }
 
+/** Түгжээг тайлж, буруу оролдлогын тоог тэглээд түүхэнд бичнэ. */
 export async function unlockAccount(actorId: string, accountId: string): Promise<boolean> {
   return sql.begin(async (tx) => {
     const rows = await tx`
@@ -336,19 +346,19 @@ export async function unlockAccount(actorId: string, accountId: string): Promise
   });
 }
 
-/** No 0/O, 1/l/I: the password is read out over the phone. */
+/** 0/O, 1/l/I байхгүй: нууц үгийг утсаар уншиж өгдөг. */
 const TEMP_ALPHABET = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function tempPassword(): string {
   const pick = (): string => TEMP_ALPHABET[randomInt(TEMP_ALPHABET.length)]!;
-  // xxxx-xxxx-xxxx: 12 random characters (~70 bits), easy to read out.
+  // xxxx-xxxx-xxxx: 12 санамсаргүй тэмдэгт (~70 bit), уншиж өгөхөд амар.
   return [0, 1, 2].map(() => Array.from({ length: 4 }, pick).join("")).join("-");
 }
 
 /**
- * A new random password, shown once to the admin (never stored in plain
- * text, never logged). Every browser signed in to the account is signed
- * out, and a lock from wrong guesses is lifted.
+ * Шинэ санамсаргүй нууц үг, админд нэг удаа харагдана (хэзээ ч энгийн текстээр
+ * хадгалагдахгүй, лог-д бичигдэхгүй). Бүртгэлд нэвтэрсэн бүх browser гарах ба
+ * буруу оролдлогоос үүссэн түгжээ арилна.
  */
 export async function resetPassword(actorId: string, accountId: string): Promise<string | null> {
   const password = tempPassword();
@@ -373,7 +383,7 @@ export async function resetPassword(actorId: string, accountId: string): Promise
 
 export type AdminChange = { ok: true } | { ok: false; reason: "self" | "not_found" };
 
-/** Grants or takes away admin. Nobody can take it from themselves, so one admin always remains. */
+/** Админ эрх олгох эсвэл хасах. Хэн ч өөрөөсөө хасаж чадахгүй тул нэг админ үргэлж үлдэнэ. */
 export async function setPlatformAdmin(
   actorId: string,
   accountId: string,
@@ -385,7 +395,7 @@ export async function setPlatformAdmin(
       UPDATE accounts SET is_platform_admin = ${value} WHERE id = ${accountId} RETURNING id
     `;
     if (rows.length === 0) return { ok: false, reason: "not_found" };
-    // Taken away: their open sessions go too, so the change applies at once.
+    // Хасагдсан: нээлттэй session-ууд нь ч устгагдах тул өөрчлөлт шууд хэрэгжинэ.
     if (!value) await tx`DELETE FROM sessions WHERE account_id = ${accountId}`;
     await audit(
       tx,
@@ -398,6 +408,7 @@ export async function setPlatformAdmin(
   });
 }
 
+/** Бүртгэлийн бүх session-ыг устгаж түүхэнд бичнэ; хэдийг устгасныг буцаана. */
 export async function endAllSessions(actorId: string, accountId: string): Promise<number> {
   return sql.begin(async (tx) => {
     const rows = await tx`DELETE FROM sessions WHERE account_id = ${accountId} RETURNING 1`;
@@ -410,7 +421,7 @@ export async function endAllSessions(actorId: string, accountId: string): Promis
 
 export type AdjustResult = { ok: true } | { ok: false; reason: "insufficient" | "not_found" };
 
-/** Adds or takes points with a reason (a goodwill gesture, a correction). */
+/** Шалтгаантайгаар оноо нэмэх эсвэл хасах (сайн санааны илэрхийлэл, засвар). */
 export async function adjustPoints(
   actorId: string,
   accountId: string,
@@ -436,7 +447,7 @@ export async function adjustPoints(
       return { ok: true };
     });
   } catch (error) {
-    // Taking more than the balance holds.
+    // Үлдэгдлээс илүүг хасах гэж байна.
     if (isPgError(error, PG.checkViolation, "accounts_points_not_negative")) {
       return { ok: false, reason: "insufficient" };
     }
@@ -444,7 +455,7 @@ export async function adjustPoints(
   }
 }
 
-/* Bookings ------------------------------------------------------------------------- */
+/* Захиалгууд ------------------------------------------------------------------------- */
 
 export type AdminBooking = ManagedBooking & {
   businessName: string | null;
@@ -452,7 +463,7 @@ export type AdminBooking = ManagedBooking & {
   pointsEarn: number;
 };
 
-/** By front-desk code, phone number or place address; the latest ones when empty. */
+/** Ресепшний код, утасны дугаар эсвэл газрын хаягаар; хоосон бол хамгийн сүүлийнхүүд. */
 export async function findBookings(query: string): Promise<AdminBooking[]> {
   const text = query.trim();
   const digits = text.replace(/[\s-]/g, "").replace(/^\+?976/, "");
@@ -475,7 +486,7 @@ export async function findBookings(query: string): Promise<AdminBooking[]> {
   `;
 }
 
-/** Support cancels for a customer (e.g. the place closed that day). Points go back. */
+/** Тусламжийн баг үйлчлүүлэгчийн өмнөөс цуцална (жишээ нь газар тэр өдөр хаалттай). Оноо буцна. */
 export async function adminCancelBooking(actorId: string, bookingId: string): Promise<boolean> {
   return sql.begin(async (tx) => {
     const [row] = await tx<{ code: string; cancelled: number }[]>`
@@ -492,7 +503,7 @@ export async function adminCancelBooking(actorId: string, bookingId: string): Pr
   });
 }
 
-/* Points ------------------------------------------------------------------------- */
+/* Оноо ------------------------------------------------------------------------- */
 
 export type PointsOverview = {
   outstanding: number;
@@ -517,6 +528,10 @@ export type LedgerRow = {
   createdAt: Date;
 };
 
+/**
+ * Онооны хөтөлбөрийн тойм: нийт үлдэгдэл, сүүлийн 30 хоногийн олголт/зарцуулалт, хамгийн их оноотой
+ * хүмүүс, сүүлийн бичлэгүүд.
+ */
 export async function getPointsOverview(): Promise<{
   totals: PointsOverview;
   top: { id: string; name: string; phone: string; balance: number }[];
@@ -553,6 +568,7 @@ export async function getPointsOverview(): Promise<{
   return { totals: totals!, top, recent };
 }
 
+/** Онооны дүрмийг шинэчилж, өөрчлөлтийг нэг transaction дотор түүхэнд бичнэ. */
 export async function updateLoyaltySettings(
   actorId: string,
   settings: LoyaltySettings,
@@ -575,7 +591,7 @@ export async function updateLoyaltySettings(
   });
 }
 
-/* Audit log ------------------------------------------------------------------------- */
+/* Үйлдлийн түүх ------------------------------------------------------------------------- */
 
 export type AuditEntry = {
   id: string;
@@ -587,6 +603,9 @@ export type AuditEntry = {
   createdAt: Date;
 };
 
+/**
+ * Үйлдлийн түүх, шинэ нь эхэндээ; тодорхой объект (`targetId`) эсвэл хэсгээр (`area`) шүүж болно.
+ */
 export async function listAudit(options: {
   limit: number;
   targetId?: string;

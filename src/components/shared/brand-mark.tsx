@@ -3,19 +3,20 @@ import type { ComponentProps, JSX } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Цагтаа brand mark: an hourglass split into two offset triangles. The lower
- * half is the upper half turned 180°, so the gap between them runs on a
- * diagonal like falling sand. Drawn on a 48×48 grid; the round-joined stroke
- * in the same color gives the soft corners. Colored by currentColor.
+ * Цагтаагийн брэндийн тэмдэг: хоёр шилжүүлсэн гурвалжинд хуваагдсан элсэн цаг. Доод
+ * хагас нь дээд хагасыг 180° эргүүлсэн хэлбэр тул тэдгээрийн хоорондох зай унаж буй
+ * элс шиг ташуу явна. 48×48 тор дээр зурсан; ижил өнгийн бөөрөнхий холбоостой
+ * зураас нь зөөлөн булангуудыг өгнө. Өнгө нь currentColor.
  *
- * The halves are separate paths (`data-part="top" | "bottom"`) so the logo
- * animation can move each one on its own.
+ * Хагаснууд нь тусдаа path (`data-part="top" | "bottom"`) тул логоны анимэйшн
+ * тус бүрийг тусад нь хөдөлгөж чадна.
  */
 const TOP_PATH = "M4 2 H44.5 L16.8 22.5 Z";
 const BOTTOM_PATH = "M44 46 H3.5 L31.2 25.5 Z";
 
 type BrandMarkProps = Omit<ComponentProps<"svg">, "children" | "viewBox">;
 
+/** Цагтаагийн элсэн цагны тэмдэг (SVG), өнгө нь currentColor. */
 export function BrandMark({ className, ...props }: BrandMarkProps): JSX.Element {
   return (
     <svg

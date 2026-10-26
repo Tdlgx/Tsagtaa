@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-/** The kind of place a business is. Every business has exactly one. */
+/** Бизнесийн газрын төрөл. Бизнес бүр яг нэгтэй. */
 export type BusinessCategorySlug =
   | "hair"
   | "barber"
@@ -25,7 +25,7 @@ export type BusinessCategorySlug =
   | "car-wash"
   | "vet";
 
-/** Top-level filter. Salon branches into subcategories; the rest are a single category. */
+/** Дээд түвшний шүүлтүүр. Салон дэд ангилал руу салаална; бусад нь нэг ангилал. */
 export type CategoryGroupSlug = "salon" | "clinic" | "dental" | "auto-repair" | "car-wash" | "vet";
 
 export type BusinessCategory = {
@@ -41,11 +41,11 @@ export type CategoryGroup = {
   label: string;
   description: string;
   icon: LucideIcon;
-  /** More than one entry means the group unfolds into subcategories. */
+  /** Нэгээс олон бичлэгтэй бол бүлэг дэд ангиллууд руу задарна. */
   categories: readonly BusinessCategorySlug[];
 };
 
-/** Every category a business can belong to. */
+/** Бизнес хамаарч болох бүх ангилал. */
 export const BUSINESS_CATEGORIES: readonly BusinessCategory[] = [
   {
     slug: "hair",
@@ -119,7 +119,7 @@ export const BUSINESS_CATEGORIES: readonly BusinessCategory[] = [
   },
 ];
 
-/** Top-level groups, in the order they appear in filters and on the home page. */
+/** Дээд түвшний бүлгүүд, шүүлтүүр болон нүүр хуудсанд гарах дарааллаар. */
 export const CATEGORY_GROUPS: readonly CategoryGroup[] = [
   {
     slug: "salon",
@@ -139,7 +139,7 @@ export const CATEGORY_GROUPS: readonly CategoryGroup[] = [
   ),
 ];
 
-/** What the `cat` filter accepts: a group ("salon") or a single category ("nails"). */
+/** `cat` шүүлтүүрийн хүлээн авах утга: бүлэг ("salon") эсвэл нэг ангилал ("nails"). */
 export type CategoryFilterSlug = CategoryGroupSlug | BusinessCategorySlug;
 
 export const CATEGORY_FILTER_SLUGS = [
@@ -149,6 +149,7 @@ export const CATEGORY_FILTER_SLUGS = [
   ]),
 ] as [CategoryFilterSlug, ...CategoryFilterSlug[]];
 
+/** Ангиллын slug-аар мэдээллийг (нэр, icon, бүлэг) авна; байхгүй slug бол алдаа шиднэ. */
 export function getBusinessCategory(slug: BusinessCategorySlug): BusinessCategory {
   const category = BUSINESS_CATEGORIES.find((item) => item.slug === slug);
   if (!category) {
@@ -157,6 +158,7 @@ export function getBusinessCategory(slug: BusinessCategorySlug): BusinessCategor
   return category;
 }
 
+/** Бүлгийн slug-аар бүлгийн мэдээллийг авна; байхгүй бол алдаа шиднэ. */
 export function getCategoryGroup(slug: CategoryGroupSlug): CategoryGroup {
   const group = CATEGORY_GROUPS.find((item) => item.slug === slug);
   if (!group) {
@@ -165,7 +167,7 @@ export function getCategoryGroup(slug: CategoryGroupSlug): CategoryGroup {
   return group;
 }
 
-/** The group a filter value sits in: "nails" → salon, "salon" → salon, "vet" → vet. */
+/** Шүүлтүүрийн утга хамаарах бүлэг: "nails" → salon, "salon" → salon, "vet" → vet. */
 export function getFilterGroup(slug: CategoryFilterSlug): CategoryGroup {
   const group = CATEGORY_GROUPS.find(
     (item) => item.slug === slug || item.categories.includes(slug as BusinessCategorySlug),
@@ -176,7 +178,7 @@ export function getFilterGroup(slug: CategoryFilterSlug): CategoryGroup {
   return group;
 }
 
-/** Does a business of `category` pass the `cat` filter? "salon" lets every salon type through. */
+/** `category` төрлийн бизнес `cat` шүүлтүүрийг давах уу? "salon" бүх салоны төрлийг нэвтрүүлнэ. */
 export function matchesCategoryFilter(
   category: BusinessCategorySlug,
   filter: CategoryFilterSlug,

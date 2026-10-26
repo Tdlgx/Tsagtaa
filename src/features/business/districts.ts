@@ -1,4 +1,4 @@
-/** Ulaanbaatar districts where businesses are listed (the central six). */
+/** Бизнесүүд бүртгэгддэг Улаанбаатарын дүүргүүд (төвийн зургаа). */
 export const DISTRICTS = [
   { slug: "sukhbaatar", label: "Сүхбаатар дүүрэг" },
   { slug: "chingeltei", label: "Чингэлтэй дүүрэг" },
@@ -15,6 +15,7 @@ export const DISTRICT_SLUGS = DISTRICTS.map((district) => district.slug) as [
   ...DistrictSlug[],
 ];
 
+/** Дүүргийн slug-аас монгол нэрийг буцаана; байхгүй slug бол алдаа шиднэ. */
 export function getDistrictLabel(slug: DistrictSlug): string {
   const district = DISTRICTS.find((item) => item.slug === slug);
   if (!district) {

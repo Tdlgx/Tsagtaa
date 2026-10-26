@@ -5,7 +5,7 @@ function subscribe(onChange: () => void): () => void {
   return () => window.removeEventListener("scroll", onChange);
 }
 
-/** `true` once the page has been scrolled more than `threshold` pixels. */
+/** Хуудсыг `threshold` пикселээс илүү гүйлгэсний дараа `true`. */
 export function useScrolled(threshold = 8): boolean {
   return useSyncExternalStore(
     subscribe,

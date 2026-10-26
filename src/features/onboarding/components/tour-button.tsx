@@ -7,7 +7,7 @@ import type { JSX } from "react";
 import { TOUR_HREF } from "@/features/onboarding/onboarding";
 import { useT } from "@/i18n/client";
 
-/** Header link that (re)starts the guided tour on the search page. */
+/** Хайлтын хуудсан дээр заавартай аяллыг (дахин) эхлүүлэх header-ийн холбоос. */
 export function TourButton(): JSX.Element {
   const t = useT();
 

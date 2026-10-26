@@ -12,7 +12,7 @@ import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 export type TourStep = {
-  /** CSS selector of the element to highlight; the first visible match wins. */
+  /** Тодруулах элементийн CSS selector; эхний харагдаж буй тохирол сонгогдоно. */
   target: string;
   title: string;
   text: string;
@@ -20,9 +20,9 @@ export type TourStep = {
 
 type Rect = { top: number; left: number; width: number; height: number };
 
-const PAD = 8; // breathing room around the highlighted element
-const GAP = 14; // between the highlight and the card
-const EDGE = 16; // minimum distance from the viewport edge
+const PAD = 8; // тодруулсан элементийн эргэн тойрны зай
+const GAP = 14; // тодруулга ба картын хооронд
+const EDGE = 16; // харагдах хүрээний ирмэгээс хамгийн бага зай
 const CARD_WIDTH = 352;
 
 function findTarget(selector: string): HTMLElement | null {
@@ -41,17 +41,21 @@ function sameRect(a: Rect | null, b: Rect): boolean {
 }
 
 /**
- * Step-by-step tour over the real page: everything dims except one element,
- * a card explains it, and the spotlight glides to the next element. Starts
- * when the URL has `?tour=1`; steps whose element is missing are skipped.
- * Keyboard: ← → to move, Esc to leave.
+ * Жинхэнэ хуудас дээрх алхам алхмаар аялал: нэг элементээс бусад бүх зүйл бүдгэрч,
+ * карт түүнийг тайлбарлан, гэрэлтүүлэг дараагийн элемент рүү гулсана. URL-д
+ * `?tour=1` байхад эхэлнэ; элемент нь байхгүй алхмуудыг алгасна.
+ * Гар: ← → шилжих, Esc гарах.
  */
 type GuidedTourProps = {
   steps: readonly TourStep[];
-  /** Toast after the last step; the search page's own words when left out. */
+  /** Сүүлийн алхмын дараах toast; өгөөгүй бол хайлтын хуудасны өөрийн үгс. */
   done?: { title: string; text: string };
 };
 
+/**
+ * Заавартай аялал: URL-д `?tour=1` байхад эхэлж, алхам бүрийн элементийг гэрэлтүүлэн
+ * тайлбарын картыг хажууд нь байрлуулна.
+ */
 export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -66,7 +70,7 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
   const cardRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
 
-  // "?tour=1" can arrive again while this page is open (the header's "Заавар" link).
+  // Энэ хуудас нээлттэй байхад "?tour=1" дахин ирж болно (header-ийн "Заавар" холбоос).
   if (requested !== lastRequested) {
     setLastRequested(requested);
     if (requested) {
@@ -75,7 +79,7 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
     }
   }
 
-  // Take the flag out of the URL so a refresh or a shared link doesn't restart the tour.
+  // URL-аас тугийг авна, ингэснээр дахин ачаалах эсвэл хуваалцсан холбоос аяллыг дахин эхлүүлэхгүй.
   useEffect(() => {
     if (!requested) return;
     const params = new URLSearchParams(searchParams.toString());
@@ -104,13 +108,13 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
     else if (next >= 0) setIndex(next);
   };
 
-  // Bring the step's element into view, then follow it every frame (scrolling,
-  // resizing, layout shifts) and update the spotlight only when it moved.
+  // Алхмын элементийг харагдах хүрээнд оруулаад кадр бүрт дагана (гүйлгэлт, хэмжээ
+  // өөрчлөгдөх, layout шилжих) бөгөөд зөвхөн хөдөлсөн үед гэрэлтүүлгийг шинэчилнэ.
   useEffect(() => {
     if (!active || !step) return;
     const target = findTarget(step.target);
     if (!target) {
-      // Nothing to point at (e.g. no search results): move on by itself.
+      // Заах юм алга (жишээ нь хайлтын үр дүн байхгүй): өөрөө дараагийнх руу шилжинэ.
       const skip = window.setTimeout(() => {
         if (index < steps.length - 1) setIndex(index + 1);
         else setActive(false);
@@ -132,12 +136,12 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
     return () => cancelAnimationFrame(frame);
   }, [active, step, index, steps.length]);
 
-  // Each new step moves focus to its main button, so Enter/Space continue the tour.
+  // Шинэ алхам бүр focus-ийг үндсэн товч руу нь шилжүүлдэг тул Enter/Space аяллыг үргэлжлүүлнэ.
   useEffect(() => {
     if (active) nextRef.current?.focus({ preventScroll: true });
   }, [active, index]);
 
-  // The page behind stays still while the tour is open.
+  // Аялал нээлттэй байх хооронд ард байгаа хуудас хөдлөхгүй.
   useEffect(() => {
     if (!active) return;
     const { overflow } = document.documentElement.style;
@@ -147,7 +151,7 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
     };
   }, [active]);
 
-  // Keys work wherever focus is (it may still be on the link that started the tour).
+  // Товчнууд focus хаана ч байсан ажиллана (аяллыг эхлүүлсэн холбоос дээр байж магадгүй).
   useEffect(() => {
     if (!active) return;
     const onKeyDown = (event: globalThis.KeyboardEvent): void => {
@@ -155,7 +159,7 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
       else if (event.key === "ArrowRight") go(1);
       else if (event.key === "ArrowLeft") go(-1);
       else if (event.key === "Tab") {
-        // Keep focus inside the card.
+        // Focus-ийг карт дотор байлгана.
         const focusable = [...(cardRef.current?.querySelectorAll<HTMLElement>("button") ?? [])];
         const first = focusable[0];
         const last = focusable.at(-1);
@@ -177,7 +181,7 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
 
   const isLast = index === steps.length - 1;
 
-  // Spotlight box, then the card below it, or above when there is no room.
+  // Гэрэлтүүлгийн хайрцаг, дараа нь карт доор нь, зай байхгүй бол дээр нь.
   const spot = {
     top: rect.top - PAD,
     left: rect.left - PAD,
@@ -202,10 +206,10 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
 
   return createPortal(
     <div className="fixed inset-0 z-60">
-      {/* Click-catcher: the page underneath can't be used mid-tour. */}
+      {/* Дарахыг барих давхарга: аяллын дундуур доорх хуудсыг ашиглах боломжгүй. */}
       <div className="absolute inset-0" aria-hidden />
 
-      {/* The hole: a box whose giant shadow dims everything else. */}
+      {/* Нүх: аварга сүүдэр нь бусад бүхнийг бүдгэрүүлдэг хайрцаг. */}
       <div
         aria-hidden
         className="pointer-events-none absolute rounded-xl transition-[top,left,width,height] duration-400 ease-soft"
@@ -250,7 +254,7 @@ export function GuidedTour({ steps, done }: GuidedTourProps): JSX.Element | null
           </span>
         </div>
 
-        {/* Re-keyed so the text fades in with each step. */}
+        {/* Алхам бүрт текст аажуухан гарч ирэхийн тулд дахин key өгнө. */}
         <div key={index} className="mt-4 animate-in duration-250 ease-soft fade-in">
           <h2 id="tour-title" className="font-heading text-lg font-medium text-foreground">
             {step.title}

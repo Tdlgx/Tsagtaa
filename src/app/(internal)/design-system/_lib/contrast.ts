@@ -1,7 +1,8 @@
-/** WCAG 2.x contrast math for #rgb / #rrggbb colors. */
+/** #rgb / #rrggbb өнгөний WCAG 2.x тодролын тооцоо. */
 
 type Rgb = readonly [number, number, number];
 
+/** "#rgb" эсвэл "#rrggbb" → [r, g, b] (0–255); hex биш бол null. */
 export function parseHex(value: string): Rgb | null {
   const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value.trim());
   const hex = match?.[1];
@@ -28,7 +29,7 @@ function luminance([r, g, b]: Rgb): number {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 }
 
-/** Contrast ratio (1–21) between two hex colors, or null if either is not hex. */
+/** Хоёр hex өнгөний тодролын харьцаа (1–21), аль нэг нь hex биш бол null. */
 export function contrastRatio(foreground: string, background: string): number | null {
   const a = parseHex(foreground);
   const b = parseHex(background);
@@ -40,7 +41,7 @@ export function contrastRatio(foreground: string, background: string): number | 
 
 export type ContrastLevel = "AAA" | "AA" | "AA UI" | "Fail";
 
-/** Text needs 4.5:1 (AA) or 7:1 (AAA); UI outlines and icons need 3:1. */
+/** Текстэд 4.5:1 (AA) эсвэл 7:1 (AAA); UI-ийн хүрээ, icon-д 3:1 хэрэгтэй. */
 export function contrastLevel(ratio: number): ContrastLevel {
   if (ratio >= 7) return "AAA";
   if (ratio >= 4.5) return "AA";

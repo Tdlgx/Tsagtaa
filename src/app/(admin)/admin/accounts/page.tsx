@@ -29,7 +29,7 @@ const FILTERS: readonly AccountFilter[] = ["all", "customers", "staff", "admins"
 const first = (value: string | string[] | undefined): string =>
   (Array.isArray(value) ? value[0] : value) ?? "";
 
-/** Everyone who can sign in: customers, the people who run places, the Цагтаа team. */
+/** Нэвтэрч чаддаг бүх хүн: үйлчлүүлэгч, газар эрхлэгч, Цагтаагийн баг. */
 export default async function AccountsPage(
   props: PageProps<"/admin/accounts">,
 ): Promise<JSX.Element> {

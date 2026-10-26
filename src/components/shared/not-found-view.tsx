@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { getI18n } from "@/i18n/server";
 
-/** The 404 page body, shared by the root and the management route groups. */
+/** 404 хуудасны агуулга, root болон удирдлагын route бүлгүүд хуваалцана. */
 export async function NotFoundView({
   withLogo = true,
 }: {

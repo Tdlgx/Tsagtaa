@@ -7,6 +7,7 @@ import { getI18n } from "@/i18n/server";
 import { APP_NAME } from "@/lib/constants";
 import { getZonedParts } from "@/lib/date";
 
+/** Хуудасны доод хэсэг: лого, тайлбар, бизнес бүртгэл болон бусад холбоос. */
 export async function SiteFooter(): Promise<JSX.Element> {
   const { locale, t } = await getI18n();
   const { year } = getZonedParts(new Date());

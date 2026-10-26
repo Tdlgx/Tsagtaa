@@ -8,7 +8,7 @@ import { useNow } from "@/hooks/use-now";
 import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
-/** Number of bookings still ahead (or happening now). */
+/** Өмнө байгаа (эсвэл яг одоо болж буй) захиалгын тоо. */
 export function useUpcomingCount(): number {
   const bookings = useBookings();
   const now = useNow(60_000);
@@ -19,7 +19,7 @@ export function useUpcomingCount(): number {
   }).length;
 }
 
-/** Lime count pill for the "Захиалга" nav item; renders nothing at zero. */
+/** "Захиалга" цэсний шар-ногоон тоон тэмдэг; тэг үед юу ч харуулахгүй. */
 export function UpcomingCount({ className }: { className?: string }): JSX.Element | null {
   const t = useT();
   const count = useUpcomingCount();

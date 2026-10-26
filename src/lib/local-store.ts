@@ -3,26 +3,25 @@
 import { useSyncExternalStore } from "react";
 
 /*
- * Whose data this browser is showing: "" when signed out, otherwise the
- * account id. Stores created with `perAccount` keep a separate copy per
- * account, so signing in as someone else starts with an empty profile and
- * booking list instead of the previous person's.
+ * Энэ browser хэний өгөгдлийг харуулж байна вэ: нэвтрээгүй бол "", үгүй бол бүртгэлийн
+ * id. `perAccount`-оор үүсгэсэн store-ууд бүртгэл бүрт тусдаа хуулбартай тул өөр
+ * хүнээр нэвтрэхэд өмнөх хүнийх биш, хоосон профайл, захиалгын жагсаалтаас эхэлнэ.
  */
 let scope = "";
 const SCOPE_EVENT = "local-store:scope";
 
-/** Set while rendering (parents render before the stores they wrap), so the first read is already right. */
+/** Render хийх үед тохирдог (эцэг нь ороосон store-уудаасаа өмнө render хийгддэг) тул эхний уншилт аль хэдийн зөв. */
 export function setStorageScope(accountId: string): void {
   scope = accountId;
 }
 
-/** After the account changed: every per-account store re-reads under the new key. */
+/** Бүртгэл өөрчлөгдсөний дараа: бүртгэл тус бүрийн store бүр шинэ түлхүүрээр дахин уншина. */
 export function announceStorageScope(): void {
   window.dispatchEvent(new Event(SCOPE_EVENT));
 }
 
 export type LocalStore<T> = {
-  /** Current value; `null` on the server and during hydration ("not known yet"). */
+  /** Одоогийн утга; сервер дээр болон hydration-ий үед `null` ("хараахан мэдэгдээгүй"). */
   use: () => T | null;
   read: () => T;
   write: (value: T) => void;
@@ -30,12 +29,12 @@ export type LocalStore<T> = {
 };
 
 /**
- * A JSON value in localStorage exposed through `useSyncExternalStore`, so
- * every reader updates together, including other open tabs. The profile and
- * the booking list live here, per account (see `perAccount`).
+ * localStorage дахь JSON утгыг `useSyncExternalStore`-оор гаргадаг тул бүх уншигч,
+ * тэр дундаа бусад нээлттэй таб хамт шинэчлэгдэнэ. Профайл болон захиалгын жагсаалт
+ * энд бүртгэл бүрээр хадгалагдана (`perAccount`-ийг үз).
  *
- * `parse` turns whatever is stored (possibly old or hand-edited) into a valid
- * value, falling back to `fallback`.
+ * `parse` нь хадгалсан аливаа зүйлийг (хуучин эсвэл гараар засварласан байж болно)
+ * хүчинтэй утга болгож, бүтэхгүй бол `fallback` руу буцна.
  */
 export function createLocalStore<T>(
   baseKey: string,
@@ -45,7 +44,7 @@ export function createLocalStore<T>(
 ): LocalStore<T> {
   const event = `local-store:${baseKey}`;
   const keyNow = (): string => (options.perAccount && scope ? `${baseKey}@${scope}` : baseKey);
-  // The snapshot must keep the same reference while the data (and whose it is) is unchanged.
+  // Өгөгдөл (болон хэнийх) өөрчлөгдөөгүй байхад snapshot ижил reference-ээ хадгалах ёстой.
   let cachedKey = "";
   let cachedRaw: string | null = null;
   let cachedValue: T = fallback;
@@ -56,7 +55,7 @@ export function createLocalStore<T>(
     try {
       raw = window.localStorage.getItem(key);
     } catch {
-      return cachedValue; // storage blocked (private mode): keep the in-memory value
+      return cachedValue; // storage хаалттай (private горим): санах ой дахь утгыг хадгална
     }
     if (key === cachedKey && raw === cachedRaw) return cachedValue;
     cachedKey = key;
@@ -76,7 +75,7 @@ export function createLocalStore<T>(
       cachedKey = keyNow();
       window.localStorage.setItem(cachedKey, cachedRaw);
     } catch {
-      // Not persisted, but this tab still sees the new value.
+      // Хадгалагдаагүй ч энэ таб шинэ утгыг харсаар байна.
     }
     window.dispatchEvent(new Event(event));
   };
@@ -87,7 +86,7 @@ export function createLocalStore<T>(
     try {
       window.localStorage.removeItem(keyNow());
     } catch {
-      // Nothing stored to remove.
+      // Устгах хадгалсан зүйл алга.
     }
     window.dispatchEvent(new Event(event));
   };

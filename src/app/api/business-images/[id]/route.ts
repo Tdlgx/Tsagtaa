@@ -6,9 +6,9 @@ import { getCurrentAccount } from "@/lib/auth/session";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * A business's logo or photo. A live place's images are public and cached
- * for a year (an id never gets new bytes: a new upload is a new id). Images
- * of a place still under review are only for its team and the Цагтаа team.
+ * Бизнесийн лого эсвэл зураг. Идэвхтэй газрын зургууд нийтэд нээлттэй бөгөөд нэг
+ * жил cache-лэгдэнэ (нэг id хэзээ ч шинэ агуулга авахгүй: шинэ upload = шинэ id).
+ * Шалгагдаж буй газрын зургийг зөвхөн тэр газрын баг болон Цагтаагийн баг харна.
  */
 export async function GET(
   _request: NextRequest,
@@ -32,8 +32,12 @@ export async function GET(
   return new Response(Buffer.from(image.bytes), {
     headers: {
       "Content-Type": image.contentType,
-      "Cache-Control": isPublic ? "public, max-age=31536000, immutable" : "private, no-store",
-      // Never let a browser treat the bytes as anything but this image.
+      // s-maxage нь Vercel-ийн CDN-д нийтийн зургийг хадгалах боломж олгоно, ингэснээр давтан
+      // үзэлт function болон Neon-ыг алгасна. Жил биш нэг өдөр: устгасан зураг үйлчлэгдэхээ болино.
+      "Cache-Control": isPublic
+        ? "public, max-age=31536000, s-maxage=86400, immutable"
+        : "private, no-store",
+      // Browser эдгээр byte-уудыг энэ зургаас өөр зүйл гэж хэзээ ч ойлгохгүй байхаар.
       "X-Content-Type-Options": "nosniff",
       "Content-Security-Policy": "default-src 'none'; sandbox",
     },

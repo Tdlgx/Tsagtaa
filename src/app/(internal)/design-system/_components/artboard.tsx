@@ -11,7 +11,7 @@ type ArtboardProps = {
   className?: string;
 };
 
-/** A titled frame on the canvas, like an artboard in Affinity Designer. */
+/** Canvas дээрх гарчигтай хүрээ, Affinity Designer-ийн artboard шиг. */
 export function Artboard({
   id,
   number,
@@ -44,7 +44,7 @@ export function Artboard({
   );
 }
 
-/** Small caption under or above a specimen. */
+/** Жишээний доор эсвэл дээр байх жижиг тайлбар. */
 export function Spec({
   children,
   className,
@@ -55,7 +55,7 @@ export function Spec({
   return <p className={cn("text-xs text-muted-foreground", className)}>{children}</p>;
 }
 
-/** Sub-heading inside an artboard. */
+/** Artboard доторх дэд гарчиг. */
 export function BoardSection({
   title,
   children,

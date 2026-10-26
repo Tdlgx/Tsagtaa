@@ -52,7 +52,7 @@ function errorText(result: AdminResult, t: Dictionary): string {
   return errors[result.error] ?? t.manage.error;
 }
 
-/** A second tap within 4 seconds confirms. */
+/** 4 секундын дотор дахин дарвал баталгаажна. */
 function useArmed(): [boolean, (value: boolean) => void] {
   const [armed, setArmed] = useState(false);
   useEffect(() => {
@@ -63,12 +63,12 @@ function useArmed(): [boolean, (value: boolean) => void] {
   return [armed, setArmed];
 }
 
-/* Review ----------------------------------------------------------------------------- */
+/* Шалгалт ----------------------------------------------------------------------------- */
 
 /**
- * The decisions a place's status allows: approve or turn down a new one,
- * take a live one off or put it back, look again at a turned-down one.
- * Turning down and taking off need a reason, which the owner sees.
+ * Газрын төлөвөөс хамаарах шийдвэрүүд: шинэ газрыг зөвшөөрөх эсвэл татгалзах,
+ * идэвхтэй газрыг түр хаах эсвэл буцааж нээх, татгалзсан газрыг дахин хянах.
+ * Татгалзах болон түр хаахад шалтгаан шаардлагатай бөгөөд эзэмшигч түүнийг харна.
  */
 export function ReviewActions({
   businessId,
@@ -175,6 +175,7 @@ export function ReviewActions({
   );
 }
 
+/** Админ газарт эзэмшигч эсвэл менежер оноох маягт (шинэ утсанд анхны нууц үгтэй). */
 export function AssignMemberForm({ slug }: { slug: string }): JSX.Element {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -234,6 +235,7 @@ export function AssignMemberForm({ slug }: { slug: string }): JSX.Element {
   );
 }
 
+/** Жишээ газруудыг DB руу импортлох товч; хэдийг нэмснийг toast-оор хэлнэ. */
 export function ImportSamplesButton(): JSX.Element {
   const t = useT();
   const [pending, start] = useTransition();
@@ -256,7 +258,7 @@ export function ImportSamplesButton(): JSX.Element {
   );
 }
 
-/* Accounts ----------------------------------------------------------------------------- */
+/* Бүртгэлүүд ----------------------------------------------------------------------------- */
 
 type AccountActionsProps = {
   accountId: string;
@@ -266,6 +268,10 @@ type AccountActionsProps = {
   sessions: number;
 };
 
+/**
+ * Нэг бүртгэл дээрх админы үйлдлүүд: нууц үг шинэчлэх, түгжээ тайлах, бүх төхөөрөмжөөс
+ * гаргах, админ эрх, оноо засах. Эрсдэлтэй үйлдлүүд хоёр товшилтоор баталгаажна.
+ */
 export function AccountActions({
   accountId,
   isAdmin,
@@ -463,7 +469,7 @@ function AdjustPointsForm({
   );
 }
 
-/* Bookings ------------------------------------------------------------------------------- */
+/* Захиалгууд ------------------------------------------------------------------------------- */
 
 export function AdminCancelBookingButton({ bookingId }: { bookingId: string }): JSX.Element {
   const t = useT();
@@ -490,7 +496,7 @@ export function AdminCancelBookingButton({ bookingId }: { bookingId: string }): 
   );
 }
 
-/* Points rules ----------------------------------------------------------------------------- */
+/* Онооны дүрэм ----------------------------------------------------------------------------- */
 
 export function LoyaltySettingsForm({ settings }: { settings: LoyaltySettings }): JSX.Element {
   const t = useT();

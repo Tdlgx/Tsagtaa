@@ -11,9 +11,9 @@ import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 /**
- * The profile picture: the photo if there is one, otherwise the first letter
- * of the name (or the brand mark). The camera badge opens the photo picker,
- * which on phones also offers the camera.
+ * Профайлын зураг: зураг байвал түүнийг, үгүй бол нэрийн эхний үсгийг (эсвэл
+ * брэндийн тэмдгийг) харуулна. Камерын тэмдэг зураг сонгогчийг нээх ба утсан дээр
+ * камер ч санал болгоно.
  */
 export function ProfileAvatar({ profile }: { profile: Profile }): JSX.Element {
   const t = useT();
@@ -23,7 +23,7 @@ export function ProfileAvatar({ profile }: { profile: Profile }): JSX.Element {
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = event.target.files?.[0];
-    // Let the same file be picked again later.
+    // Дараа нь ижил файлыг дахин сонгох боломжтой болгоно.
     event.target.value = "";
     if (!file) return;
     setBusy(true);
@@ -41,7 +41,7 @@ export function ProfileAvatar({ profile }: { profile: Profile }): JSX.Element {
     <div className="relative">
       <span className="flex size-20 items-center justify-center overflow-hidden rounded-xl bg-brand-ink font-heading text-3xl font-medium text-primary ring-4 ring-surface">
         {profile.avatar ? (
-          // A data URL made on this device; next/image adds nothing here.
+          // Энэ төхөөрөмж дээр үүсгэсэн data URL; next/image энд юу ч нэмэхгүй.
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={profile.avatar}
@@ -80,7 +80,7 @@ export function ProfileAvatar({ profile }: { profile: Profile }): JSX.Element {
   );
 }
 
-/** "Remove photo", shown under the name while there is one. */
+/** "Зураг хасах", зураг байх үед нэрийн доор харагдана. */
 export function RemoveAvatarButton(): JSX.Element {
   const t = useT();
   return (

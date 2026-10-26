@@ -7,15 +7,15 @@ import { useState, type JSX } from "react";
 import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
-/** Lowercase, and Mongolian Ө/Ү match О/У, so "уйлчилгээ" still finds "үйлчилгээ". */
+/** Жижиг үсгээр, Монгол Ө/Ү нь О/У-тай тэнцүү тул "уйлчилгээ" гэж бичсэн ч "үйлчилгээ"-г олно. */
 function fold(text: string): string {
   return text.toLowerCase().replaceAll("ө", "о").replaceAll("ү", "у");
 }
 
 /**
- * The questions by topic, with a search that filters as you type (matching
- * both questions and answers) and jump chips for each topic. Every answer is
- * a disclosure, so it works with the keyboard and screen readers.
+ * Сэдвээр бүлэглэсэн асуултууд, бичих явцад шүүдэг хайлттай (асуулт, хариулт
+ * хоёуланд нь тааруулна) ба сэдэв бүр рүү үсрэх товчтой. Хариулт бүр нээгдэх
+ * хэсэг тул гар болон screen reader-ээр ажиллана.
  */
 export function FaqList(): JSX.Element {
   const t = useT();
@@ -93,7 +93,7 @@ export function FaqList(): JSX.Element {
             >
               {section.title}
             </h2>
-            {/* While searching, open every match so the answer is right there. */}
+            {/* Хайх үед тохирсон бүхнийг нээнэ, ингэснээр хариулт шууд харагдана. */}
             <Accordion.Root
               key={needle ? `search-${needle}` : "browse"}
               type="multiple"

@@ -6,9 +6,9 @@ import type { JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { updateDraft } from "@/features/business-registration/draft-store";
 import {
   MAX_STAFF,
+  type DraftUpdate,
   type RegistrationDraft,
   type StepErrors,
 } from "@/features/business-registration/registration";
@@ -18,36 +18,38 @@ import { cn } from "@/lib/utils";
 
 type StaffStepProps = {
   draft: RegistrationDraft;
+  update: DraftUpdate;
   errors: StepErrors;
   t: Dictionary;
 };
 
-/** Avatar tints, cycled so people are told apart at a glance. */
+/** Avatar-ын өнгөнүүд, ээлжлэн өгнө, ингэснээр хүмүүсийг шууд ялгана. */
 const TONES = [
   "bg-primary-soft text-primary-strong",
   "bg-sun-soft text-sun-strong",
   "bg-success-soft text-success-foreground",
 ] as const;
 
-export function addStaff(name = ""): void {
-  updateDraft((draft) => ({
+/** Ажилтны жагсаалтад шинэ мөр нэмнэ (хамгийн ихдээ MAX_STAFF хүртэл). */
+export function addStaff(update: DraftUpdate, name = ""): void {
+  update((draft) => ({
     ...draft,
     staff: [...draft.staff, { id: crypto.randomUUID(), name }].slice(0, MAX_STAFF),
   }));
 }
 
-function setStaffName(id: string, name: string): void {
-  updateDraft((draft) => ({
+function setStaffName(update: DraftUpdate, id: string, name: string): void {
+  update((draft) => ({
     ...draft,
     staff: draft.staff.map((member) => (member.id === id ? { ...member, name } : member)),
   }));
 }
 
-function removeStaff(id: string): void {
-  updateDraft((draft) => ({ ...draft, staff: draft.staff.filter((member) => member.id !== id) }));
+function removeStaff(update: DraftUpdate, id: string): void {
+  update((draft) => ({ ...draft, staff: draft.staff.filter((member) => member.id !== id) }));
 }
 
-/** A car wash books bays, not people: "Бокс 3" is the next free number. */
+/** Авто угаалга хүн биш, бокс захиалдаг: "Бокс 3" бол дараагийн сул дугаар. */
 export function nextBayName(draft: RegistrationDraft, t: Dictionary): string {
   for (let number = 1; ; number += 1) {
     const name = t.register.bayName(number);
@@ -55,7 +57,8 @@ export function nextBayName(draft: RegistrationDraft, t: Dictionary): string {
   }
 }
 
-export function StaffStep({ draft, errors, t }: StaffStepProps): JSX.Element {
+/** Бүртгэлийн ажилтны алхам: хүмүүсийг (авто угаалгад боксуудыг) нэмэх, засах, хасах. */
+export function StaffStep({ draft, update, errors, t }: StaffStepProps): JSX.Element {
   const words = t.register;
   const category = draft.category ?? "hair";
   const role = t.staff[category].role;
@@ -105,9 +108,9 @@ export function StaffStep({ draft, errors, t }: StaffStepProps): JSX.Element {
                   data-staff-name
                   value={member.name}
                   maxLength={60}
-                  onChange={(event) => setStaffName(member.id, event.target.value)}
+                  onChange={(event) => setStaffName(update, member.id, event.target.value)}
                   aria-invalid={Boolean(error)}
-                  // Bays get a numbered hint; people's names are left blank.
+                  // Боксууд дугаартай зөвлөмж авна; хүмүүсийн нэрийг хоосон үлдээнэ.
                   placeholder={
                     isWash ? words.staffPlaceholder(words.bayName(index + 1)) : undefined
                   }
@@ -118,7 +121,7 @@ export function StaffStep({ draft, errors, t }: StaffStepProps): JSX.Element {
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`${words.remove}: ${member.name || index + 1}`}
-                  onClick={() => removeStaff(member.id)}
+                  onClick={() => removeStaff(update, member.id)}
                   className="text-muted-foreground is-hover:text-danger-foreground"
                 >
                   <Trash2 />
@@ -137,7 +140,7 @@ export function StaffStep({ draft, errors, t }: StaffStepProps): JSX.Element {
         className="w-full border-dashed"
         disabled={full}
         onClick={() => {
-          addStaff(isWash ? nextBayName(draft, t) : "");
+          addStaff(update, isWash ? nextBayName(draft, t) : "");
           if (!isWash) focusLast();
         }}
       >

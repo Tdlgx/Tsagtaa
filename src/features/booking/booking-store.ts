@@ -3,7 +3,7 @@
 import type { Booking } from "@/features/booking/booking";
 import { createLocalStore } from "@/lib/local-store";
 
-/** Bookings made in this browser, one list per account (and one for signed out). */
+/** Энэ browser-т хийсэн захиалгууд, бүртгэл бүрт нэг жагсаалт (нэвтрээгүй үед дахиад нэг). */
 const store = createLocalStore<readonly Booking[]>(
   "tsagtaa.bookings.v1",
   [],
@@ -11,7 +11,7 @@ const store = createLocalStore<readonly Booking[]>(
   { perAccount: true },
 );
 
-/** `null` while rendering on the server / hydrating: "not known yet", not "none". */
+/** Сервер дээр render / hydrate хийх үед `null`: "байхгүй" биш, "хараахан мэдэгдээгүй". */
 export function useBookings(): readonly Booking[] | null {
   return store.use();
 }
@@ -20,6 +20,7 @@ export function addBooking(booking: Booking): void {
   store.write([...store.read(), booking]);
 }
 
+/** Энэ төхөөрөмж дээрх захиалгыг цуцлагдсан гэж тэмдэглэнэ. */
 export function cancelBooking(id: string): void {
   store.write(
     store

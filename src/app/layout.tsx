@@ -15,16 +15,16 @@ import { cn } from "@/lib/utils";
 
 import "./globals.css";
 
-// Mongolian Ө ө Ү ү live in the "cyrillic-ext" subset; "latin-ext" carries ₮.
-// Body + UI: Onest, a calm grotesque drawn with Cyrillic as a first-class script.
+// Монгол Ө ө Ү ү үсгүүд "cyrillic-ext" дэд олонлогт байдаг; ₮-ийг "latin-ext" агуулна.
+// Үндсэн текст + UI: Onest, кирилл үсгийг тэгш эрхтэйгээр зурсан тайван grotesque фонт.
 const onest = Onest({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   variable: "--font-onest",
   display: "swap",
 });
 
-// Display: Unbounded, a wide geometric face. Its round, clock-like numerals
-// carry the brand's big moments (headlines, the live time); never body text.
+// Display: Unbounded, өргөн геометрийн фонт. Түүний бөөрөнхий, цаг шиг цифрүүд
+// брэндийн том мөчүүдийг (гарчиг, амьд цаг) илэрхийлнэ; үндсэн текстэд хэзээ ч биш.
 const unbounded = Unbounded({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   weight: ["400", "500", "600"],
@@ -34,7 +34,7 @@ const unbounded = Unbounded({
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, t } = await getI18n();
-  // The env name labels staging/demo builds; in English the brand is spelled in Latin.
+  // Env-ийн нэр staging/demo build-ийг ялгана; англи хэл дээр брэндийг латинаар бичнэ.
   const brand = locale === "mn" ? APP_NAME : t.brand;
   const title = `${brand} — ${t.meta.tagline}`;
 
@@ -60,11 +60,12 @@ export const viewport: Viewport = {
   ],
 };
 
+/** Бүх хуудасны үндсэн layout: фонт, хэл, theme, хэрэглэгчийн storage хүрээ, toast, analytics. */
 export default async function RootLayout({ children }: LayoutProps<"/">): Promise<JSX.Element> {
   const [locale, account] = await Promise.all([getLocale(), getCurrentAccount()]);
 
   return (
-    // next-themes sets the theme class on <html> before React hydrates.
+    // next-themes React hydrate хийхээс өмнө <html> дээр theme-ийн классыг тохируулна.
     <html
       lang={locale}
       suppressHydrationWarning
@@ -75,9 +76,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">): Promis
           <ThemeProvider>
             <StorageScope accountId={account?.id ?? null}>{children}</StorageScope>
             <Toaster />
-            {/* Vercel Web Analytics: page views, no cookies; does nothing outside Vercel. */}
+            {/* Vercel Web Analytics: хуудас үзэлт, cookie-гүй; Vercel-ээс гадна юу ч хийхгүй. */}
             <Analytics />
-            {/* Vercel Speed Insights: Core Web Vitals; also a no-op outside Vercel. */}
+            {/* Vercel Speed Insights: Core Web Vitals; мөн Vercel-ээс гадна юу ч хийхгүй. */}
             <SpeedInsights />
           </ThemeProvider>
         </LocaleProvider>

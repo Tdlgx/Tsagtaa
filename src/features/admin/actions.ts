@@ -21,18 +21,18 @@ import { isAcceptablePassword } from "@/lib/auth/password";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 
 /*
- * The Цагтаа team's actions. Each one checks the admin before it reads its
- * input: Server Actions can be called directly with a POST, not only from
- * the admin pages.
+ * Цагтаагийн багийн action-ууд. Тус бүр оролтоо уншихаас өмнө админыг шалгана:
+ * Server Action-ыг зөвхөн админы хуудаснаас биш, шууд POST-оор ч дуудаж болно.
  */
 
 export type AdminResult = { ok: true; message?: string } | { ok: false; error: string };
 
-/** Every admin page shows fresh data after a change. */
+/** Өөрчлөлтийн дараа админы хуудас бүр шинэ өгөгдөл харуулна. */
 function refresh(): void {
   revalidatePath("/admin", "layout");
 }
 
+/** Газрын төлөвийг өөрчилнө (зөвшөөрөх, татгалзах, түр хаах, дахин хянах). */
 export async function reviewBusinessAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = z
@@ -49,6 +49,7 @@ export async function reviewBusinessAction(input: unknown): Promise<AdminResult>
   return result.ok ? { ok: true } : { ok: false, error: result.reason };
 }
 
+/** Жишээ газруудыг DB руу импортлоно; хэдийг нэмснийг буцаана. */
 export async function importSamplesAction(): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const added = await importSampleBusinesses(admin.id);
@@ -56,7 +57,7 @@ export async function importSamplesAction(): Promise<AdminResult> {
   return { ok: true, message: String(added) };
 }
 
-/** Gives a place its owner or a manager (e.g. after a phone call). */
+/** Газарт эзэмшигч эсвэл менежер өгнө (жишээ нь утсаар ярьсны дараа). */
 export async function assignMemberAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = z
@@ -85,10 +86,11 @@ export async function assignMemberAction(input: unknown): Promise<AdminResult> {
   return { ok: true, message: result.created ? "created" : "linked" };
 }
 
-/* Accounts ------------------------------------------------------------------------ */
+/* Бүртгэлүүд ------------------------------------------------------------------------ */
 
 const accountInput = z.object({ accountId: z.uuid() });
 
+/** Буруу нууц үгээс болж түгжигдсэн бүртгэлийн түгжээг тайлна. */
 export async function unlockAccountAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = accountInput.safeParse(input);
@@ -98,7 +100,7 @@ export async function unlockAccountAction(input: unknown): Promise<AdminResult> 
   return done ? { ok: true } : { ok: false, error: "not_found" };
 }
 
-/** Returns the new password once, for the admin to pass on in person. */
+/** Шинэ нууц үгийг нэг удаа буцаана, админ түүнийг биечлэн дамжуулна. */
 export async function resetPasswordAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = accountInput.safeParse(input);
@@ -108,6 +110,7 @@ export async function resetPasswordAction(input: unknown): Promise<AdminResult> 
   return password ? { ok: true, message: password } : { ok: false, error: "not_found" };
 }
 
+/** Бүртгэлд админ эрх олгох эсвэл хасах. */
 export async function setAdminAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = accountInput.extend({ value: z.boolean() }).safeParse(input);
@@ -117,6 +120,7 @@ export async function setAdminAction(input: unknown): Promise<AdminResult> {
   return result.ok ? { ok: true } : { ok: false, error: result.reason };
 }
 
+/** Бүртгэлийн бүх нэвтэрсэн session-ыг дуусгана; хэдийг дуусгасныг буцаана. */
 export async function endSessionsAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = accountInput.safeParse(input);
@@ -126,6 +130,7 @@ export async function endSessionsAction(input: unknown): Promise<AdminResult> {
   return { ok: true, message: String(ended) };
 }
 
+/** Бүртгэлд шалтгаантайгаар оноо нэмэх эсвэл хасах (тэг биш, ±1 саяас хэтрэхгүй). */
 export async function adjustPointsAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = accountInput
@@ -146,7 +151,7 @@ export async function adjustPointsAction(input: unknown): Promise<AdminResult> {
   return result.ok ? { ok: true } : { ok: false, error: result.reason };
 }
 
-/* Bookings and points ----------------------------------------------------------------- */
+/* Захиалга ба оноо ----------------------------------------------------------------- */
 
 export async function adminCancelBookingAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
@@ -157,6 +162,7 @@ export async function adminCancelBookingAction(input: unknown): Promise<AdminRes
   return done ? { ok: true } : { ok: false, error: "not_found" };
 }
 
+/** Онооны дүрмийг (асаах/унтраах, олгох хувь, хамгийн бага ба их зарцуулалт) хадгална. */
 export async function loyaltySettingsAction(input: unknown): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
   const parsed = z

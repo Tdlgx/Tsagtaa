@@ -15,7 +15,7 @@ import { mn } from "@/i18n/dictionaries/mn";
 import { formatDayLabel } from "@/i18n/format";
 import { getZonedParts } from "@/lib/date";
 
-/** Businesses are listed for one working day, 09:00–21:00 Ulaanbaatar time. */
+/** Бизнесүүдийг нэг ажлын өдрөөр жагсаана, Улаанбаатарын цагаар 09:00–21:00. */
 export const DAY_START = 9 * 60;
 export const DAY_END = 21 * 60;
 
@@ -25,7 +25,7 @@ export type SearchSort = "soonest" | "rating" | "price";
 
 export type SearchFilters = {
   q: string;
-  /** A group ("salon") or one category inside it ("nails"). */
+  /** Бүлэг ("salon") эсвэл түүн доторх нэг ангилал ("nails"). */
   cat: CategoryFilterSlug | "";
   district: DistrictSlug | "";
   day: SearchDay;
@@ -68,13 +68,13 @@ const MAX_QUERY_LENGTH = 60;
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
-/** `?a=1&a=2` arrives as an array; only the first value counts. */
+/** `?a=1&a=2` массив болж ирдэг; зөвхөн эхний утга тооцогдоно. */
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-// Anything missing or invalid in the URL quietly falls back to the default,
-// so a hand-edited or outdated link still shows a sensible page.
+// URL-д дутуу эсвэл буруу зүйл байвал чимээгүйхэн анхдагч утга руу буцна,
+// ингэснээр гараар засварласан эсвэл хуучирсан холбоос ч утга учиртай хуудас харуулна.
 const searchParamsSchema = z.object({
   q: z
     .string()
@@ -88,6 +88,7 @@ const searchParamsSchema = z.object({
   sort: z.enum(["soonest", "rating", "price"]).catch(DEFAULT_FILTERS.sort),
 });
 
+/** URL-ын query-г шүүлтүүр болгон хувиргана; буруу утгууд анхдагч руу буцна. */
 export function parseSearchParams(raw: RawSearchParams): SearchFilters {
   return searchParamsSchema.parse({
     q: first(raw.q),
@@ -99,7 +100,7 @@ export function parseSearchParams(raw: RawSearchParams): SearchFilters {
   });
 }
 
-/** "/search?cat=nails&day=tomorrow". Default values are left out to keep links short. */
+/** "/search?cat=nails&day=tomorrow". Холбоосыг богино байлгахын тулд анхдагч утгуудыг оруулахгүй. */
 export function toSearchHref(filters: SearchFilters): string {
   const params = new URLSearchParams();
   const keys = Object.keys(DEFAULT_FILTERS) as (keyof SearchFilters)[];
@@ -125,6 +126,7 @@ export function toMinutes(time: string): number {
   return hours * 60 + minutes;
 }
 
+/** Шөнө дундаас хойших минутыг "HH:MM" болгоно: 630 → "10:30". */
 export function toClock(totalMinutes: number): string {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
@@ -132,13 +134,14 @@ export function toClock(totalMinutes: number): string {
 }
 
 export type SearchClock = {
-  /** Minutes since midnight in Ulaanbaatar. */
+  /** Улаанбаатарын цагаар шөнө дундаас хойш өнгөрсөн минут. */
   nowMinutes: number;
   /** "Мягмар, 10-р сарын 7" / "Tuesday, October 7" */
   todayLabel: string;
   tomorrowLabel: string;
 };
 
+/** Хайлтад хэрэгтэй "одоо": Улаанбаатарын одоогийн минут, өнөөдөр ба маргаашийн шошго. */
 export function getSearchClock(now: Date, locale: Locale): SearchClock {
   const { hour, minute } = getZonedParts(now);
   const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -150,7 +153,7 @@ export function getSearchClock(now: Date, locale: Locale): SearchClock {
   };
 }
 
-/** open: bookable · past: already gone today · outside: not in the chosen part of the day */
+/** open: захиалж болно · past: өнөөдөр аль хэдийн өнгөрсөн · outside: сонгосон өдрийн хэсэгт ороогүй */
 export type SlotState = "open" | "past" | "outside";
 
 export type ResultSlot = { time: string; start: number; state: SlotState };
@@ -159,10 +162,10 @@ export type SearchResult = {
   business: SampleBusiness;
   slots: readonly ResultSlot[];
   openCount: number;
-  /** Earliest bookable start, or null when the day is full. */
+  /** Хамгийн эрт захиалж болох эхлэх цаг, өдөр дүүрсэн бол null. */
   firstOpen: number | null;
   priceFrom: number;
-  /** Shortest service; sets the width of a slot on the day strip. */
+  /** Хамгийн богино үйлчилгээ; өдрийн зурвас дээрх цагийн өргөнийг тогтооно. */
   shortestService: number;
 };
 
@@ -175,14 +178,14 @@ function matchesQuery(business: SampleBusiness, query: string): boolean {
   if (words.length === 0) return true;
 
   const { group } = getBusinessCategory(business.category);
-  // Both languages, so "маникюр" and "manicure" find the same places.
+  // Хоёр хэлээр, ингэснээр "маникюр" ба "manicure" ижил газруудыг олно.
   const haystack = normalize(
     [
       business.slug,
       business.category,
       ...[mn, en].flatMap((words) => [
         words.categories[business.category].label,
-        // "салон" / "salon" finds every salon type, not just places named "... салон".
+        // "салон" / "salon" нэрэндээ "... салон" гэсэн газруудыг биш, бүх салоны төрлийг олно.
         group === "salon" ? words.groups.salon.label : "",
         words.districts[business.district],
       ]),
@@ -190,22 +193,21 @@ function matchesQuery(business: SampleBusiness, query: string): boolean {
     ].join(" "),
   );
 
-  // Every word must appear somewhere: "маникюр хан-уул" narrows to both.
+  // Үг бүр хаа нэг газар байх ёстой: "маникюр хан-уул" хоёуланг нь агуулсныг л үлдээнэ.
   return words.every((word) => haystack.includes(word));
 }
 
 /**
- * When a service must end on `day`: the place's own closing time if it is a
- * registered place, otherwise the end of the shared schedule.
+ * `day` өдөр үйлчилгээ хэзээ дуусах ёстой вэ: бүртгэлтэй газар бол өөрийн хаах цаг,
+ * үгүй бол нийтлэг хуваарийн төгсгөл.
  */
 export function closingMinutes(business: SampleBusiness, day: SearchDay): number {
   return business.closesAt?.[day] ?? DAY_END;
 }
 
 /**
- * Filters and sorts businesses (the samples, plus registered places when the
- * page passes them). `nowMinutes` hides today's past times; pass null when
- * searching tomorrow.
+ * Бизнесүүдийг шүүж, эрэмбэлнэ (жишээ газрууд, мөн хуудас дамжуулбал бүртгэлтэй
+ * газрууд). `nowMinutes` өнөөдрийн өнгөрсөн цагуудыг нууна; маргаашийг хайхад null өгнө.
  */
 export function searchBusinesses(
   filters: SearchFilters,
@@ -245,7 +247,7 @@ export function searchBusinesses(
     b.business.rating - a.business.rating || b.business.reviewCount - a.business.reviewCount;
 
   return results.sort((a, b) => {
-    // Places with no time left always go last, whatever the sort.
+    // Цаг үлдээгүй газрууд эрэмбээс үл хамааран үргэлж хамгийн сүүлд.
     if ((a.openCount === 0) !== (b.openCount === 0)) return a.openCount === 0 ? 1 : -1;
     if (filters.sort === "rating") return byRating(a, b);
     if (filters.sort === "price") return a.priceFrom - b.priceFrom || byRating(a, b);

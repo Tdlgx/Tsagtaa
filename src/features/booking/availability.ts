@@ -3,16 +3,16 @@ import type { SearchDay } from "@/features/business/search";
 
 const DAY_MINUTES = 24 * 60;
 
-/** A confirmed booking's time, in minutes from midnight (Ulaanbaatar) of today or tomorrow. */
+/** Баталгаажсан захиалгын цаг, өнөөдөр эсвэл маргаашийн шөнө дундаас (Улаанбаатар) хойших минутаар. */
 export type TakenSlot = { staffId: string; day: SearchDay; start: number; end: number };
 
-/** Today and tomorrow in Ulaanbaatar: the 48 hours the booking page offers. */
+/** Улаанбаатарын өнөөдөр ба маргааш: захиалгын хуудасны санал болгодог 48 цаг. */
 export function getBookableWindow(now: Date): { from: Date; to: Date } {
   const from = toStartInstant("today", "00:00", now);
   return { from, to: new Date(from.getTime() + 2 * DAY_MINUTES * 60_000) };
 }
 
-/** Stored bookings → minutes on the booking page's two days. */
+/** Хадгалсан захиалгууд → захиалгын хуудасны хоёр өдөр дээрх минутууд. */
 export function toTakenSlots(
   ranges: readonly { staffId: string; startsAt: Date; endsAt: Date }[],
   now: Date,
@@ -27,8 +27,8 @@ export function toTakenSlots(
 }
 
 /**
- * Would `duration` minutes from `start` overlap one of this person's bookings?
- * Only for showing times: the database's overlap constraint has the final say.
+ * `start`-аас эхлэх `duration` минут энэ хүний захиалгын аль нэгтэй давхцах уу?
+ * Зөвхөн цаг харуулахад: эцсийн шийдвэрийг DB-ийн давхцлын constraint гаргана.
  */
 export function isTaken(
   taken: readonly TakenSlot[],

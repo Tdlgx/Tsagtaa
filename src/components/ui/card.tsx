@@ -11,13 +11,13 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        /** Most cards: hairline + barely-there shadow. */
+        /** Ихэнх карт: нарийн шугам + арай ядан мэдрэгдэх сүүдэр. */
         default: "shadow-sm",
-        /** Nested inside another surface: no shadow at all. */
+        /** Өөр гадаргуу дотор байрласан: огт сүүдэргүй. */
         flat: "",
-        /** Floating panels (popovers, sheets). */
+        /** Хөвөгч самбарууд (popover, sheet). */
         elevated: "shadow-md",
-        /** Clickable cards lift 2px; the deeper shadow fades in (opacity only). */
+        /** Дарагддаг карт 2px дээш өргөгдөнө; гүнзгий сүүдэр аажуухан гарна (зөвхөн тунгалаг байдал). */
         interactive: [
           "shadow-sm transition-transform duration-250 ease-soft is-hover:-translate-y-0.5",
           "after:pointer-events-none after:absolute after:-inset-px after:-z-10 after:rounded-[inherit] after:opacity-0 after:shadow-md after:transition-opacity after:duration-250 after:ease-soft is-hover:after:opacity-100",

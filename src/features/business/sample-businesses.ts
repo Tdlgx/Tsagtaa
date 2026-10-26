@@ -3,9 +3,9 @@ import type { DistrictSlug } from "@/features/business/districts";
 
 export type SampleService = {
   name: string;
-  /** Minutes */
+  /** Минут */
   duration: number;
-  /** Tögrög */
+  /** Төгрөг */
   price: number;
 };
 
@@ -14,26 +14,26 @@ export type SampleBusiness = {
   name: string;
   category: BusinessCategorySlug;
   district: DistrictSlug;
-  /** Neighbourhood or landmark people use to find the place. */
+  /** Хүмүүс газрыг олоход хэрэглэдэг хороолол эсвэл тэмдэгт газар. */
   area: string;
   rating: number;
   reviewCount: number;
   services: readonly SampleService[];
-  /** Open start times, "HH:MM", Ulaanbaatar time. Gaps are already booked. */
+  /** Сул эхлэх цагууд, "HH:MM", Улаанбаатарын цагаар. Завсрууд нь аль хэдийн захиалагдсан. */
   open: { today: readonly string[]; tomorrow: readonly string[] };
-  /** Places registered on the site (from the database) also carry: */
-  /** their own staff (any of them can take any open time; ids are "slug-position"), */
+  /** Сайт дээр бүртгүүлсэн газрууд (DB-ээс) мөн дараахыг агуулна: */
+  /** өөрийн ажилтнууд (аль нь ч дурын сул цагийг авч болно; id нь "slug-position"), */
   staff?: readonly { position: number; name: string }[];
-  /** closing time per day, in minutes, so a service must end by then (null: closed), */
+  /** өдөр бүрийн хаах цаг минутаар, үйлчилгээ тэр болтол дуусах ёстой (null: амарна), */
   closesAt?: { today: number | null; tomorrow: number | null };
-  /** and no reviews yet: shown as "new" instead of a star rating. */
+  /** мөн хараахан үнэлгээгүй: одны үнэлгээний оронд "шинэ" гэж харагдана. */
   isNew?: boolean;
 };
 
 /**
- * Sample businesses for the search page until real listings come from the
- * database. Names are invented; open times are fixed per day so the page looks
- * the same on every visit (past times are hidden at request time).
+ * Жинхэнэ бүртгэлүүд DB-ээс ирэх хүртэл хайлтын хуудсанд зориулсан жишээ бизнесүүд.
+ * Нэрс зохиомол; сул цагууд өдөр бүрт тогтмол тул хуудас айлчлал бүрт ижил
+ * харагдана (өнгөрсөн цагуудыг хүсэлтийн үед нууна).
  */
 export const SAMPLE_BUSINESSES: readonly SampleBusiness[] = [
   {

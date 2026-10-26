@@ -12,9 +12,9 @@ import { getZonedParts } from "@/lib/date";
 import { sql, withDeadline } from "@/lib/db";
 
 /*
- * Registered places (approved in /admin, stored in the database) in the same
- * shape as the sample places, so search, the home board and the booking page
- * treat both alike. Their open times come from their own working hours.
+ * Бүртгэлтэй газрууд (/admin-д зөвшөөрөгдөж, DB-д хадгалагдсан) жишээ газруудтай
+ * ижил хэлбэрээр, ингэснээр хайлт, нүүр хуудасны самбар, захиалгын хуудас хоёуланд
+ * адилхан хандана. Тэдний сул цагууд өөрсдийн ажлын цагаас ирнэ.
  */
 
 const SAMPLE_SLUGS = SAMPLE_BUSINESSES.map((business) => business.slug);
@@ -32,16 +32,16 @@ type StoredPlace = {
   hours: { weekday: number; opens: string; closes: string }[] | null;
 };
 
-/** ISO weekday (1 = Monday … 7 = Sunday) of today and tomorrow in Ulaanbaatar. */
+/** Улаанбаатарын өнөөдөр, маргаашийн ISO гараг (1 = Даваа … 7 = Ням). */
 function weekdays(now: Date): Record<SearchDay, number> {
   const iso = (date: Date): number => getZonedParts(date).weekday || 7;
   return { today: iso(now), tomorrow: iso(new Date(now.getTime() + DAY_MINUTES * 60_000)) };
 }
 
 /**
- * Start times on the place's own grid (every `slot` minutes from opening),
- * kept to the hours the site's schedule shows, and only where the shortest
- * service still ends by closing time.
+ * Газрын өөрийн тор дээрх эхлэх цагууд (нээснээс хойш `slot` минут тутамд), сайтын
+ * хуваарийн харуулдаг цагийн хүрээнд, мөн хамгийн богино үйлчилгээ хаах цагаас
+ * өмнө дуусах цагуудад л.
  */
 function startTimes(opens: number, closes: number, slot: number, shortest: number): string[] {
   const times: string[] = [];
@@ -80,7 +80,7 @@ async function loadStoredPlaces(now: Date, slug?: string): Promise<SampleBusines
   return rows.flatMap((row): SampleBusiness[] => {
     const services = row.services ?? [];
     const staff = row.staff ?? [];
-    // Nothing to book without a service and someone to do it.
+    // Үйлчилгээ, түүнийг хийх хүнгүйгээр захиалах зүйл алга.
     if (services.length === 0 || staff.length === 0) return [];
     const shortest = Math.min(...services.map((service) => service.duration));
     const taken = toTakenSlots(
@@ -93,7 +93,7 @@ async function loadStoredPlaces(now: Date, slug?: string): Promise<SampleBusines
       if (!hours) return { times: [], closes: null };
       const opens = toMinutes(hours.opens);
       const closes = toMinutes(hours.closes);
-      // A time is shown while at least one person is still free for it.
+      // Ядаж нэг хүн сул байх хооронд цагийг харуулна.
       const times = startTimes(opens, closes, row.slotMinutes, shortest).filter((time) =>
         staff.some(
           (member) =>
@@ -125,9 +125,9 @@ async function loadStoredPlaces(now: Date, slug?: string): Promise<SampleBusines
 }
 
 /**
- * Every place customers can find: the samples and the approved registered
- * places. If the database does not answer, the samples alone.
- * Memoized per request (the page and its metadata ask twice).
+ * Үйлчлүүлэгчдийн олж чадах бүх газар: жишээ газрууд болон зөвшөөрөгдсөн
+ * бүртгэлтэй газрууд. DB хариу өгөхгүй бол зөвхөн жишээнүүд.
+ * Хүсэлт бүрт memoize хийнэ (хуудас болон түүний metadata хоёр удаа асуудаг).
  */
 export const getListings = cache(async (): Promise<SampleBusiness[]> => {
   try {
@@ -138,7 +138,7 @@ export const getListings = cache(async (): Promise<SampleBusiness[]> => {
   }
 });
 
-/** One place by its address: a sample, or an approved registered place. */
+/** Хаягаар нь нэг газар: жишээ, эсвэл зөвшөөрөгдсөн бүртгэлтэй газар. */
 export const findListing = cache(async (slug: string): Promise<SampleBusiness | null> => {
   const sample = SAMPLE_BUSINESSES.find((business) => business.slug === slug);
   if (sample) return sample;

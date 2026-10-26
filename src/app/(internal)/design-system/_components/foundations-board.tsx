@@ -70,6 +70,7 @@ const ICONS: readonly LucideIcon[] = [
   UserRound,
 ];
 
+/** Design system: 4pt суурьтай зайн хэмжүүр болон layout тор. */
 export function LayoutBoard(): JSX.Element {
   return (
     <>
@@ -120,6 +121,7 @@ export function LayoutBoard(): JSX.Element {
   );
 }
 
+/** Design system: булангийн радиус болон сүүдрийн түвшнүүд. */
 export function ShapeBoard(): JSX.Element {
   return (
     <>
@@ -184,6 +186,7 @@ export function ShapeBoard(): JSX.Element {
   );
 }
 
+/** Design system: хөдөлгөөний хугацаа ба easing-ийг заагч эсвэл Tab-аар туршиж үзэх. */
 export function MotionBoard(): JSX.Element {
   return (
     <>

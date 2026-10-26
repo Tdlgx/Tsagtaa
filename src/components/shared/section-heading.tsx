@@ -3,18 +3,18 @@ import type { JSX, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type SectionHeadingProps = {
-  /** Small label above the title, e.g. "Ангилал". */
+  /** Гарчгийн дээрх жижиг шошго, жишээ нь "Ангилал". */
   eyebrow?: string;
   title: ReactNode;
   description?: string;
-  /** E.g. hide the description on phones. */
+  /** Жишээ нь утсан дээр тайлбарыг нуух. */
   descriptionClassName?: string;
-  /** Heading level for correct document outline; looks the same. */
+  /** Document outline зөв байхад зориулсан гарчгийн түвшин; харагдах байдал ижил. */
   as?: "h1" | "h2" | "h3";
   className?: string;
 };
 
-/** Section header: optional short label, wide display title, calm description. */
+/** Хэсгийн толгой: сонголттой богино шошго, өргөн display гарчиг, тайван тайлбар. */
 export function SectionHeading({
   eyebrow,
   title,

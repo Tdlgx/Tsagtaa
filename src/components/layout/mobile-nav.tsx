@@ -10,12 +10,12 @@ import { UpcomingCount } from "@/features/booking/components/upcoming-count";
 import { cn } from "@/lib/utils";
 
 type MobileNavProps = {
-  /** Override the highlighted item (used for previews). */
+  /** Тодруулах цэсийг хүчээр сонгоно (урьдчилан харахад). */
   activeHref?: string;
   className?: string;
 };
 
-/** Bottom tab bar for phones: 4 destinations, 64px tall, thumb-friendly. */
+/** Утасны доод цэс: 4 чиглэл, 64px өндөр, эрхий хуруунд эвтэйхэн. */
 export function MobileNav({ activeHref, className }: MobileNavProps): JSX.Element {
   const pathname = usePathname();
   const t = useT();

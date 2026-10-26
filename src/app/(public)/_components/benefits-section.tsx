@@ -9,13 +9,13 @@ type BenefitsSectionProps = {
   id: string;
   title: string;
   items: readonly Benefit[];
-  /** "ink" is the dark band in the logo's colors, placed right before the lime one. */
+  /** "ink" бол логоны өнгөөрх бараан тууз, шар-ногоон туузын яг өмнө байрлана. */
   tone?: "light" | "ink";
-  /** Empty slots shown while the list has not been written yet. */
+  /** Жагсаалт хараахан бичигдээгүй үед харуулах хоосон хайрцгууд. */
   placeholders?: number;
 };
 
-/** Home-page list of what one audience gets from Цагтаа. */
+/** Нүүр хуудсан дээр нэг төрлийн хэрэглэгч Цагтаагаас юу авахыг жагсаана. */
 export function BenefitsSection({
   id,
   title,
@@ -32,8 +32,8 @@ export function BenefitsSection({
       aria-labelledby={titleId}
       className={cn(
         "scroll-mt-16 border-t",
-        // Still empty: the placeholder boxes stay on wide screens, where the
-        // layout is being planned, but are not worth a phone screen of scrolling.
+        // Одоохондоо хоосон: том дэлгэцэнд layout төлөвлөгдөж байгаа тул хоосон хайрцгууд
+        // үлдэнэ, харин утсан дээр гүйлгэх үнэ цэнгүй тул харуулахгүй.
         items.length === 0 && "max-md:hidden",
         ink
           ? "border-brand-ink bg-brand-ink text-brand-ink-foreground"
@@ -41,8 +41,8 @@ export function BenefitsSection({
       )}
     >
       <Container className="py-16 md:py-24">
-        {/* Color comes from the section: `cn` would read `text-heading` (a size)
-            as a color and drop it next to another text color. */}
+        {/* Өнгө нь хэсгээс ирнэ: `cn` нь `text-heading`-ийг (хэмжээ) өнгө гэж уншиж,
+            өөр текстийн өнгөний хажууд хасах байсан. */}
         <h2 id={titleId} className="max-w-2xl font-heading text-heading font-medium">
           {title}
         </h2>

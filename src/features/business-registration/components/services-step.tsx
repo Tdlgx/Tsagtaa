@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { updateDraft } from "@/features/business-registration/draft-store";
 import {
   MAX_SERVICES,
+  type DraftUpdate,
   type RegistrationDraft,
   type ServiceDraft,
   type StepErrors,
@@ -23,12 +23,13 @@ import { cn } from "@/lib/utils";
 
 type ServicesStepProps = {
   draft: RegistrationDraft;
+  update: DraftUpdate;
   errors: StepErrors;
   t: Dictionary;
   locale: Locale;
 };
 
-/** Lengths offered in the picker; a custom value from a template is kept too. */
+/** Сонгогчид санал болгох хугацаанууд; загвараас ирсэн өөр утга ч хадгалагдана. */
 const DURATIONS = [
   10, 15, 20, 25, 30, 40, 45, 50, 60, 75, 90, 105, 120, 150, 180, 240, 300, 360, 420, 480,
 ];
@@ -36,8 +37,8 @@ const DURATIONS = [
 const sameName = (a: string, b: string): boolean =>
   a.trim().toLowerCase() === b.trim().toLowerCase();
 
-function addServices(services: Omit<ServiceDraft, "id">[]): void {
-  updateDraft((draft) => ({
+function addServices(update: DraftUpdate, services: Omit<ServiceDraft, "id">[]): void {
+  update((draft) => ({
     ...draft,
     services: [
       ...draft.services,
@@ -46,8 +47,8 @@ function addServices(services: Omit<ServiceDraft, "id">[]): void {
   }));
 }
 
-function setService(id: string, change: Partial<ServiceDraft>): void {
-  updateDraft((draft) => ({
+function setService(update: DraftUpdate, id: string, change: Partial<ServiceDraft>): void {
+  update((draft) => ({
     ...draft,
     services: draft.services.map((service) =>
       service.id === id ? { ...service, ...change } : service,
@@ -55,20 +56,21 @@ function setService(id: string, change: Partial<ServiceDraft>): void {
   }));
 }
 
-function removeService(id: string): void {
-  updateDraft((draft) => ({
+function removeService(update: DraftUpdate, id: string): void {
+  update((draft) => ({
     ...draft,
     services: draft.services.filter((service) => service.id !== id),
   }));
 }
 
-/** "35 000", "35,000₮" → 35000; anything else → 0. */
+/** "35 000", "35,000₮" → 35000; бусад бүх зүйл → 0. */
 function parsePrice(text: string): number {
   const digits = text.replace(/\D/g, "").slice(0, 8);
   return digits ? Number(digits) : 0;
 }
 
-export function ServicesStep({ draft, errors, t, locale }: ServicesStepProps): JSX.Element {
+/** Бүртгэлийн үйлчилгээний алхам: ангиллын загвараас нэмэх, нэр/хугацаа/үнийг засах. */
+export function ServicesStep({ draft, update, errors, t, locale }: ServicesStepProps): JSX.Element {
   const words = t.register;
   const templates = draft.category ? SERVICE_TEMPLATES[draft.category] : [];
   const fresh = templates.filter(
@@ -99,6 +101,7 @@ export function ServicesStep({ draft, errors, t, locale }: ServicesStepProps): J
                 size="sm"
                 onClick={() =>
                   addServices(
+                    update,
                     fresh.map((template) => ({
                       name: template[locale],
                       duration: template.duration,
@@ -121,7 +124,7 @@ export function ServicesStep({ draft, errors, t, locale }: ServicesStepProps): J
                       type="button"
                       disabled={added || full}
                       onClick={() =>
-                        addServices([
+                        addServices(update, [
                           {
                             name: template[locale],
                             duration: template.duration,
@@ -181,7 +184,14 @@ export function ServicesStep({ draft, errors, t, locale }: ServicesStepProps): J
 
         <ul className="mt-3 flex flex-col gap-3">
           {draft.services.map((service, index) => (
-            <ServiceRow key={service.id} service={service} index={index} errors={errors} t={t} />
+            <ServiceRow
+              key={service.id}
+              service={service}
+              index={index}
+              update={update}
+              errors={errors}
+              t={t}
+            />
           ))}
         </ul>
 
@@ -191,8 +201,8 @@ export function ServicesStep({ draft, errors, t, locale }: ServicesStepProps): J
           className="mt-3 w-full border-dashed"
           disabled={full}
           onClick={() => {
-            addServices([{ name: "", duration: 30, price: 0 }]);
-            // Focus the new row's name once it is on screen.
+            addServices(update, [{ name: "", duration: 30, price: 0 }]);
+            // Шинэ мөр дэлгэцэнд гармагц түүний нэрийн талбарт focus хийнэ.
             requestAnimationFrame(() => {
               const inputs = document.querySelectorAll<HTMLInputElement>("[data-service-name]");
               inputs[inputs.length - 1]?.focus();
@@ -210,11 +220,13 @@ export function ServicesStep({ draft, errors, t, locale }: ServicesStepProps): J
 function ServiceRow({
   service,
   index,
+  update,
   errors,
   t,
 }: {
   service: ServiceDraft;
   index: number;
+  update: DraftUpdate;
   errors: StepErrors;
   t: Dictionary;
 }): JSX.Element {
@@ -239,7 +251,7 @@ function ServiceRow({
             data-service-name
             value={service.name}
             maxLength={80}
-            onChange={(event) => setService(service.id, { name: event.target.value })}
+            onChange={(event) => setService(update, service.id, { name: event.target.value })}
             aria-invalid={Boolean(nameError)}
             placeholder={words.serviceNamePlaceholder}
             className="h-10"
@@ -251,7 +263,9 @@ function ServiceRow({
             aria-label={words.duration}
             aria-invalid={Boolean(durationError)}
             value={service.duration}
-            onChange={(event) => setService(service.id, { duration: Number(event.target.value) })}
+            onChange={(event) =>
+              setService(update, service.id, { duration: Number(event.target.value) })
+            }
             className="h-10 tabular-nums"
           >
             {durations.map((minutes) => (
@@ -268,7 +282,9 @@ function ServiceRow({
             aria-invalid={Boolean(priceError)}
             inputMode="numeric"
             value={service.price ? service.price.toLocaleString("en-US") : ""}
-            onChange={(event) => setService(service.id, { price: parsePrice(event.target.value) })}
+            onChange={(event) =>
+              setService(update, service.id, { price: parsePrice(event.target.value) })
+            }
             placeholder="0"
             className="h-10 pr-8 text-right tabular-nums"
           />
@@ -283,7 +299,7 @@ function ServiceRow({
           variant="ghost"
           size="icon-sm"
           aria-label={`${words.remove}: ${service.name || index + 1}`}
-          onClick={() => removeService(service.id)}
+          onClick={() => removeService(update, service.id)}
           className="self-center text-muted-foreground is-hover:text-danger-foreground"
         >
           <Trash2 />

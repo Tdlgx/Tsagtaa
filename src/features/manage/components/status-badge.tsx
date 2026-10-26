@@ -11,6 +11,7 @@ const TONES = {
   suspended: "neutral",
 } as const;
 
+/** Газрын төлөвийн өнгөт тэмдэг (шалгагдаж буй, идэвхтэй, татгалзсан, түр хаагдсан). */
 export function StatusBadge({ status, t }: { status: BusinessStatus; t: Dictionary }): JSX.Element {
   return (
     <Badge tone={TONES[status]} dot>

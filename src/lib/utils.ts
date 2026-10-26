@@ -1,7 +1,7 @@
 /**
- * `cn(...)` joins class names and resolves Tailwind conflicts, so the last one wins:
+ * `cn(...)` класс нэрсийг нэгтгэж, Tailwind-ийн зөрчлийг шийддэг тул сүүлийнх нь давамгайлна:
  *   cn("px-2 py-1", isActive && "bg-primary", "px-4") → "py-1 bg-primary px-4"
- * It comes from the `cn` package by shadcn (a faster drop-in for clsx + tailwind-merge).
- * Import it from here (`@/lib/utils`) so the implementation can change in one place.
+ * Энэ нь shadcn-ий `cn` package-аас ирдэг (clsx + tailwind-merge-ийн хурдан орлуулагч).
+ * Хэрэгжүүлэлтийг нэг газраас солихын тулд эндээс (`@/lib/utils`) import хийнэ.
  */
 export { cn } from "cn";

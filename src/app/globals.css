@@ -3,19 +3,19 @@
 @import "shadcn/tailwind.css";
 
 /* ==========================================================================
-   Цагтаа design system — ink & lime
-   Every color, size, radius, shadow and easing used in the app comes from
-   the tokens below. Tailwind's default palette and scales are removed on
-   purpose, so a stray `text-gray-500` or `rounded-2xl` simply does not exist.
+   Цагтаагийн дизайн систем — ink & lime
+   Аппад хэрэглэгддэг бүх өнгө, хэмжээ, булангийн радиус, сүүдэр, easing доорх
+   token-уудаас ирнэ. Tailwind-ийн анхдагч палитр, хэмжүүрүүдийг зориуд хассан тул
+   санамсаргүй `text-gray-500` эсвэл `rounded-2xl` огт байхгүй.
    ========================================================================== */
 
-/* Dark mode is driven by a `.dark` class on <html> (set by next-themes). */
+/* Dark mode-ийг <html> дээрх `.dark` класс удирдана (next-themes тохируулдаг). */
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Interaction state variants. They react to the real interaction, and can also
- * be forced with `data-force="hover active focus"` so the /design-system
- * artboards can show every state side by side without a mouse.
+ * Харилцан үйлдлийн төлөвийн variant-ууд. Жинхэнэ үйлдэлд хариу үйлдэл үзүүлэх ба
+ * `data-force="hover active focus"`-оор хүчээр идэвхжүүлж болно, ингэснээр
+ * /design-system artboard-ууд хулганагүйгээр бүх төлөвийг зэрэгцүүлж харуулна.
  */
 @custom-variant is-hover {
   @media (hover: hover) {
@@ -45,44 +45,44 @@
 }
 
 /* --------------------------------------------------------------------------
-   1. Raw color tokens (light). Hex values are hand-picked; every text/background
-      pair is checked against WCAG AA (≥ 4.5:1) — see /design-system.
-      Palette (from the logo): cool paper, ink black, an electric lime fill for
-      every action, and saffron "нар" reserved for time: the now-line, ratings.
-      Lime is a FILL color: on light surfaces, text, icons and borders use
-      `primary-strong` (deep olive) instead, because lime on white is ~1.2:1.
+   1. Анхдагч өнгөний token-ууд (light). Hex утгуудыг гараар сонгосон; текст/дэвсгэрийн
+      хос бүрийг WCAG AA (≥ 4.5:1)-аар шалгасан — /design-system-ийг үз.
+      Палитр (логооос): сэрүүн цаас, бараан бэх, үйлдэл бүрт цахилгаан шар-ногоон
+      дүүргэлт, гүргэм "нар" нь зөвхөн цагт: одоогийн шугам, үнэлгээ.
+      Шар-ногоон бол ДҮҮРГЭЛТИЙН өнгө: цайвар дэвсгэр дээр текст, icon, хүрээнд оронд нь
+      `primary-strong` (бараан чидун) ашиглана, учир нь цагаан дээрх шар-ногоон ~1.2:1.
    -------------------------------------------------------------------------- */
 :root {
-  /* Surfaces */
-  --background: #f2f3f5; /* cool paper */
-  --surface: #ffffff; /* cards, schedule board */
-  --surface-muted: #e8e9ed; /* wells, skeletons, past time */
+  /* Гадаргуу */
+  --background: #f2f3f5; /* сэрүүн цаас */
+  --surface: #ffffff; /* карт, хуваарийн самбар */
+  --surface-muted: #e8e9ed; /* хонхор хэсэг, skeleton, өнгөрсөн цаг */
 
-  /* Ink */
-  --foreground: #0e1014; /* logo ink, never pure black */
+  /* Бэх */
+  --foreground: #0e1014; /* логоны бэх, хэзээ ч цэвэр хар биш */
   --muted-foreground: #565b66;
 
-  /* Lines */
-  --border: #dfe1e6; /* 1px hairline, decorative */
-  --input: #868b96; /* form control outline, ≥ 3:1 so empty fields stay visible */
+  /* Шугамууд */
+  --border: #dfe1e6; /* 1px нарийн шугам, чимэглэл */
+  --input: #868b96; /* маягтын талбарын хүрээ, ≥ 3:1 тул хоосон талбар харагдсаар байна */
 
-  /* Brand */
-  --brand-ink: #0b0c0f; /* the logo tile and booking tickets; the same in both themes */
+  /* Брэнд */
+  --brand-ink: #0b0c0f; /* логоны хавтан ба захиалгын тасалбар; хоёр theme-д ижил */
   --brand-ink-foreground: #f1f2f4;
-  --brand-ink-muted: #9da2ad; /* 7:1 on brand-ink */
-  --primary: #c2f41e; /* electric lime, fills only */
+  --brand-ink-muted: #9da2ad; /* brand-ink дээр 7:1 */
+  --primary: #c2f41e; /* цахилгаан шар-ногоон, зөвхөн дүүргэлтэд */
   --primary-hover: #b2e60c;
   --primary-foreground: #0e1014;
   --primary-soft: #eefbc8;
-  --primary-strong: #4a6100; /* lime's legible twin: links, icons, borders */
+  --primary-strong: #4a6100; /* шар-ногооны уншигдахуйц ихэр: холбоос, icon, хүрээ */
 
-  /* Saffron sun: the current-time line, ratings, rare highlights */
+  /* Гүргэм нар: одоогийн цагийн шугам, үнэлгээ, ховор тодруулга */
   --sun: #f2ae1c;
-  --sun-foreground: #151a3b; /* text on a sun fill */
-  --sun-strong: #835400; /* saffron-colored text on light surfaces */
+  --sun-foreground: #151a3b; /* нарны дүүргэлт дээрх текст */
+  --sun-strong: #835400; /* цайвар гадаргуу дээрх гүргэм өнгийн текст */
   --sun-soft: #fdf0cc;
 
-  /* Status */
+  /* Төлөв */
   --success: #1d7a54;
   --success-foreground: #1d7a54;
   --success-soft: #e3f3eb;
@@ -93,10 +93,10 @@
   --danger-foreground: #b3352a;
   --danger-soft: #fce9e6;
 
-  /* Focus ring: primary-strong at 45% (lime itself would vanish on white) */
+  /* Focus ring: 45%-ийн primary-strong (шар-ногоон өөрөө цагаан дээр харагдахгүй) */
   --ring: color-mix(in srgb, var(--primary-strong) 45%, transparent);
 
-  /* Elevation: ink-tinted shadows, two layers each (contact + ambient) */
+  /* Өндрийн мэдрэмж: бэхний өнгөтэй сүүдэр, тус бүр хоёр давхар (шүргэлт + орчны) */
   --shadow-tint: 14 16 20;
   --elevation-1:
     0 1px 1px rgb(var(--shadow-tint) / 0.04), 0 2px 8px -2px rgb(var(--shadow-tint) / 0.06);
@@ -105,7 +105,7 @@
   --elevation-3:
     0 2px 4px rgb(var(--shadow-tint) / 0.05), 0 28px 64px -16px rgb(var(--shadow-tint) / 0.2);
 
-  /* Aliases for shadcn/ui components (keep their class names working) */
+  /* shadcn/ui компонентуудад зориулсан нэрс (тэдний класс нэрсийг ажиллуулсаар байх) */
   --card: var(--surface);
   --card-foreground: var(--foreground);
   --popover: var(--surface);
@@ -113,7 +113,7 @@
   --secondary: var(--surface-muted);
   --secondary-foreground: var(--foreground);
   --muted: var(--surface-muted);
-  --accent: var(--surface-muted); /* shadcn "accent" = subtle hover fill, not the brand sun */
+  --accent: var(--surface-muted); /* shadcn "accent" = зөөлөн hover дүүргэлт, брэндийн нар биш */
   --accent-foreground: var(--foreground);
   --destructive: var(--danger);
   --chart-1: var(--primary);
@@ -131,7 +131,7 @@
   --sidebar-ring: var(--ring);
 }
 
-/* Dark: ink, never #000. Lime glows on it, so primary-strong is lime itself. */
+/* Dark: бэх, хэзээ ч #000 биш. Шар-ногоон түүн дээр гэрэлтэх тул primary-strong нь шар-ногоон өөрөө. */
 .dark {
   --background: #0b0c0f;
   --surface: #15171c;
@@ -168,7 +168,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. Static scales. `initial` wipes Tailwind's defaults so only these exist.
+   2. Тогтмол хэмжүүрүүд. `initial` нь Tailwind-ийн анхдагчийг арилгаж зөвхөн эдгээрийг үлдээнэ.
    -------------------------------------------------------------------------- */
 @theme {
   --color-*: initial;
@@ -180,12 +180,12 @@
   --leading-*: initial;
   --ease-*: initial;
 
-  /* Weights: 400 body, 500 UI + display headings, 600 emphasis. Nothing else. */
+  /* Жин: 400 үндсэн текст, 500 UI + гарчиг, 600 тодотгол. Өөр юу ч биш. */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
-  /* Modular scale, ratio 1.25: 12 / 14 / 16 / 20 / 25 / 31 / 39 / 49 px */
+  /* Модуляр хэмжүүр, харьцаа 1.25: 12 / 14 / 16 / 20 / 25 / 31 / 39 / 49 px */
   --text-xs: 0.75rem;
   --text-xs--line-height: 1rem;
   --text-sm: 0.875rem;
@@ -206,11 +206,11 @@
   --text-4xl--line-height: 1.15;
   --text-4xl--letter-spacing: -0.02em;
 
-  /* Fluid headings: grow smoothly from a 360px phone to a 1280px desktop. */
+  /* Уян гарчиг: 360px утаснаас 1280px компьютер хүртэл жигд томорно. */
   --text-heading: clamp(1.375rem, 1.05rem + 1.6vw, 2.4375rem); /* 22 → 39px */
   --text-heading--line-height: 1.2;
   --text-heading--letter-spacing: -0.02em;
-  /* Display is set in wide Unbounded, so it stops growing at 61px. */
+  /* Display гарчиг өргөн Unbounded фонттой тул 61px-д хүрээд томрохоо болино. */
   --text-display: clamp(1.75rem, 0.75rem + 4.2vw, 3.8125rem); /* 28 → 61px */
   --text-display--line-height: 1.08;
   --text-display--letter-spacing: -0.035em;
@@ -223,21 +223,21 @@
   --leading-snug: 1.25;
   --leading-normal: 1.6;
 
-  /* Radius: 6 small · 10 controls · 16 cards · 24 panels · 40 device frame */
+  /* Радиус: 6 жижиг · 10 талбар · 16 карт · 24 самбар · 40 төхөөрөмжийн хүрээ */
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-device: 2.5rem;
-  --radius-device-inner: 2rem; /* device radius − 8px frame padding */
+  --radius-device-inner: 2rem; /* төхөөрөмжийн радиус − 8px хүрээний зай */
 
-  /* Motion: one easing curve; durations 150 / 250 / 400 ms via duration-* */
+  /* Хөдөлгөөн: нэг easing муруй; хугацаа 150 / 250 / 400 ms, duration-*-ээр */
   --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* Layout */
+  /* Layout (хуудасны бүтэц) */
   --container-page: 75rem; /* 1200px */
 
-  /* The logo's hourglass turns over, rests, turns again. */
+  /* Логоны элсэн цаг эргэж, амарч, дахин эргэнэ. */
   --animate-flip: flip 3.2s var(--ease-soft) infinite;
   @keyframes flip {
     0%,
@@ -250,7 +250,7 @@
     }
   }
 
-  /* Tour spotlight: a lime ring breathes out from the highlighted element. */
+  /* Танилцуулгын гэрэлтүүлэг: тодруулсан элементээс шар-ногоон цагираг амьсгалах мэт тэлнэ. */
   --animate-beacon: beacon 1.8s var(--ease-soft) infinite;
   @keyframes beacon {
     from {
@@ -261,10 +261,10 @@
     }
   }
 
-  /* Splash: the logo sequence, large, once per visit (see SplashScreen).
-     0–0.7s halves slide in · 0.6–1.25s flip · 1.0–1.8s letters · 1.8–2.4s
-     glow + shine · 2.6–3.05s the screen lifts away. Delays are built in so
-     it all runs from the first paint, before any JavaScript. */
+  /* Splash: логоны дараалал, том хэмжээтэй, айлчлалд нэг удаа (SplashScreen-ийг үз).
+     0–0.7с хагаснууд орж ирнэ · 0.6–1.25с эргэнэ · 1.0–1.8с үсгүүд · 1.8–2.4с
+     гэрэлтэлт + гялбаа · 2.6–3.05с дэлгэц дээш хөөрнө. Хоцролтууд нь дотроо
+     суусан тул бүгд JavaScript-ээс өмнө, анхны зурагдалтаас эхлэн ажиллана. */
   --animate-splash-top: splash-from-left 700ms var(--ease-soft) both;
   --animate-splash-bottom: splash-from-right 700ms var(--ease-soft) both;
   --animate-splash-mark:
@@ -388,7 +388,7 @@
   }
 }
 
-/* 3. Map tokens to utilities (bg-surface, text-primary, shadow-md, …). */
+/* 3. Token-уудыг utility-тай холбох (bg-surface, text-primary, shadow-md, …). */
 @theme inline {
   --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-unbounded), var(--font-onest), ui-sans-serif, sans-serif;
@@ -455,10 +455,10 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. Custom utilities
+   4. Өөрийн utility-ууд
    -------------------------------------------------------------------------- */
 
-/* 4 / 8 / 12-column layout grid (phone / tablet / desktop). */
+/* 4 / 8 / 12 баганатай layout тор (утас / таблет / компьютер). */
 @utility layout-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -472,7 +472,7 @@
   }
 }
 
-/* Film grain: SVG noise at ~2.5% opacity, for hero and large backgrounds only. */
+/* Хальсны мөхлөг: ~2.5% тунгалаг SVG noise, зөвхөн hero болон том дэвсгэрт. */
 @utility grain {
   position: relative;
   isolation: isolate;
@@ -487,7 +487,7 @@
   }
 }
 
-/* Diagonal hatching for "booked" time slots. */
+/* "Захиалагдсан" цагуудад зориулсан ташуу зураас. */
 @utility bg-hatch {
   background-image: repeating-linear-gradient(
     -45deg,
@@ -496,7 +496,7 @@
   );
 }
 
-/* Hour lines on a schedule track; the element sets --hour (one hour's width). */
+/* Хуваарийн зам дээрх цагийн шугамууд; элемент --hour-ийг (нэг цагийн өргөн) тохируулна. */
 @utility bg-hours {
   background-image: repeating-linear-gradient(
     to right,
@@ -505,16 +505,16 @@
   );
 }
 
-/* Dotted canvas behind design-system artboards (like a design tool). */
+/* Design-system artboard-уудын ард цэгтэй canvas (дизайны программ шиг). */
 @utility bg-canvas {
   background-color: var(--surface-muted);
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: --spacing(4) --spacing(4);
 }
 
-/* 3D tilt toward the pointer, with a light that follows it. `useTilt` sets
-   the variables; the element needs `relative` and `overflow-hidden`. Moves
-   track the pointer quickly; letting go springs back with a small overshoot. */
+/* Заагч руу хазайх 3D эффект, түүнийг дагах гэрэлтэй. `useTilt` хувьсагчдыг
+   тохируулна; элементэд `relative`, `overflow-hidden` хэрэгтэй. Хөдөлгөөн заагчийг
+   хурдан дагана; суллахад бага зэрэг хэтэрч пүрш шиг буцна. */
 @utility tilt-3d {
   transform: perspective(60rem) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg))
     scale(var(--tilt-scale, 1));
@@ -528,8 +528,8 @@
     transition-duration: 150ms, 300ms, 250ms, 250ms;
     transition-timing-function: var(--ease-soft);
   }
-  /* Light: a soft spot under the pointer, a sheen across the card, and shade
-     toward the far edges. */
+  /* Гэрэл: заагчийн доор зөөлөн толбо, картын дээгүүр гялбаа, алслагдсан ирмэг рүү
+     сүүдэр. */
   &::after {
     content: "";
     position: absolute;
@@ -565,9 +565,9 @@
   }
 }
 
-/* A card you can turn round with a finger or the mouse (see `useSpin`).
-   Put `spin-3d-scene` on a wrapper (the depth), `spin-3d` on the card, and
-   `spin-face` on each side; the back side also gets `spin-face-back`. */
+/* Хуруу эсвэл хулганаар эргүүлж болох карт (`useSpin`-ийг үз).
+   Гаднах элементэд `spin-3d-scene` (гүн), картанд `spin-3d`, тал бүрт `spin-face`
+   тавина; ар тал нь мөн `spin-face-back` авна. */
 @utility spin-3d-scene {
   perspective: 70rem;
 }
@@ -576,9 +576,9 @@
   transform-style: preserve-3d;
   transform: rotateX(calc(var(--spin-x, 0deg) + var(--hover-x, 0deg)))
     rotateY(calc(var(--spin-y, 0deg) + var(--hover-y, 0deg)));
-  /* Settling: a spring that overshoots a touch, like a card laid down. */
+  /* Тогтох: бага зэрэг хэтэрдэг пүрш, ширээн дээр тавьсан карт шиг. */
   transition: transform 900ms cubic-bezier(0.34, 1.4, 0.64, 1);
-  /* Up/down swipes still scroll the page; sideways ones turn the card. */
+  /* Дээш/доош шудрах нь хуудсыг гүйлгэсээр; хажуу тийш шудрах нь картыг эргүүлнэ. */
   touch-action: pan-y;
   cursor: grab;
   user-select: none;
@@ -605,8 +605,8 @@
   transform: rotateY(180deg);
 }
 
-/* Map pins (Leaflet divIcons): a round head holding the logo or a letter,
-   with a point at the bottom that marks the spot. */
+/* Газрын зургийн цэгүүд (Leaflet divIcon): лого эсвэл үсэг агуулсан бөөрөнхий толгой,
+   доод талдаа байршлыг заах үзүүртэй. */
 @layer components {
   .map-pin-wrap {
     background: none;
@@ -660,7 +660,7 @@
   .map-pin.is-selected::after {
     border-color: var(--primary);
   }
-  /* On the dark map, a light ring keeps the ink pins visible. */
+  /* Бараан газрын зураг дээр цайвар цагираг бэхэн цэгүүдийг харагдуулна. */
   .dark .map-pin,
   .dark .map-pin::after {
     border-color: color-mix(in oklab, var(--foreground) 80%, transparent);
@@ -669,11 +669,11 @@
   .dark .map-pin.is-selected::after {
     border-color: var(--primary);
   }
-  /* Dark mode: OpenStreetMap has no dark style, so its tiles are inverted. */
+  /* Dark mode: OpenStreetMap бараан стильгүй тул хавтангуудыг нь урвуулна. */
   .map-tiles-dark {
     filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
   }
-  /* Leaflet's own chrome, in the site's colors. */
+  /* Leaflet-ийн өөрийн элементүүд, сайтын өнгөөр. */
   .map-surface .leaflet-control-zoom a {
     background: var(--surface);
     color: var(--foreground);
@@ -689,13 +689,13 @@
   }
 }
 
-/* Keeps fixed bottom bars clear of the iPhone home indicator. */
+/* Тогтмол доод мөрнүүдийг iPhone-ийн home indicator-оос зайтай байлгана. */
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* --------------------------------------------------------------------------
-   5. Base styles
+   5. Үндсэн стиль
    -------------------------------------------------------------------------- */
 @layer base {
   * {
@@ -725,12 +725,12 @@
     cursor: pointer;
   }
 
-  /* lucide-react icons: one stroke weight across the whole app. */
+  /* lucide-react icon-ууд: бүх аппад нэг зураасны зузаан. */
   .lucide {
     stroke-width: 1.5;
   }
 
-  /* Respect "reduce motion": keep state changes, drop the movement. */
+  /* "Reduce motion"-ийг хүндэтгэнэ: төлөвийн өөрчлөлт үлдэж, хөдөлгөөн арилна. */
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,

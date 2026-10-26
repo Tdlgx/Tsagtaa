@@ -19,7 +19,7 @@ type ProfileFormProps = {
   onDone: () => void;
 };
 
-/** Name, phone and email; saved on this device and used to pre-fill bookings. */
+/** Нэр, утас, имэйл; энэ төхөөрөмж дээр хадгалагдаж, захиалгыг урьдчилан бөглөхөд ашиглагдана. */
 export function ProfileForm({ profile, onDone }: ProfileFormProps): JSX.Element {
   const t = useT();
   const [name, setName] = useState(profile.name);

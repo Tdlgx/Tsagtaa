@@ -12,9 +12,12 @@ import { passwordStrength } from "@/features/business-registration/components/ow
 import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
-const INITIAL: SignupState = { error: null, name: "", phone: "" };
+const INITIAL: SignupState = { error: null, name: "", phone: "", email: "" };
 
-/** Name, phone, password. A plain <form> with a Server Action; it works before JavaScript loads. */
+/**
+ * Нэр, утас, сонголттой имэйл, нууц үг. Server Action-тэй энгийн <form>;
+ * JavaScript ачаалагдахаас өмнө ч ажиллана.
+ */
 export function SignupForm({ next }: { next: string }): JSX.Element {
   const t = useT();
   const words = t.signup;
@@ -65,6 +68,24 @@ export function SignupForm({ next }: { next: string }): JSX.Element {
           required
           className="tabular-nums"
         />
+      </Field>
+      <Field>
+        <Label htmlFor="signup-email">
+          {words.email} <span className="font-normal text-muted-foreground">{words.optional}</span>
+        </Label>
+        <Input
+          id="signup-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          defaultValue={state.email}
+          placeholder="name@gmail.com"
+          maxLength={120}
+          aria-describedby="signup-email-hint"
+        />
+        <FieldHint id="signup-email-hint" className="text-xs">
+          {words.emailHint}
+        </FieldHint>
       </Field>
       <Field>
         <Label htmlFor="signup-password">{t.auth.password}</Label>
@@ -123,7 +144,7 @@ export function SignupForm({ next }: { next: string }): JSX.Element {
           required
         />
       </Field>
-      {/* Consent before storing personal data (Law on Personal Data Protection); never pre-ticked. */}
+      {/* Хувийн мэдээлэл хадгалахаас өмнө зөвшөөрөл (Хувь хүний мэдээлэл хамгаалах тухай хууль); урьдчилан чагтлахгүй. */}
       <div className="flex items-start gap-3">
         <input
           id="signup-consent"

@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.register.metaTitle, description: t.register.metaDescription };
 }
 
-/** Business sign-up: how it works, then the six-step form with its guided tour. */
+/** Бизнес бүртгэл: хэрхэн ажилладаг, дараа нь заавартай 6 алхамт маягт. */
 export default async function RegisterBusinessPage(): Promise<JSX.Element> {
   const { t } = await getI18n();
   const words = t.register;

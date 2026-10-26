@@ -14,15 +14,14 @@ import { formatTime } from "@/lib/date";
 type CancelDialogProps = {
   booking: Booking;
   dayLabel: string;
-  /** The button that opens the dialog. */
+  /** Цонхыг нээх товч. */
   children: ReactNode;
 };
 
 /**
- * Confirms before cancelling; cancelling cannot be undone. The booking is
- * cancelled in the database first, which frees the time for others; only then
- * on this device. Bookings the database does not know (made before it, or the
- * guide's sample) are cancelled on this device only.
+ * Цуцлахаас өмнө баталгаажуулна; цуцалсныг буцаах боломжгүй. Захиалгыг эхлээд
+ * DB-д цуцалж цагийг бусдад чөлөөлнө, дараа нь л энэ төхөөрөмж дээр. DB-д байхгүй
+ * захиалгуудыг (түүнээс өмнө хийсэн, эсвэл зааврын жишээ) зөвхөн энэ төхөөрөмж дээр цуцална.
  */
 export function CancelDialog({ booking, dayLabel, children }: CancelDialogProps): JSX.Element {
   const t = useT();
@@ -61,7 +60,7 @@ export function CancelDialog({ booking, dayLabel, children }: CancelDialogProps)
             <AlertDialog.Cancel asChild>
               <Button variant="outline">{t.cancel.keep}</Button>
             </AlertDialog.Cancel>
-            {/* Not an AlertDialog.Action: that would close the dialog before the server answers. */}
+            {/* AlertDialog.Action биш: тэр нь сервер хариулахаас өмнө цонхыг хаах байсан. */}
             <Button variant="destructive" loading={pending} onClick={() => void confirm()}>
               {t.cancel.confirm}
             </Button>

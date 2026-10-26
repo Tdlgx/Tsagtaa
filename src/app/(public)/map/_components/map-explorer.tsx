@@ -27,16 +27,16 @@ export type MapEntry = {
   lng: number;
   logoUrl: string | null;
   photoUrl: string | null;
-  /** Takes bookings on the site (for now, the sample places). */
+  /** Сайт дээр захиалга авдаг (одоогоор жишээ газрууд). */
   bookable: boolean;
-  /** Joined recently. */
+  /** Саяхан нэгдсэн. */
   isNew: boolean;
 };
 
 /**
- * The map with a list underneath (on wide screens, beside it). Choosing a
- * pin or a list row shows that place's card. The list is also how keyboard
- * and screen-reader users reach every place.
+ * Газрын зураг, доор нь жагсаалт (том дэлгэцэнд хажууд нь). Цэг эсвэл жагсаалтын
+ * мөр сонгоход тухайн газрын карт гарна. Гар болон screen reader хэрэглэгчид
+ * жагсаалтаар дамжуулан бүх газарт хүрнэ.
  */
 export function MapExplorer({ entries }: { entries: readonly MapEntry[] }): JSX.Element {
   const t = useT();
@@ -44,7 +44,7 @@ export function MapExplorer({ entries }: { entries: readonly MapEntry[] }): JSX.
   const [selected, setSelected] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Sample places have English names too.
+  // Жишээ газрууд англи нэртэй ч бий.
   const named = useMemo(
     () =>
       entries.map((entry) => {
@@ -95,7 +95,7 @@ export function MapExplorer({ entries }: { entries: readonly MapEntry[] }): JSX.
                 aria-pressed={entry.slug === selected}
                 onClick={() => {
                   setSelected(entry.slug);
-                  // On phones the map is above the list: bring it back into view.
+                  // Утсан дээр газрын зураг жагсаалтын дээр байдаг: түүнийг харагдах хүрээнд буцааж оруулна.
                   if (window.matchMedia("(max-width: 1023px)").matches) {
                     mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }
@@ -135,7 +135,7 @@ function describe(entry: MapEntry, t: Dictionary): string {
 function Logo({ entry, large = false }: { entry: MapEntry; large?: boolean }): JSX.Element {
   const size = large ? "size-12" : "size-9";
   return entry.logoUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element -- our own small, cached images
+    // eslint-disable-next-line @next/next/no-img-element -- өөрсдийн жижиг, cache-тэй зургууд
     <img
       src={entry.logoUrl}
       alt=""
@@ -162,7 +162,7 @@ function PlaceCard({ entry, t }: { entry: MapEntry; t: Dictionary }): JSX.Elemen
       className="flex animate-in gap-4 overflow-hidden rounded-xl border border-border bg-surface p-4 duration-250 fade-in"
     >
       {entry.photoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- our own small, cached images
+        // eslint-disable-next-line @next/next/no-img-element -- өөрсдийн жижиг, cache-тэй зургууд
         <img
           src={entry.photoUrl}
           alt=""

@@ -1,16 +1,17 @@
 /**
- * Map pins. Shared by the server (which checks) and the map components.
- * The service area is Ulaanbaatar with a margin, the same box the database
- * enforces (`businesses_location_area`).
+ * Газрын зургийн цэгүүд. Сервер (шалгадаг) болон газрын зургийн компонентууд
+ * хуваалцана. Үйлчилгээний бүс нь зайтай Улаанбаатар, DB-ийн мөрддөг
+ * (`businesses_location_area`) хүрээтэй ижил.
  */
 
 export type LatLng = { lat: number; lng: number };
 
 export const SERVICE_AREA = { south: 47.6, north: 48.2, west: 106.4, east: 107.6 } as const;
 
-/** Sükhbaatar Square: where a map opens when there is nothing to show. */
+/** Сүхбаатарын талбай: харуулах юм байхгүй үед газрын зураг эндээс нээгдэнэ. */
 export const CITY_CENTER: LatLng = { lat: 47.9186, lng: 106.9176 };
 
+/** Цэг Улаанбаатарын үйлчилгээний бүсэд (DB-ийн шалгадагтай ижил хүрээнд) байгаа эсэх. */
 export function isInServiceArea({ lat, lng }: LatLng): boolean {
   return (
     Number.isFinite(lat) &&
@@ -22,14 +23,14 @@ export function isInServiceArea({ lat, lng }: LatLng): boolean {
   );
 }
 
-/** Six decimals is about 10 cm: enough, and keeps stored values tidy. */
+/** Зургаан аравтын орон нь ойролцоогоор 10 см: хангалттай бөгөөд хадгалсан утгыг цэгцтэй байлгана. */
 export function roundLatLng({ lat, lng }: LatLng): LatLng {
   return { lat: Math.round(lat * 1e6) / 1e6, lng: Math.round(lng * 1e6) / 1e6 };
 }
 
 /**
- * Approximate pins for the sample places (by their neighbourhood), so the
- * map is not empty in a fresh demo. Real places set their own.
+ * Жишээ газруудын ойролцоо цэгүүд (хорооллоор нь), ингэснээр шинэ demo-д газрын
+ * зураг хоосон биш байна. Жинхэнэ газрууд өөрсдөө тохируулна.
  */
 export const SAMPLE_LOCATIONS: Record<string, LatLng> = {
   "ongo-salon": { lat: 47.9192, lng: 106.9168 },

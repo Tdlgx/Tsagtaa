@@ -8,14 +8,14 @@ import { cn } from "@/lib/utils";
 type TiltCardProps = {
   children: ReactNode;
   className?: string;
-  /** Strongest tilt at a corner, in degrees. Smaller for cards that are also controls. */
+  /** Буланд хамгийн хүчтэй хазайлт, градусаар. Удирдлага болдог картад бага. */
   maxDegrees?: number;
 };
 
 /**
- * Card that leans toward the cursor or finger, with a light that follows it
- * (see `useTilt` and the `tilt-3d` utility). Give it the card's own rounding,
- * background and padding through `className`.
+ * Курсор эсвэл хуруу руу хазайдаг, түүнийг дагах гэрэлтэй карт (`useTilt` болон
+ * `tilt-3d` utility-г үз). Картын өөрийн булангийн радиус, дэвсгэр, зайг
+ * `className`-ээр өгнө.
  */
 export function TiltCard({ children, className, maxDegrees = 8 }: TiltCardProps): JSX.Element {
   const tilt = useTilt<HTMLDivElement>(maxDegrees);

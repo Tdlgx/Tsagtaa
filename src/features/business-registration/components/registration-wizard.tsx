@@ -40,6 +40,7 @@ import {
   useDraft,
 } from "@/features/business-registration/draft-store";
 import {
+  fieldId,
   firstInvalidStep,
   STEPS,
   validateStep,
@@ -50,13 +51,10 @@ import {
 import { useLocale, useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
-/** "service:abc:name" → the input's id "reg-service-abc-name". */
-const fieldId = (key: string): string => `reg-${key.replaceAll(":", "-")}`;
-
 /**
- * Six-step business registration. The form lives in an autosaved draft, so
- * every keystroke survives a reload; each step is checked before moving on,
- * and the server checks everything again when it is sent.
+ * 6 алхамт бизнес бүртгэл. Маягт автоматаар хадгалагддаг ноорогт байдаг тул товч
+ * дарах бүр дахин ачаалсны дараа ч үлдэнэ; алхам бүрийг урагшлахаас өмнө шалгаж,
+ * илгээх үед сервер бүгдийг дахин шалгана.
  */
 export function RegistrationWizard(): JSX.Element {
   const draft = useDraft();
@@ -68,12 +66,12 @@ export function RegistrationWizard(): JSX.Element {
   const [banner, setBanner] = useState<string | null>(null);
   const [consent, setConsent] = useState(false);
   const [consentError, setConsentError] = useState(false);
-  // The owner's sign-in. Kept in memory only, never in the autosaved draft.
+  // Эзэмшигчийн нэвтрэх мэдээлэл. Зөвхөн санах ойд, автоматаар хадгалагдах ноорогт хэзээ ч биш.
   const [owner, setOwner] = useState<OwnerFields>(EMPTY_OWNER);
   const [ownerErrors, setOwnerErrors] = useState<OwnerErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<RegisteredBusiness | null>(null);
-  // Known once the saved draft is read: was there earlier work to continue?
+  // Хадгалсан ноорог уншигдсаны дараа мэдэгдэнэ: үргэлжлүүлэх өмнөх ажил байсан уу?
   const [restored, setRestored] = useState<boolean | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -81,7 +79,7 @@ export function RegistrationWizard(): JSX.Element {
 
   if (draft && restored === null) setRestored(hasProgress(draft));
 
-  // The first visit starts the guided tour once the form is on screen.
+  // Анхны айлчлалд маягт дэлгэцэнд гармагц заавартай аялал эхэлнэ.
   useEffect(() => {
     if (ready && takeFirstTourVisit()) router.replace(`${pathname}?tour=1`, { scroll: false });
   }, [ready, pathname, router]);
@@ -105,7 +103,7 @@ export function RegistrationWizard(): JSX.Element {
   const step = Math.min(draft.step, STEPS.length - 1);
   const stepKey = STEPS[step] ?? "category";
   const isLast = step === STEPS.length - 1;
-  // Once a step has shown its problems, re-check as the owner types so fixed ones disappear.
+  // Алхам алдаагаа нэг харуулсны дараа эзэмшигч бичих явцад дахин шалгаж, зассан алдаа алга болно.
   const shown = Object.keys(errors).length > 0 ? validateStep(stepKey, draft) : {};
 
   const scrollToTop = (): void => {
@@ -140,11 +138,11 @@ export function RegistrationWizard(): JSX.Element {
       showErrors(problems);
       return;
     }
-    // Arriving at the staff step with nobody listed: a car wash gets its
-    // first bay, anyone else an empty row ready to type into.
+    // Ажилтны алхамд хэн ч бүртгээгүй ирвэл: авто угаалга эхний боксоо авна,
+    // бусад нь бичихэд бэлэн хоосон мөр авна.
     if (STEPS[step + 1] === "staff" && draft.staff.length === 0) {
       goTo(step + 1);
-      addStaff(draft.category === "car-wash" ? nextBayName(draft, t) : "");
+      addStaff(updateDraft, draft.category === "car-wash" ? nextBayName(draft, t) : "");
       return;
     }
     goTo(step + 1);
@@ -205,7 +203,7 @@ export function RegistrationWizard(): JSX.Element {
 
     switch (result.error) {
       case "slug_taken": {
-        // Someone took the address a moment ago: offer the free one in its place.
+        // Хаягийг хэн нэгэн саяхан авчихсан: оронд нь сул хаягийг санал болгоно.
         const suggestion = result.suggestion ?? "";
         goTo(1, (d) => ({ ...d, slug: suggestion || d.slug, slugEdited: true }));
         setBanner(words.errors.slugTaken(suggestion));
@@ -238,7 +236,7 @@ export function RegistrationWizard(): JSX.Element {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    // Enter on an earlier step means "next", not "send".
+    // Өмнөх алхам дээр Enter дарах нь "илгээх" биш, "дараах" гэсэн утгатай.
     if (isLast) void submit();
     else goNext();
   };
@@ -269,7 +267,7 @@ export function RegistrationWizard(): JSX.Element {
         />
       </div>
 
-      {/* Phones: score and autosave above the form, since the side panel is hidden. */}
+      {/* Утас: хажуугийн самбар нуугдсан тул оноо, автомат хадгалалт маягтын дээр. */}
       <div className="mt-6 rounded-lg border border-border bg-surface p-4 lg:hidden">
         <div data-tour="reg-score">
           <Completeness draft={draft} t={t} compact />
@@ -306,11 +304,21 @@ export function RegistrationWizard(): JSX.Element {
 
             {stepKey === "category" ? <CategoryStep draft={draft} errors={shown} t={t} /> : null}
             {stepKey === "basics" ? <BasicsStep draft={draft} errors={shown} t={t} /> : null}
-            {stepKey === "hours" ? <HoursStep draft={draft} errors={shown} t={t} /> : null}
-            {stepKey === "services" ? (
-              <ServicesStep draft={draft} errors={shown} t={t} locale={locale} />
+            {stepKey === "hours" ? (
+              <HoursStep draft={draft} update={updateDraft} errors={shown} t={t} />
             ) : null}
-            {stepKey === "staff" ? <StaffStep draft={draft} errors={shown} t={t} /> : null}
+            {stepKey === "services" ? (
+              <ServicesStep
+                draft={draft}
+                update={updateDraft}
+                errors={shown}
+                t={t}
+                locale={locale}
+              />
+            ) : null}
+            {stepKey === "staff" ? (
+              <StaffStep draft={draft} update={updateDraft} errors={shown} t={t} />
+            ) : null}
             {stepKey === "review" ? (
               <ReviewStep
                 draft={draft}
@@ -332,7 +340,7 @@ export function RegistrationWizard(): JSX.Element {
             ) : null}
           </div>
 
-          {/* Action bar: sticks above the phone tab bar, sits inline on desktop. */}
+          {/* Үйлдлийн мөр: утсан дээр доод цэсний дээр наалдана, компьютер дээр мөрөндөө байрлана. */}
           <div
             data-tour="reg-actions"
             className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mt-8 md:bottom-4"

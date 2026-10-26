@@ -11,6 +11,7 @@ const STATUS_META: Record<BookingStatus, { label: string; tone: BadgeTone }> = {
   cancelled: { label: "Цуцлагдсан", tone: "danger" },
 };
 
+/** Захиалгын төлөвийн өнгөт тэмдэг. */
 export function BookingStatusBadge({ status }: { status: BookingStatus }): JSX.Element {
   const { label, tone } = STATUS_META[status];
 

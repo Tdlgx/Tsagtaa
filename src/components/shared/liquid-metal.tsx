@@ -5,36 +5,36 @@ import { useEffect, useRef, type JSX } from "react";
 import { cn } from "@/lib/utils";
 
 export type LiquidMetalProps = {
-  /** Reflection tint ramp, dark to light: the first stains the deep pools, the last tints the bright bands. */
+  /** Тусгалын өнгөний шат, бараанаас цайвар руу: эхнийх нь гүн хонхрыг, сүүлийнх нь тод туузыг будна. */
   colors?: readonly string[];
-  /** What the dark pools sink into; match the surface behind so the metal melts into the edges. */
+  /** Бараан хонхорууд юу руу шингэх вэ; ард байгаа гадаргуутай тааруулбал металл ирмэгтээ уусна. */
   bg?: string;
-  /** 1 = solid metal sheet, 0 = only the bright metal renders and the page shows through the pools. */
+  /** 1 = бүтэн металл хуудас, 0 = зөвхөн тод металл зурагдаж хонхроор хуудас харагдана. */
   bgAlpha?: number;
-  /** 0.05–2. Lower = slow, expensive molten drift; higher = lively quicksilver. */
+  /** 0.05–2. Бага = удаан, хүнд хайлмал урсгал; их = сэргэлэн мөнгөн ус. */
   speed?: number;
-  /** 0.5–4. Lower = a few huge blobs; higher = many small ripples. */
+  /** 0.5–4. Бага = цөөн аварга бөөгнөрөл; их = олон жижиг долгион. */
   scale?: number;
-  /** 0–1. Higher = heavy slow mercury with smooth blobs; lower = runny metal with fine ripples. */
+  /** 0–1. Их = гөлгөр бөөгнөрөлтэй хүнд удаан мөнгөн ус; бага = нарийн долгионтой шингэн металл. */
   viscosity?: number;
-  /** 0–2.5. Hot white light pings on the curvature peaks; 0 = matte satin. */
+  /** 0–2.5. Муруйлтын оргилууд дээрх халуун цагаан гэрлийн гялбаа; 0 = царцсан торго. */
   specular?: number;
-  /** 0.5–2.2. Higher = hard graphic chrome stripes; lower = soft pewter sheen. */
+  /** 0.5–2.2. Их = хурц график хром судал; бага = зөөлөн цагаан тугалганы гялбаа. */
   contrast?: number;
-  /** 0–360°. Direction the metal streams: 0 = horizontal drift, 90 = rising columns. */
+  /** 0–360°. Металлын урсах чиглэл: 0 = хэвтээ урсгал, 90 = дээшлэх багана. */
   flowAngle?: number;
-  /** 0.2–2.5. Surface depth: higher = deep churning waves, lower = a near-flat satin sheet. */
+  /** 0.2–2.5. Гадаргуугийн гүн: их = гүн долгион, бага = бараг хавтгай торгон хуудас. */
   relief?: number;
-  /** 0–1. Animated film grain; also hides gradient banding. */
+  /** 0–1. Хөдөлгөөнт хальсны мөхлөг; градиентын шатлалыг ч нууна. */
   grain?: number;
-  /** 0–1. How hard the pointer dents the metal (a dip, a raised rim, slow ripple rings); 0 = off. */
+  /** 0–1. Заагч металлыг хэр хүчтэй хонхойлгох вэ (хонхор, товгор ирмэг, удаан цагираг); 0 = унтраалттай. */
   mouse?: number;
-  /** Fraction of the screen's pixel density to render at; lower is faster and softer. */
+  /** Дэлгэцийн пикселийн нягтын аль хэсгээр render хийх вэ; бага нь хурдан бөгөөд зөөлөн. */
   quality?: number;
   className?: string;
 };
 
-/* Shaders ------------------------------------------------------------------- */
+/* Shader-ууд ------------------------------------------------------------------- */
 
 const VERTEX = `
 attribute vec2 aPosition;
@@ -48,16 +48,16 @@ uniform vec2 uRes;
 uniform float uTime;
 uniform vec3 uC0, uC1, uC2, uC3, uC4, uBg;
 uniform float uBgAlpha, uScale, uDetail, uSpecular, uContrast, uRelief, uGrain;
-uniform vec2 uFlow;     // cos, sin of the flow angle
-uniform vec3 uPointer;  // xy in surface space, z = how deep the dent is (0..1)
-uniform vec2 uRipple;   // x = seconds since the rings started, y = their strength
+uniform vec2 uFlow;     // урсгалын өнцгийн cos, sin
+uniform vec3 uPointer;  // xy нь гадаргуун координат, z нь хонхрын гүн (0..1)
+uniform vec2 uRipple;   // x = цагирагууд эхэлснээс хойших секунд, y = тэдний хүч
 
 vec2 hash2(vec2 p) {
   p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
   return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
 }
 
-// Gradient noise, roughly -0.7..0.7.
+// Gradient noise, ойролцоогоор -0.7..0.7.
 float noise(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
@@ -69,7 +69,7 @@ float noise(vec2 p) {
   );
 }
 
-// Four octaves; uDetail (from viscosity) sets how much fine ripple survives.
+// Дөрвөн octave; uDetail (зуурамтгай байдлаас) нарийн долгион хэр үлдэхийг тогтооно.
 float fbm(vec2 p) {
   float value = 0.0;
   float amp = 0.5;
@@ -82,7 +82,7 @@ float fbm(vec2 p) {
   return value;
 }
 
-// Height of the metal at a point: domain-warped noise, stretched and drifting along the flow.
+// Цэг дээрх металлын өндөр: domain-warp хийсэн noise, урсгалын дагуу сунаж хөвнө.
 float surface(vec2 uv) {
   vec2 p = vec2(dot(uv, uFlow), dot(uv, vec2(-uFlow.y, uFlow.x))) * uScale;
   p.x *= 0.55;
@@ -95,11 +95,11 @@ float surface(vec2 uv) {
   );
   float h = fbm(p + 1.2 * r);
 
-  // The pointer presses a soft dip with a raised meniscus rim around it…
+  // Заагч зөөлөн хонхор гаргаж, эргэн тойронд нь товгор ирмэг үүсгэнэ…
   vec2 toPointer = uv - uPointer.xy;
   float d = length(toPointer);
   h += uPointer.z * (-0.09 * exp(-d * d / 0.008) + 0.045 * exp(-pow((d - 0.11) / 0.035, 2.0)));
-  // …and one or two slow rings radiate out from it.
+  // …мөн түүнээс нэг хоёр удаан цагираг тархана.
   h += uRipple.y * 0.012 * sin(d * 18.0 - uRipple.x * 3.5) * exp(-d * 6.0) * smoothstep(0.0, 0.06, d);
   return h;
 }
@@ -121,15 +121,15 @@ void main() {
   float tilt = 0.3 * uRelief;
   vec3 n = normalize(vec3((h - hx) / e * tilt, (h - hy) / e * tilt, 1.0));
 
-  // Chrome = a studio environment reflected in a curved mirror: stretched light/dark bands.
+  // Хром = муруй толинд туссан студийн орчин: сунасан цайвар/бараан туузууд.
   vec3 refl = reflect(vec3(0.0, 0.0, -1.0), n);
   float band = (refl.y * 1.4 + refl.x * 0.6) * 4.5 + h * 1.4;
   float shade = 0.5 + 0.5 * sin(band * 2.8);
-  shade = smoothstep(0.12, 0.88, shade); // crisp chrome edges between the bands
+  shade = smoothstep(0.12, 0.88, shade); // туузуудын хоорондох хурц хромын ирмэг
   shade = clamp((shade - 0.5) * uContrast + 0.5, 0.0, 1.0);
   vec3 color = ramp(shade);
 
-  // Low ground is a pool; the metal darkens as it curls down into it.
+  // Нам газар бол хонхор; металл түүн рүү эргэлдэн орохдоо бараантана.
   float metal = smoothstep(-0.13, -0.09, h);
   color *= mix(0.4, 1.0, smoothstep(-0.11, -0.06, h));
 
@@ -147,7 +147,7 @@ void main() {
 }
 `;
 
-/* Helpers ------------------------------------------------------------------- */
+/* Туслах функцууд ------------------------------------------------------------------- */
 
 function hexToRgb(hex: string): [number, number, number] {
   const value = hex.replace("#", "");
@@ -156,7 +156,7 @@ function hexToRgb(hex: string): [number, number, number] {
   return [((number >> 16) & 255) / 255, ((number >> 8) & 255) / 255, (number & 255) / 255];
 }
 
-/** Any number of colors → exactly the 5 stops the shader blends between. */
+/** Хэдэн ч өнгө → shader-ийн холих яг 5 цэг. */
 function toFiveStops(colors: readonly string[]): [number, number, number][] {
   const rgb = (colors.length > 0 ? colors : ["#000000", "#ffffff"]).map(hexToRgb);
   return Array.from({ length: 5 }, (_, i) => {
@@ -200,18 +200,17 @@ const DEFAULTS: Required<Omit<LiquidMetalProps, "className">> = {
 type Params = Required<Omit<LiquidMetalProps, "className">>;
 
 /**
- * Molten chrome surface (WebGL). It drifts on its own; the pointer dents it
- * with a soft dip, a raised rim and slow rings, and it relaxes a couple of
- * seconds after the pointer rests. Fills its positioned parent and listens
- * for the pointer on that parent, so the content on top stays clickable.
- * Pauses off screen and in background tabs; "reduce motion" gets one still
- * frame. Without WebGL the parent's own background shows.
+ * Хайлмал хромын гадаргуу (WebGL). Өөрөө урсана; заагч зөөлөн хонхор, товгор ирмэг,
+ * удаан цагирагаар түүнийг хонхойлгох ба заагч зогссоноос хэдэн секундын дараа
+ * тайвширна. Байрлалтай эцэг элементээ дүүргэж, заагчийг тэр эцэг дээр сонсдог тул
+ * дээрх агуулга дарагдсаар байна. Дэлгэцээс гадуур болон арын табд зогсоно;
+ * "reduce motion" үед нэг хөдөлгөөнгүй кадр. WebGL-гүй бол эцгийн өөрийн дэвсгэр харагдана.
  */
 export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const paramsRef = useRef<Params>({ ...DEFAULTS, ...props });
 
-  // The animation loop reads the latest props from here every frame.
+  // Анимэйшний давталт кадр бүрт хамгийн сүүлийн props-ыг эндээс уншина.
   useEffect(() => {
     paramsRef.current = { ...DEFAULTS, ...props };
   });
@@ -233,7 +232,7 @@ export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Elem
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
     gl.useProgram(program);
 
-    // One triangle that covers the whole canvas.
+    // Бүх canvas-ыг бүрхэх нэг гурвалжин.
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -267,7 +266,7 @@ export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Elem
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Size the drawing buffer to the element, at a fraction of the pixel density.
+    // Зурах buffer-ийн хэмжээг элементэд тааруулна, пикселийн нягтын тодорхой хэсгээр.
     const resize = (): void => {
       const scale = Math.min(window.devicePixelRatio || 1, 1.5) * paramsRef.current.quality;
       const width = Math.max(1, Math.round(host.clientWidth * scale));
@@ -280,7 +279,7 @@ export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Elem
     };
     resize();
 
-    // Pointer: where it is (eased), how deep the dent is, and the ring clock.
+    // Заагч: хаана байгаа (зөөлрүүлсэн), хонхор хэр гүн, цагирагийн цаг.
     const pointer = {
       x: 0,
       y: 0,
@@ -301,7 +300,7 @@ export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Elem
       const now = performance.now();
       const [x, y] = toSurface(event);
       if (pointer.press < 0.05) {
-        // A fresh touch: start where the pointer is, not where it last left.
+        // Шинэ хүрэлт: заагчийн сүүлд байсан газраас биш, одоо байгаа газраас эхэлнэ.
         pointer.x = x;
         pointer.y = y;
         pointer.rippleStart = now;
@@ -324,16 +323,16 @@ export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Elem
     let visible = true;
     let frame = 0;
     let last = performance.now();
-    let time = 7.3; // start mid-flow, not from a blank first frame
+    let time = 7.3; // хоосон эхний кадраас биш, урсгалын дундаас эхэлнэ
 
     const draw = (now: number): void => {
       const p = paramsRef.current;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      // Thick metal also moves slower.
+      // Зузаан металл мөн удаан хөдөлнө.
       time += dt * p.speed * (1.25 - 0.6 * p.viscosity);
 
-      // Dent eases in while the pointer moves, relaxes ~2 s after it rests.
+      // Заагч хөдлөх үед хонхор аажмаар гүнзгийрч, зогссоноос ~2 сек дараа тайвширна.
       const active = now - pointer.lastMove < 1200;
       pointer.press += ((active ? 1 : 0) - pointer.press) * (active ? 0.08 : 0.025);
       pointer.x += (pointer.targetX - pointer.x) * 0.12;
@@ -371,7 +370,7 @@ export function LiquidMetal({ className, ...props }: LiquidMetalProps): JSX.Elem
       frame = requestAnimationFrame(loop);
     };
 
-    // Run only while on screen and in the foreground tab.
+    // Зөвхөн дэлгэц дээр, урд байгаа табд байх үед ажиллана.
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry?.isIntersecting ?? true;
       if (visible) start();

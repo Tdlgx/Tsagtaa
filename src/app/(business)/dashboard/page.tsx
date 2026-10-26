@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.dashboard.metaTitle, robots: { index: false } };
 }
 
-/** The places this person runs. With just one, go straight to it. */
+/** Энэ хүний удирддаг газрууд. Ганцхан байвал шууд түүн рүү орно. */
 export default async function DashboardIndex(): Promise<JSX.Element> {
   const { t } = await getI18n();
   const account = await requireAccount("/dashboard");

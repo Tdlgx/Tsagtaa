@@ -32,7 +32,7 @@ export async function generateMetadata(
   return { title: business?.name ?? t.admin.nav.places, robots: { index: false } };
 }
 
-/** Everything a registration says, the automatic checks, and the decision. */
+/** Бүртгэлийн бүх мэдээлэл, автомат шалгалтууд, шийдвэр. */
 export default async function PlaceReviewPage(
   props: PageProps<"/admin/places/[slug]">,
 ): Promise<JSX.Element> {
@@ -177,7 +177,7 @@ export default async function PlaceReviewPage(
                     className="aspect-square overflow-hidden rounded-lg border border-border bg-surface"
                   >
                     <a href={`/api/business-images/${image.id}`} target="_blank" rel="noreferrer">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- our own small, cached images */}
+                      {/* eslint-disable-next-line @next/next/no-img-element -- өөрсдийн жижиг, cache-тэй зургууд */}
                       <img
                         src={`/api/business-images/${image.id}`}
                         alt={image.kind === "logo" ? t.media.logoAlt : t.media.photoAlt(index)}

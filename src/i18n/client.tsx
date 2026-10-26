@@ -7,7 +7,7 @@ import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 const LocaleContext = createContext<Locale>(DEFAULT_LOCALE);
 
-/** Set once in the root layout from the cookie the server read. */
+/** Серверийн уншсан cookie-ээс root layout дотор нэг удаа тохирно. */
 export function LocaleProvider({
   locale,
   children,
@@ -22,7 +22,7 @@ export function useLocale(): Locale {
   return use(LocaleContext);
 }
 
-/** The dictionary for the current language, in Client Components. */
+/** Client Component-д одоогийн хэлний толь бичиг. */
 export function useT(): Dictionary {
   return getDictionary(use(LocaleContext));
 }

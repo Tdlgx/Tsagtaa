@@ -6,9 +6,9 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { transliterate } from "@/i18n/transliterate";
 
 /**
- * Sample data is written in Mongolian (the stored, canonical form). These
- * helpers return display copies in the visitor's language; nothing stored
- * ever changes language.
+ * Жишээ өгөгдлийг Монголоор бичсэн (хадгалагдах, үндсэн хэлбэр). Эдгээр туслах
+ * функцууд зочны хэл дээрх харуулах хуулбарыг буцаана; хадгалагдсан юу ч хэлээ
+ * хэзээ ч солихгүй.
  */
 export function localizeBusiness(business: SampleBusiness, locale: Locale): SampleBusiness {
   const en = locale === "en" ? SAMPLE_BUSINESSES_EN[business.slug] : undefined;
@@ -24,7 +24,7 @@ export function localizeBusiness(business: SampleBusiness, locale: Locale): Samp
   };
 }
 
-/** Business, service and staff text of a stored booking, in the visitor's language. */
+/** Хадгалсан захиалгын бизнес, үйлчилгээ, ажилтны текст, зочны хэл дээр. */
 export function localizeBooking(booking: Booking, locale: Locale): Booking {
   if (locale === "mn") return booking;
   const business = SAMPLE_BUSINESSES.find((item) => item.slug === booking.businessSlug);
@@ -43,7 +43,7 @@ export function localizeBooking(booking: Booking, locale: Locale): Booking {
   };
 }
 
-/** Every name a place goes by, in both languages, for search matching. */
+/** Газрын хоёр хэл дээрх бүх нэр, хайлтад тааруулахад. */
 export function getSearchableText(business: SampleBusiness): string[] {
   const en = SAMPLE_BUSINESSES_EN[business.slug];
   return [

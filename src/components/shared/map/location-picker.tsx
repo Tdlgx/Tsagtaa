@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 type LocationPickerProps = {
   value: LatLng | null;
   onChange: (value: LatLng | null) => void;
-  /** Labelled by this id (the field's label). */
+  /** Энэ id-тай элементээр шошголно (талбарын label). */
   labelId?: string;
   className?: string;
 };
@@ -34,9 +34,9 @@ type PickerState = {
 const PIN_HTML = '<span class="map-pin is-selected"><b>●</b></span>';
 
 /**
- * Where the place is: tap the map or drag the pin, or use this device's
- * location. Points outside Ulaanbaatar are refused with a note, the same
- * rule the database enforces.
+ * Газар хаана байрладаг вэ: газрын зураг дээр дарах, цэгийг чирэх эсвэл энэ
+ * төхөөрөмжийн байршлыг ашиглана. Улаанбаатараас гадуурх цэгийг тайлбартайгаар
+ * татгалзана, DB-ийн мөрддөг дүрэмтэй ижил.
  */
 export function LocationPicker({
   value,
@@ -104,7 +104,7 @@ export function LocationPicker({
     current.tiles = tileLayer(current.L, theme).addTo(current.map);
   }, [theme, ready]);
 
-  // The pin follows the value: placed, moved or removed.
+  // Цэг утгыг дагана: тавигдсан, зөөгдсөн эсвэл хасагдсан.
   useEffect(() => {
     const current = state.current;
     if (!ready || !current) return;
@@ -129,7 +129,7 @@ export function LocationPicker({
         .on("dragend", (event) => {
           const position = (event.target as Leaflet.Marker).getLatLng();
           chooseRef.current({ lat: position.lat, lng: position.lng });
-          // Snap back if the drag ended outside the city.
+          // Чирэлт хотоос гадна дууссан бол буцаана.
           const kept = latest.current.value;
           if (kept) (event.target as Leaflet.Marker).setLatLng([kept.lat, kept.lng]);
         })

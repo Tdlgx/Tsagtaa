@@ -13,18 +13,19 @@ import { CATEGORY_GROUPS } from "@/features/business/categories";
 import { DEFAULT_FILTERS, toSearchHref } from "@/features/business/search";
 import { getI18n } from "@/i18n/server";
 
+/** Нүүр хуудас: hero, өнөөдрийн сул цагийн самбар, хэрхэн ажилладаг, ангилал, эзэмшигчдэд. */
 export default async function HomePage(): Promise<JSX.Element> {
   const { locale, t } = await getI18n();
   const boardRows = await getBoardRows(locale, new Date());
 
   return (
     <>
-      {/* Hero: the promise, then the day itself ------------------------- */}
+      {/* Hero: амлалт, дараа нь өдөр өөрөө ------------------------- */}
       <section className="border-b border-border">
         <Container className="pt-6 pb-12 md:pt-8 md:pb-20">
-          {/* Molten lime chrome in the logo's colors; a scrim keeps the words readable. */}
+          {/* Логоны өнгөөр хийсэн хайлмал шар-ногоон хром; бүрхүүл үгсийг уншигдахуйц байлгана. */}
           <div className="relative isolate overflow-hidden rounded-xl bg-brand-ink text-brand-ink-foreground shadow-lg">
-            {/* Ambient only, and only on wider screens: on a phone it was too much light. */}
+            {/* Зөвхөн орчны гэрэл, зөвхөн өргөн дэлгэцэнд: утсан дээр хэт их гэрэл байсан. */}
             <LiquidMetal className="-z-20 max-md:hidden" mouse={0} />
             <div
               aria-hidden
@@ -60,7 +61,7 @@ export default async function HomePage(): Promise<JSX.Element> {
         </Container>
       </section>
 
-      {/* How it works: a real sequence, so it is numbered -------------- */}
+      {/* Хэрхэн ажилладаг: жинхэнэ дараалал тул дугаарласан -------------- */}
       <section id="how-it-works" aria-labelledby="how-it-works-title" className="scroll-mt-16">
         <Container className="layout-grid gap-y-6 py-12 md:gap-y-10 md:py-24">
           <SectionHeading
@@ -96,7 +97,7 @@ export default async function HomePage(): Promise<JSX.Element> {
         items={t.home.benefits.customers.items}
       />
 
-      {/* Categories: what can be booked --------------------------------- */}
+      {/* Ангилал: юуг захиалж болох --------------------------------- */}
       <section aria-labelledby="categories-title" className="border-t border-border bg-surface">
         <Container className="py-12 md:py-24">
           <SectionHeading title={<span id="categories-title">{t.home.categoriesTitle}</span>} />
@@ -130,7 +131,7 @@ export default async function HomePage(): Promise<JSX.Element> {
         items={t.home.benefits.business.items}
       />
 
-      {/* For owners: the one inverted band ------------------------------ */}
+      {/* Эзэмшигчдэд: цорын ганц урвуу өнгөтэй тууз ------------------------------ */}
       <section aria-labelledby="owners-title" className="bg-primary text-primary-foreground">
         <Container className="layout-grid gap-y-8 py-12 md:py-20">
           <div className="col-span-4 md:col-span-8 lg:col-span-6">

@@ -1,15 +1,15 @@
--- Sign-in for the people who run places (owners, managers) and for the
--- Цагтаа team. Customers still book without an account.
+-- Газар эрхэлдэг хүмүүс (эзэмшигч, менежер) болон Цагтаагийн багийн нэвтрэлт.
+-- Үйлчлүүлэгчид бүртгэлгүйгээр захиалсаар байна.
 
 CREATE TABLE accounts (
   id                uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   phone             text        NOT NULL,
   name              text        NOT NULL,
-  -- "scrypt$N$r$p$salt$hash" (base64). Never the password itself.
+  -- "scrypt$N$r$p$salt$hash" (base64). Нууц үгийг өөрийг нь хэзээ ч хадгалахгүй.
   password_hash     text        NOT NULL,
-  -- The Цагтаа team: reviews registrations and sees every place.
+  -- Цагтаагийн баг: бүртгэлүүдийг шалгаж, бүх газрыг харна.
   is_platform_admin boolean     NOT NULL DEFAULT false,
-  -- Brute-force brake: 5 wrong passwords lock the account for 15 minutes.
+  -- Brute-force хамгаалалт: 5 удаа буруу нууц үг оруулбал бүртгэл 15 минут түгжигдэнэ.
   failed_logins     integer     NOT NULL DEFAULT 0,
   locked_until      timestamptz,
   created_at        timestamptz NOT NULL DEFAULT now(),
@@ -19,7 +19,7 @@ CREATE TABLE accounts (
   CONSTRAINT accounts_name_length CHECK (length(name) BETWEEN 2 AND 80)
 );
 
--- Who runs which place. The dashboard is only for the owner (дарга) and managers.
+-- Хэн аль газрыг удирддаг вэ. Удирдлагын самбар зөвхөн эзэмшигч (дарга), менежерүүдэд.
 CREATE TABLE memberships (
   account_id  uuid        NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
   business_id uuid        NOT NULL REFERENCES businesses (id) ON DELETE CASCADE,
@@ -29,11 +29,11 @@ CREATE TABLE memberships (
   CONSTRAINT memberships_role_valid CHECK (role IN ('owner', 'manager'))
 );
 CREATE INDEX memberships_business_idx ON memberships (business_id);
--- Exactly one owner per place.
+-- Нэг газар яг нэг эзэмшигчтэй.
 CREATE UNIQUE INDEX memberships_one_owner ON memberships (business_id) WHERE role = 'owner';
 
--- Signed-in browsers. The cookie holds a random token; only its SHA-256
--- is stored, so a leaked table cannot be used to sign in.
+-- Нэвтэрсэн browser-ууд. Cookie-д санамсаргүй token байх ба DB-д зөвхөн түүний SHA-256
+-- хадгалагдана. Тиймээс хүснэгт алдагдсан ч түүгээр нэвтрэх боломжгүй.
 CREATE TABLE sessions (
   token_hash text        PRIMARY KEY,
   account_id uuid        NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
@@ -42,7 +42,7 @@ CREATE TABLE sessions (
 );
 CREATE INDEX sessions_account_idx ON sessions (account_id);
 
--- Who approved or turned down a registration, when, and why.
+-- Бүртгэлийг хэн, хэзээ, яагаад зөвшөөрсөн эсвэл татгалзсан.
 ALTER TABLE businesses
   ADD COLUMN reviewed_at timestamptz,
   ADD COLUMN reviewed_by uuid REFERENCES accounts (id) ON DELETE SET NULL,

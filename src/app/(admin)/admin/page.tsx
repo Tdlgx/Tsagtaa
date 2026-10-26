@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.admin.metaTitle, robots: { index: false } };
 }
 
-/** The Цагтаа team's front page. Anyone else gets "not found". */
+/** Цагтаагийн багийн нүүр хуудас. Бусдад "олдсонгүй" гэж харагдана. */
 export default async function AdminPage(): Promise<JSX.Element> {
   await requirePlatformAdmin("/admin");
   const { t } = await getI18n();

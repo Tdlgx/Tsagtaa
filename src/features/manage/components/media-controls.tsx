@@ -26,7 +26,7 @@ const errorText = (result: ActionResult, t: Dictionary): string => {
   return errors[result.error] ?? t.manage.error;
 };
 
-/* Logo and photos ---------------------------------------------------------------- */
+/* Лого ба зураг ---------------------------------------------------------------- */
 
 type MediaManagerProps = {
   slug: string;
@@ -36,9 +36,9 @@ type MediaManagerProps = {
 };
 
 /**
- * The place's logo and up to `maxPhotos` photos. Images are shrunk in the
- * browser before they are sent (and their location data dropped), so even a
- * 10 MB phone photo uploads as a few hundred KB.
+ * Газрын лого болон `maxPhotos` хүртэлх зураг. Зургийг илгээхээс өмнө browser дээр
+ * жижигрүүлдэг (байршлын мэдээллийг нь хасна) тул 10 MB утасны зураг ч хэдэн зуун
+ * KB болж хуулагдана.
  */
 export function MediaManager({ slug, logo, photos, maxPhotos }: MediaManagerProps): JSX.Element {
   const t = useT();
@@ -70,7 +70,7 @@ export function MediaManager({ slug, logo, photos, maxPhotos }: MediaManagerProp
     event.target.value = "";
     if (files.length === 0) return;
     setBusy(kind);
-    // Photos: as many as still fit, one after another.
+    // Зураг: багтах хэмжээгээр, нэг нэгээр нь.
     const room = kind === "logo" ? 1 : Math.max(0, maxPhotos - photos.length);
     let added = 0;
     for (const file of files.slice(0, room)) {
@@ -94,7 +94,7 @@ export function MediaManager({ slug, logo, photos, maxPhotos }: MediaManagerProp
       <div className="flex items-center gap-4">
         <span className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface">
           {logo ? (
-            // eslint-disable-next-line @next/next/no-img-element -- our own small, cached images
+            // eslint-disable-next-line @next/next/no-img-element -- өөрсдийн жижиг, cache-тэй зургууд
             <img
               src={`/api/business-images/${logo.id}`}
               alt={words.logoAlt}
@@ -151,7 +151,7 @@ export function MediaManager({ slug, logo, photos, maxPhotos }: MediaManagerProp
         <ul className="mt-2 grid grid-cols-3 gap-2">
           {photos.map((photo, index) => (
             <li key={photo.id} className="group relative aspect-square overflow-hidden rounded-lg">
-              {/* eslint-disable-next-line @next/next/no-img-element -- our own small, cached images */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- өөрсдийн жижиг, cache-тэй зургууд */}
               <img
                 src={`/api/business-images/${photo.id}`}
                 alt={words.photoAlt(index + 1)}
@@ -200,7 +200,7 @@ export function MediaManager({ slug, logo, photos, maxPhotos }: MediaManagerProp
   );
 }
 
-/* Map pin --------------------------------------------------------------------------- */
+/* Байршлын цэг --------------------------------------------------------------------------- */
 
 export function LocationEditor({
   slug,

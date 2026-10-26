@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 type GuideStep = { icon: LucideIcon; art: (t: Dictionary) => ReactNode };
 
-/** Tiny UI drawings made of the real tokens, one per step. */
+/** Жинхэнэ token-уудаар хийсэн жижиг UI зурагууд, алхам бүрт нэг. */
 const STEPS: readonly GuideStep[] = [
   {
     icon: Search,
@@ -84,7 +84,7 @@ const STEPS: readonly GuideStep[] = [
   },
 ];
 
-/** Lets a first-time visitor see the page in action without booking for real. */
+/** Анх ирсэн зочинд жинхэнэ захиалга хийлгүйгээр хуудас хэрхэн ажилладгийг харуулна. */
 function createSampleBooking(t: Dictionary): void {
   const business = SAMPLE_BUSINESSES[0];
   const service = business?.services[0];
@@ -118,7 +118,7 @@ function createSampleBooking(t: Dictionary): void {
   });
 }
 
-/** Empty state of the bookings page, doubling as a how-to for first-time visitors. */
+/** Захиалгын хуудасны хоосон төлөв, анх ирсэн зочинд заавар болж давхар үйлчилнэ. */
 export function BookingsGuide(): JSX.Element {
   const t = useT();
   return (
@@ -137,7 +137,7 @@ export function BookingsGuide(): JSX.Element {
         </h2>
 
         <ol className="relative mt-10 grid gap-6 md:grid-cols-4 md:gap-4">
-          {/* Dashed path joining the steps (desktop). */}
+          {/* Алхмуудыг холбосон тасархай зам (компьютер дээр). */}
           <span
             aria-hidden
             className="absolute top-5 right-[12%] left-[12%] hidden border-t-2 border-dashed border-border md:block"

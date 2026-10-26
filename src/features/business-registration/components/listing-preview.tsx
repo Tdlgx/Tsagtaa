@@ -19,15 +19,15 @@ import { cn } from "@/lib/utils";
 const clock = (minutes: number): string =>
   `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
-/** Today's weekday in Ulaanbaatar, Monday = 0. */
+/** Улаанбаатарын өнөөдрийн гараг, Даваа = 0. */
 function todayIndex(): number {
   return (getZonedParts(new Date()).weekday + 6) % 7;
 }
 
 /**
- * The listing as customers will meet it in search, redrawn as the owner
- * types: name, kind, place, today's hours, first services and a few start
- * times on the chosen grid.
+ * Үйлчлүүлэгчид хайлтад хэрхэн харахаар бүртгэлийг эзэмшигч бичих явцад дахин
+ * зурна: нэр, төрөл, байршил, өнөөдрийн цаг, эхний үйлчилгээнүүд, сонгосон тор
+ * дээрх хэдэн эхлэх цаг.
  */
 export function ListingPreview({
   draft,
@@ -130,7 +130,7 @@ export function ListingPreview({
   );
 }
 
-/** Score bar plus the two tips that would raise it most. */
+/** Онооны зурвас болон түүнийг хамгийн их өсгөх хоёр зөвлөмж. */
 export function Completeness({
   draft,
   t,

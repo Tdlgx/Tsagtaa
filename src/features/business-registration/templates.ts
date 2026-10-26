@@ -2,7 +2,7 @@ import type { BusinessCategorySlug } from "@/features/business/categories";
 
 export type ServiceTemplate = { mn: string; en: string; duration: number; price: number };
 
-/** Usual services and Ulaanbaatar prices per kind of place; added in one tap, then edited. */
+/** Газрын төрөл бүрийн ердийн үйлчилгээ, Улаанбаатарын үнэ; нэг товшилтоор нэмээд засна. */
 export const SERVICE_TEMPLATES: Record<BusinessCategorySlug, readonly ServiceTemplate[]> = {
   hair: [
     { mn: "Эмэгтэй үс засалт", en: "Women's haircut", duration: 45, price: 35_000 },

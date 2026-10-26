@@ -6,23 +6,24 @@ import { DISTRICT_SLUGS, type DistrictSlug } from "@/features/business/districts
 import { isInServiceArea, type LatLng } from "@/features/business/locations";
 import { transliterate } from "@/i18n/transliterate";
 
-/* Shape ---------------------------------------------------------------------- */
+/* Бүтэц ---------------------------------------------------------------------- */
 
-/** Monday first. Index 0 = Monday … 6 = Sunday (stored as ISO weekday 1–7). */
+/** Даваа эхэнд. Индекс 0 = Даваа … 6 = Ням (ISO гараг 1–7 хэлбэрээр хадгална). */
 export type DayHours = { open: boolean; opens: string; closes: string };
 export type ServiceDraft = { id: string; name: string; duration: number; price: number };
-export type StaffDraft = { id: string; name: string };
+/** `position` нь аль хэдийн хадгалагдсан хүнд байна (захиалгууд түүнийг заадаг); шинэ мөрөнд байхгүй. */
+export type StaffDraft = { id: string; name: string; position?: number };
 export type SlotMinutes = 15 | 30 | 60;
 
-/** Everything the form holds. Autosaved on this device until it is sent. */
+/** Маягтын агуулж буй бүх зүйл. Илгээх хүртэл энэ төхөөрөмж дээр автоматаар хадгалагдана. */
 export type RegistrationDraft = {
-  /** Same id for every retry of this form, so it is stored once. Set on the first change. */
+  /** Энэ маягтын бүх дахин оролдлогод ижил id, ингэснээр нэг л удаа хадгалагдана. Эхний өөрчлөлтөөр тохирно. */
   requestId: string;
   step: number;
   category: BusinessCategorySlug | null;
   name: string;
   slug: string;
-  /** Once the owner edits the address by hand, the name stops rewriting it. */
+  /** Эзэмшигч хаягийг гараар зассаны дараа нэр түүнийг дахин бичихээ болино. */
   slugEdited: boolean;
   district: DistrictSlug | "";
   address: string;
@@ -31,14 +32,20 @@ export type RegistrationDraft = {
   registerNumber: string;
   description: string;
   hours: DayHours[];
-  /** Once the owner changes the hours, picking a category stops resetting them. */
+  /** Эзэмшигч цагийн хуваарийг өөрчилсний дараа ангилал сонгох нь түүнийг дахин тохируулахаа болино. */
   hoursEdited: boolean;
   slotMinutes: SlotMinutes;
   services: ServiceDraft[];
   staff: StaffDraft[];
-  /** Map pin; optional, but a place with one shows up on the map. */
+  /** Газрын зургийн цэг; заавал биш, гэхдээ цэгтэй газар газрын зураг дээр гарна. */
   location: LatLng | null;
 };
+
+/**
+ * Алхам харуулагдаж буй маягтаа хэрхэн өөрчлөх вэ: автоматаар хадгалагддаг
+ * бүртгэл, эсвэл самбар дээрх газрын цагийн хуваарь, үйлчилгээ, ажилтан засварлагч.
+ */
+export type DraftUpdate = (change: (draft: RegistrationDraft) => RegistrationDraft) => void;
 
 export const STEPS = ["category", "basics", "hours", "services", "staff", "review"] as const;
 export type StepKey = (typeof STEPS)[number];
@@ -49,15 +56,15 @@ export const MAX_SERVICES = 30;
 export const MAX_STAFF = 20;
 export const DESCRIPTION_MAX = 300;
 
-/** Half-hour times from 06:00 to 23:30: suggestions for the hour fields, which also take any typed time. */
+/** 06:00-оос 23:30 хүртэлх хагас цагууд: цагийн талбаруудын санал, тэд дурын бичсэн цагийг ч хүлээн авна. */
 export const TIME_OPTIONS: readonly string[] = Array.from({ length: 36 }, (_, index) => {
   const minutes = 6 * 60 + index * 30;
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 });
 
 /**
- * A typed time → "HH:MM", or null if it is not a time of day.
- * Accepts what people type on a phone keypad or keyboard:
+ * Бичсэн цаг → "HH:MM", өдрийн цаг биш бол null.
+ * Утасны товчлуур эсвэл гараар бичдэг зүйлийг хүлээн авна:
  * "8" → 08:00, "845" / "0845" / "8:45" / "8.45" / "8 45" → 08:45, "21:5" → 21:05.
  */
 export function parseTime(input: string): string | null {
@@ -69,7 +76,7 @@ export function parseTime(input: string): string | null {
     hours = Number(parts[1]);
     minutes = Number(parts[2]);
   } else if (/^\d{1,4}$/.test(text)) {
-    // Digits only: the last two are minutes once there are more than two.
+    // Зөвхөн цифр: хоёроос олон байвал сүүлийн хоёр нь минут.
     hours = Number(text.length <= 2 ? text : text.slice(0, -2));
     minutes = text.length <= 2 ? 0 : Number(text.slice(-2));
   } else {
@@ -79,7 +86,7 @@ export function parseTime(input: string): string | null {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
-/* Smart defaults per kind of place -------------------------------------------- */
+/* Газрын төрөл бүрийн ухаалаг анхдагч утгууд -------------------------------------------- */
 
 const day = (opens: string, closes: string): DayHours => ({ open: true, opens, closes });
 const closed = (opens = "09:00", closes = "18:00"): DayHours => ({ open: false, opens, closes });
@@ -95,7 +102,7 @@ export const HOURS_PRESETS = {
 
 export type HoursPreset = keyof typeof HOURS_PRESETS;
 
-/** What a place of this kind usually does: its hours and how often a time can start. */
+/** Ийм төрлийн газар ихэвчлэн ямар байдаг: цагийн хуваарь болон цаг хэр давтамжтай эхэлж болох. */
 export const CATEGORY_DEFAULTS: Record<
   BusinessCategorySlug,
   { hours: HoursPreset; slotMinutes: SlotMinutes }
@@ -133,13 +140,13 @@ export const EMPTY_DRAFT: RegistrationDraft = {
   location: null,
 };
 
-/* Helpers ---------------------------------------------------------------------- */
+/* Туслах функцууд ---------------------------------------------------------------------- */
 
 export const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
- * "Өнгө салон" → "ongo-salon": Latin, lowercase, words joined by dashes.
- * Inside a word "е" is read "e" ("тест" → "test"); only at the start "ye".
+ * "Өнгө салон" → "ongo-salon": латин, жижиг үсэг, үгсийг зураасаар холбоно.
+ * Үгийн дотор "е"-г "e" гэж уншина ("тест" → "test"); зөвхөн эхэнд "ye".
  */
 export function slugify(text: string): string {
   return transliterate(text.replace(/(?<=[а-яёөү])е/giu, "э"))
@@ -155,7 +162,7 @@ export function isValidSlug(slug: string): boolean {
   return slug.length >= 3 && slug.length <= 60 && SLUG_PATTERN.test(slug);
 }
 
-/** Company: 7 digits. Individual: 2 Cyrillic letters + 8 digits ("УБ99112233"). */
+/** Компани: 7 оронтой тоо. Хувь хүн: 2 кирилл үсэг + 8 оронтой тоо ("УБ99112233"). */
 export function detectRegisterNumber(input: string): "company" | "person" | null {
   const value = input.replace(/\s/g, "").toUpperCase();
   if (/^\d{7}$/.test(value)) return "company";
@@ -180,7 +187,7 @@ const DOMAIN_TYPOS: Record<string, string> = {
   "outlok.com": "outlook.com",
 };
 
-/** "bold@gmial.com" → "bold@gmail.com"; null when nothing looks mistyped. */
+/** "bold@gmial.com" → "bold@gmail.com"; алдаатай бичсэн юм харагдахгүй бол null. */
 export function suggestEmail(email: string): string | null {
   const [local, domain] = email.trim().toLowerCase().split("@");
   const fixed = domain ? DOMAIN_TYPOS[domain] : undefined;
@@ -192,7 +199,7 @@ export function toMinutes(time: string): number {
   return Number(hours) * 60 + Number(minutes);
 }
 
-/** Minutes the place is open in a week. */
+/** Газар долоо хоногт нээлттэй байх минут. */
 export function weeklyMinutes(hours: readonly DayHours[]): number {
   return hours.reduce(
     (sum, item) =>
@@ -201,7 +208,7 @@ export function weeklyMinutes(hours: readonly DayHours[]): number {
   );
 }
 
-/* Validation (same rules in the browser and on the server) ----------------------- */
+/* Шалгалт (browser болон сервер дээр ижил дүрэм) ----------------------- */
 
 export type FieldError =
   | "category"
@@ -223,12 +230,19 @@ export type FieldError =
   | "staffName"
   | "staffDuplicate";
 
-/** Field → problem. Row fields are keyed "service:<id>:name", "staff:<id>" and so on. */
+/** Талбар → асуудал. Мөрийн талбаруудын түлхүүр нь "service:<id>:name", "staff:<id>" гэх мэт. */
 export type StepErrors = Record<string, FieldError>;
+
+/** Алдааны түлхүүр хамаарах элемент: "service:<id>:name" → "reg-service-<id>-name". */
+export const fieldId = (key: string): string => `reg-${key.replaceAll(":", "-")}`;
 
 const sameText = (a: string, b: string): boolean =>
   a.trim().toLowerCase() === b.trim().toLowerCase();
 
+/**
+ * Нэг алхмын бүх дүрмийг шалгаж, талбар → алдааны кодыг буцаана (хоосон бол алхам зөв).
+ * Browser болон сервер хоёулаа энэ функцийг ашигладаг тул дүрэм нэг газар л байна.
+ */
 export function validateStep(step: StepKey, draft: RegistrationDraft): StepErrors {
   const errors: StepErrors = {};
 
@@ -284,17 +298,17 @@ export function validateStep(step: StepKey, draft: RegistrationDraft): StepError
   return errors;
 }
 
-/** First step with a problem, or -1 when the whole form is ready to send. */
+/** Асуудалтай эхний алхам, эсвэл бүх маягт илгээхэд бэлэн бол -1. */
 export function firstInvalidStep(draft: RegistrationDraft): number {
   return STEPS.findIndex((step) => Object.keys(validateStep(step, draft)).length > 0);
 }
 
-/* Completeness and gentle warnings ------------------------------------------------ */
+/* Бүрэн байдал ба зөөлөн анхааруулга ------------------------------------------------ */
 
 export type Tip =
   "description" | "moreServices" | "email" | "registerNumber" | "moreStaff" | "location";
 
-/** 0–100, plus what would raise it. Required fields weigh most; extras make a listing stand out. */
+/** 0–100, мөн түүнийг юу өсгөх вэ. Заавал талбарууд хамгийн их жинтэй; нэмэлтүүд бүртгэлийг тодруулна. */
 export function getCompleteness(draft: RegistrationDraft): { score: number; tips: Tip[] } {
   const checks: [boolean, number, Tip | null][] = [
     [draft.category !== null, 10, null],
@@ -318,7 +332,7 @@ export function getCompleteness(draft: RegistrationDraft): { score: number; tips
 
 export type Warning = { kind: "serviceTooLong"; service: string; minutes: number };
 
-/** Things that are allowed but probably a mistake, shown before sending. */
+/** Зөвшөөрөгдөх боловч алдаа байх магадлалтай зүйлс, илгээхээс өмнө харуулна. */
 export function getWarnings(draft: RegistrationDraft): Warning[] {
   const openDays = draft.hours.filter((item) => item.open);
   if (openDays.length === 0) return [];
@@ -330,7 +344,7 @@ export function getWarnings(draft: RegistrationDraft): Warning[] {
     .map((service) => ({ kind: "serviceTooLong", service: service.name, minutes: longestDay }));
 }
 
-/* What the server accepts ---------------------------------------------------------- */
+/* Серверийн хүлээн авах өгөгдөл ---------------------------------------------------------- */
 
 const TIME = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 const CATEGORY_SLUGS = BUSINESS_CATEGORIES.map((category) => category.slug) as [
@@ -338,6 +352,7 @@ const CATEGORY_SLUGS = BUSINESS_CATEGORIES.map((category) => category.slug) as [
   ...BusinessCategorySlug[],
 ];
 
+/** Бүртгэлийн маягтаас серверт ирэх өгөгдлийн schema; Server Action оролтоо үүгээр шалгана. */
 export const registrationInput = z.object({
   requestId: z.uuid(),
   category: z.enum(CATEGORY_SLUGS),
@@ -370,16 +385,16 @@ export const registrationInput = z.object({
     .object({ lat: z.number(), lng: z.number() })
     .nullable()
     .refine((value) => value === null || isInServiceArea(value)),
-  // Who is registering: they become the owner and sign in with the business phone.
+  // Хэн бүртгүүлж байна: эзэмшигч болж, бизнесийн утсаар нэвтэрнэ.
   ownerName: z.string().trim().min(2).max(80),
   password: z.string().min(8).max(200),
-  // The owner confirms the details are true and accepts the privacy policy.
+  // Эзэмшигч мэдээлэл үнэн гэдгийг баталж, нууцлалын бодлогыг зөвшөөрнө.
   consent: z.literal(true),
 });
 
 export type RegistrationInput = z.input<typeof registrationInput>;
 
-/** Loose check of what was autosaved: anything unreadable starts a fresh form. */
+/** Автоматаар хадгалсан зүйлийн сул шалгалт: уншиж болохгүй бүх зүйл шинэ маягтаас эхэлнэ. */
 export const draftSchema = z.object({
   requestId: z.string(),
   step: z
@@ -404,6 +419,6 @@ export const draftSchema = z.object({
     z.object({ id: z.string(), name: z.string(), duration: z.number(), price: z.number() }),
   ),
   staff: z.array(z.object({ id: z.string(), name: z.string() })),
-  // Drafts saved before the map existed have no pin.
+  // Газрын зураг гарахаас өмнө хадгалсан ноорогт цэг байхгүй.
   location: z.object({ lat: z.number(), lng: z.number() }).nullable().default(null),
 });

@@ -1,12 +1,12 @@
--- Businesses that registered themselves, with their hours, services and
--- staff. A registration is written in one transaction: either all of it is
--- stored, or none of it. New businesses wait in 'pending' until checked.
+-- Өөрсдөө бүртгүүлсэн бизнесүүд, тэдний цагийн хуваарь, үйлчилгээ, ажилтан.
+-- Бүртгэлийг нэг transaction-оор бичнэ: бүгд хадгалагдана, эсвэл юу ч хадгалагдахгүй.
+-- Шинэ бизнес шалгагдтал 'pending' төлөвт хүлээнэ.
 
 CREATE TABLE businesses (
   id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  -- One per registration form: a double click or a retry is stored once.
+  -- Бүртгэлийн маягт бүрт нэг: давхар дарах эсвэл дахин оролдлого нэг л удаа хадгалагдана.
   request_id      uuid        NOT NULL,
-  -- Public address: /book/<slug>.
+  -- Нийтийн хаяг: /book/<slug>.
   slug            text        NOT NULL,
   name            text        NOT NULL,
   category        text        NOT NULL,
@@ -14,18 +14,18 @@ CREATE TABLE businesses (
   address         text        NOT NULL,
   phone           text        NOT NULL,
   email           text,
-  -- 7 digits for a company, 2 letters + 8 digits for an individual.
+  -- Компанид 7 оронтой тоо, хувь хүнд 2 үсэг + 8 оронтой тоо.
   register_number text,
   description     text        NOT NULL DEFAULT '',
-  -- Booking grid: a time can start every 15, 30 or 60 minutes.
+  -- Захиалгын тор: цаг 15, 30 эсвэл 60 минут тутамд эхэлж болно.
   slot_minutes    integer     NOT NULL,
   status          text        NOT NULL DEFAULT 'pending',
-  -- When the owner confirmed the details are true and accepted the policy.
+  -- Эзэмшигч мэдээлэл үнэн гэдгийг баталж, бодлогыг зөвшөөрсөн цаг.
   owner_consented_at timestamptz NOT NULL,
   created_at      timestamptz NOT NULL DEFAULT now(),
 
   CONSTRAINT businesses_request_id_key UNIQUE (request_id),
-  -- Two owners racing for the same address: exactly one gets it.
+  -- Хоёр эзэмшигч нэг хаягийг зэрэг авах гэвэл яг нэг нь л авна.
   CONSTRAINT businesses_slug_key UNIQUE (slug),
   CONSTRAINT businesses_slug_format
     CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND length(slug) BETWEEN 3 AND 60),
@@ -43,13 +43,13 @@ CREATE TABLE businesses (
   CONSTRAINT businesses_status_valid CHECK (status IN ('pending', 'active', 'rejected'))
 );
 
--- A register number can back only one live registration; a rejected one
--- does not block trying again.
+-- Нэг регистрийн дугаар зөвхөн нэг идэвхтэй бүртгэлд хамаарна; татгалзсан бүртгэл
+-- дахин оролдоход саад болохгүй.
 CREATE UNIQUE INDEX businesses_register_number_key
   ON businesses (register_number)
   WHERE register_number IS NOT NULL AND status <> 'rejected';
 
--- Weekdays are ISO: 1 = Monday … 7 = Sunday. A missing day means closed.
+-- Гарагууд ISO стандартаар: 1 = Даваа … 7 = Ням. Байхгүй өдөр нь амралтын өдөр.
 CREATE TABLE business_hours (
   business_id uuid     NOT NULL REFERENCES businesses (id) ON DELETE CASCADE,
   weekday     smallint NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE services (
   CONSTRAINT services_duration_valid CHECK (duration_min BETWEEN 5 AND 480 AND duration_min % 5 = 0),
   CONSTRAINT services_price_valid CHECK (price BETWEEN 0 AND 10000000)
 );
--- "Үс засалт" and "үс засалт" are the same service.
+-- "Үс засалт" ба "үс засалт" нь нэг үйлчилгээ.
 CREATE UNIQUE INDEX services_name_key ON services (business_id, lower(name));
 
 CREATE TABLE staff (

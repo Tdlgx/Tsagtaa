@@ -1,9 +1,8 @@
--- Fewer sample places: one per category (10 instead of 19). The nine dropped
--- from the code are removed here too, or they would show up in search as if
--- they were new registered places. Only the copies the admin's sample import
--- made are deleted (its placeholder phone or its note); a real place is never
--- touched. Their hours, services, staff and images go with them; past
--- bookings stay (they keep the place's address as plain text).
+-- Жишээ газруудыг цөөлөв: ангилал бүрт нэг (19-ийн оронд 10). Кодоос хассан есөн газрыг
+-- энд ч устгана, эс бөгөөс хайлтад шинэ бүртгэлтэй газар мэт харагдана. Зөвхөн админы
+-- жишээ импортын хуулбаруудыг (түр утас эсвэл тэмдэглэлээр нь) устгана, жинхэнэ газарт
+-- хэзээ ч хүрэхгүй. Цагийн хуваарь, үйлчилгээ, ажилтан, зургууд нь хамт устана; өмнөх
+-- захиалгууд үлдэнэ (газрын хаягийг энгийн текстээр хадгалдаг).
 DELETE FROM businesses
 WHERE slug IN (
     'setgel-salon', 'nomad-barber', 'tsetseg-nail', 'nar-spa', 'sod-beauty',

@@ -1,35 +1,35 @@
--- Loyalty points for customers, and the tools the Цагтаа team needs to run
--- the platform: suspending a place, an audit trail, fuzzy duplicate checks.
+-- Үйлчлүүлэгчийн урамшууллын оноо, мөн Цагтаагийн багт платформыг удирдахад хэрэгтэй
+-- хэрэгслүүд: газрыг түр хаах, үйлдлийн түүх, ижил төстэй бүртгэл илрүүлэх.
 
--- Similar-name search for spotting the same place registered twice.
+-- Нэг газрыг хоёр бүртгүүлснийг илрүүлэхийн тулд төстэй нэрээр хайх.
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX businesses_name_trgm_idx ON businesses USING gin (lower(name) gin_trgm_ops);
 
--- Suspended: an approved place taken off the site for now (complaints,
--- unpaid fees, …). Unlike "rejected", it was live and can come back.
+-- Түр хаагдсан: зөвшөөрөгдсөн газрыг сайтаас түр авсан (гомдол, төлбөр төлөөгүй, …).
+-- "Татгалзсан"-аас ялгаатай нь өмнө нь идэвхтэй байсан бөгөөд буцаж нээгдэж болно.
 ALTER TABLE businesses DROP CONSTRAINT businesses_status_valid;
 ALTER TABLE businesses ADD CONSTRAINT businesses_status_valid
   CHECK (status IN ('pending', 'active', 'rejected', 'suspended'));
 
-/* Points ------------------------------------------------------------------------ */
+/* Оноо ------------------------------------------------------------------------ */
 
--- 1 point = 1 ₮ off a booking. The balance is a cache of the ledger's sum,
--- kept by the trigger below; the CHECK makes overspending impossible even
--- when two bookings spend points at the same moment (the second UPDATE waits
--- for the first one's row lock, then sees the lower balance and fails).
+-- 1 оноо = захиалгаас 1 ₮ хямдрал. Үлдэгдэл нь ledger-ийн нийлбэрийн cache бөгөөд
+-- доорх trigger хадгалдаг. CHECK нь хоёр захиалга зэрэг оноо зарцуулсан ч хэтрүүлэн
+-- зарцуулахыг боломжгүй болгоно (хоёр дахь UPDATE эхнийхийн мөрийн lock-ийг хүлээж,
+-- дараа нь багассан үлдэгдлийг хараад амжилтгүй болно).
 ALTER TABLE accounts
   ADD COLUMN points_balance integer NOT NULL DEFAULT 0,
   ADD CONSTRAINT accounts_points_not_negative CHECK (points_balance >= 0);
 
 ALTER TABLE bookings
-  -- Set when a signed-in customer books; only those bookings earn points.
+  -- Нэвтэрсэн үйлчлүүлэгч захиалахад бөглөгдөнө; зөвхөн ийм захиалга оноо өгнө.
   ADD COLUMN customer_account_id uuid REFERENCES accounts (id) ON DELETE SET NULL,
-  -- Points spent on this booking (₮ off the price).
+  -- Энэ захиалгад зарцуулсан оноо (үнээс хасах ₮).
   ADD COLUMN points_used integer NOT NULL DEFAULT 0,
-  -- Points promised at booking time, credited after the visit. Fixed then,
-  -- so a later change of the earn rate does not change a promise.
+  -- Захиалах үед амласан, үйлчлүүлсний дараа олгох оноо. Тэр үед тогтоогдох тул
+  -- дараа нь оноо олгох хувь өөрчлөгдсөн ч амлалт өөрчлөгдөхгүй.
   ADD COLUMN points_earn integer NOT NULL DEFAULT 0,
-  -- Marked by the place: did the customer come?
+  -- Газар тэмдэглэнэ: үйлчлүүлэгч ирсэн үү?
   ADD COLUMN attendance text,
   ADD COLUMN attendance_at timestamptz,
   ADD CONSTRAINT bookings_points_used_valid CHECK (points_used BETWEEN 0 AND price),
@@ -41,19 +41,19 @@ ALTER TABLE bookings
 CREATE INDEX bookings_customer_idx ON bookings (customer_account_id, starts_at DESC)
   WHERE customer_account_id IS NOT NULL;
 
--- Every change to a balance, append-only. The balance is never written directly.
+-- Үлдэгдлийн өөрчлөлт бүр, зөвхөн нэмэгдэнэ. Үлдэгдлийг хэзээ ч шууд бичихгүй.
 CREATE TABLE points_ledger (
   id         bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   account_id uuid        NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
   delta      integer     NOT NULL,
-  -- earn: after a visit. redeem: spent on a booking. refund: that booking was
-  -- cancelled or missed. adjust: by the Цагтаа team, with a reason.
+  -- earn: үйлчлүүлсний дараа. redeem: захиалгад зарцуулсан. refund: тэр захиалга
+  -- цуцлагдсан эсвэл ирээгүй. adjust: Цагтаагийн баг шалтгаантайгаар.
   kind       text        NOT NULL,
-  -- A booking with points history cannot be deleted (RESTRICT): it would
-  -- leave the balance and the ledger disagreeing.
+  -- Онооны түүхтэй захиалгыг устгаж болохгүй (RESTRICT): устгавал үлдэгдэл ба
+  -- ledger хоорондоо зөрнө.
   booking_id uuid        REFERENCES bookings (id) ON DELETE RESTRICT,
-  -- Who adjusted. RESTRICT: an admin with adjustments on record is demoted,
-  -- not deleted, so the history keeps saying who did it.
+  -- Хэн засварласан. RESTRICT: засвар хийсэн түүхтэй админыг устгахгүй, эрхийг нь
+  -- бууруулна. Ингэснээр түүх хэн хийснийг харуулсаар байна.
   actor_id   uuid        REFERENCES accounts (id) ON DELETE RESTRICT,
   note       text,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -68,8 +68,8 @@ CREATE TABLE points_ledger (
   CONSTRAINT points_ledger_adjust_reason
     CHECK (kind <> 'adjust' OR (actor_id IS NOT NULL AND length(note) >= 3))
 );
--- A booking earns once, spends once and is refunded once, however many
--- times (or how concurrently) the code that does it runs.
+-- Захиалга хэдэн удаа (эсвэл хэчнээн зэрэг) ажилласан ч нэг л удаа оноо олгож,
+-- нэг л удаа зарцуулж, нэг л удаа буцаана.
 CREATE UNIQUE INDEX points_ledger_booking_once ON points_ledger (booking_id, kind)
   WHERE booking_id IS NOT NULL;
 CREATE INDEX points_ledger_account_idx ON points_ledger (account_id, created_at DESC);
@@ -84,9 +84,9 @@ $$;
 CREATE TRIGGER points_ledger_apply AFTER INSERT ON points_ledger
   FOR EACH ROW EXECUTE FUNCTION points_ledger_apply();
 
--- History is not rewritten: a mistake is fixed with an "adjust" entry. The
--- one exception is deleting an account, whose entries go with it (that
--- delete arrives from the foreign key, one trigger level down).
+-- Түүхийг дахин бичихгүй: алдааг "adjust" бичлэгээр засна. Цорын ганц үл хамаарах
+-- тохиолдол нь бүртгэл устгах бөгөөд бичлэгүүд нь хамт устана (тэр устгал foreign
+-- key-ээс, trigger-ийн нэг түвшин доороос ирдэг).
 CREATE FUNCTION points_ledger_append_only() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 THEN
@@ -98,7 +98,7 @@ $$;
 CREATE TRIGGER points_ledger_append_only BEFORE UPDATE OR DELETE ON points_ledger
   FOR EACH ROW EXECUTE FUNCTION points_ledger_append_only();
 
--- And the balance only moves through the ledger.
+-- Мөн үлдэгдэл зөвхөн ledger-ээр л өөрчлөгдөнө.
 CREATE FUNCTION accounts_balance_guard() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.points_balance IS DISTINCT FROM OLD.points_balance AND pg_trigger_depth() < 2 THEN
@@ -111,29 +111,29 @@ $$;
 CREATE TRIGGER accounts_balance_guard BEFORE UPDATE OF points_balance ON accounts
   FOR EACH ROW EXECUTE FUNCTION accounts_balance_guard();
 
--- The rules, set by the Цагтаа team in /admin/points. Exactly one row.
+-- Цагтаагийн баг /admin/points дээр тогтоодог дүрмүүд. Яг нэг мөр.
 CREATE TABLE loyalty_settings (
   id                 boolean     PRIMARY KEY DEFAULT true CHECK (id),
   enabled            boolean     NOT NULL DEFAULT true,
-  -- Points per 100 ₮ paid.
+  -- Төлсөн 100 ₮ тутамд олгох оноо.
   earn_percent       integer     NOT NULL DEFAULT 5 CHECK (earn_percent BETWEEN 0 AND 30),
-  -- Smallest spend, so points are not frittered away 10 at a time.
+  -- Хамгийн бага зарцуулалт, ингэснээр оноог 10-аар нь бутаргаж үрэхгүй.
   min_redeem         integer     NOT NULL DEFAULT 1000 CHECK (min_redeem BETWEEN 0 AND 1000000),
-  -- At most this share of one booking can be paid in points.
+  -- Нэг захиалгын үнийн хамгийн ихдээ энэ хувийг оноогоор төлж болно.
   max_redeem_percent integer     NOT NULL DEFAULT 50 CHECK (max_redeem_percent BETWEEN 0 AND 100),
   updated_at         timestamptz NOT NULL DEFAULT now(),
   updated_by         uuid        REFERENCES accounts (id) ON DELETE SET NULL
 );
 INSERT INTO loyalty_settings DEFAULT VALUES;
 
-/* Audit ------------------------------------------------------------------------- */
+/* Үйлдлийн түүх ------------------------------------------------------------------------- */
 
--- What the Цагтаа team did, written in the same transaction as the change.
+-- Цагтаагийн багийн хийсэн үйлдэл, өөрчлөлттэй нэг transaction-д бичигдэнэ.
 CREATE TABLE admin_audit (
   id         bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   actor_id   uuid        REFERENCES accounts (id) ON DELETE SET NULL,
   action     text        NOT NULL,
-  -- Readable label at the time (place name, phone …), and the id it points at.
+  -- Тухайн үеийн уншигдахуйц нэр (газрын нэр, утас …) ба заасан id.
   target     text        NOT NULL,
   target_id  text,
   detail     text,

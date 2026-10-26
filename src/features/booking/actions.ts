@@ -12,7 +12,7 @@ import { getStaff } from "@/features/staff/sample-staff";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCurrentAccount } from "@/lib/auth/session";
 
-/** "No preference": the server picks the first free person. */
+/** "Хамаагүй": сервер эхний сул хүнийг сонгоно. */
 const ANY_STAFF = "any";
 
 const createInput = z.object({
@@ -25,9 +25,9 @@ const createInput = z.object({
   name: z.string().trim().min(2).max(80),
   phone: z.string().max(20),
   note: z.string().trim().max(300),
-  // Consent is required before any personal data is stored.
+  // Хувийн мэдээлэл хадгалахаас өмнө зөвшөөрөл заавал шаардлагатай.
   consent: z.literal(true),
-  // Points to spend; only a signed-in customer can, and the rules are checked here.
+  // Зарцуулах оноо; зөвхөн нэвтэрсэн үйлчлүүлэгч зарцуулж чадах ба дүрмийг энд шалгана.
   points: z.number().int().min(0).max(10_000_000).default(0),
 });
 
@@ -38,16 +38,16 @@ export type CreateBookingResult =
   | {
       ok: false;
       /**
-       * slot_taken: someone else got the time first. unavailable: not on the
-       * schedule (any more). points: not enough points (any more).
+       * slot_taken: өөр хүн цагийг түрүүлж авсан. unavailable: хуваарьт (одоо) байхгүй.
+       * points: оноо (одоо) хүрэлцэхгүй.
        */
       error: "invalid" | "unavailable" | "slot_taken" | "points" | "server";
     };
 
 /**
- * Books a time. Server Actions can be called by anyone with a POST, so
- * nothing from the browser is trusted: the business, service, price,
- * duration, staff and start time are all looked up or computed here.
+ * Цаг захиална. Server Action-ыг хэн ч POST-оор дуудаж болох тул browser-оос ирсэн
+ * юунд ч итгэхгүй: бизнес, үйлчилгээ, үнэ, хугацаа, ажилтан, эхлэх цагийг бүгдийг
+ * энд хайж олох эсвэл тооцоолно.
  */
 export async function createBookingAction(input: unknown): Promise<CreateBookingResult> {
   const parsed = createInput.safeParse(input);
@@ -55,12 +55,12 @@ export async function createBookingAction(input: unknown): Promise<CreateBooking
   if (!parsed.success || !phone) return { ok: false, error: "invalid" };
   const data = parsed.data;
 
-  // A sample place or an approved registered one (from the database).
+  // Жишээ газар эсвэл зөвшөөрөгдсөн бүртгэлтэй газар (DB-ээс).
   const business = await findListing(data.slug);
   const service = business?.services[data.serviceIndex];
   if (!business || !service) return { ok: false, error: "invalid" };
 
-  // People on duty at that time; the database decides which of them is still free.
+  // Тэр цагт ажиллаж буй хүмүүс; тэдний хэн нь сул байгааг DB шийднэ.
   const staff = getStaff(business, "mn");
   const candidates = staff.filter(
     (member) =>
@@ -69,17 +69,17 @@ export async function createBookingAction(input: unknown): Promise<CreateBooking
   );
   const now = new Date();
   const startsAt = toStartInstant(data.day, data.time, now);
-  // The service has to end by closing time.
+  // Үйлчилгээ хаах цагаас өмнө дуусах ёстой.
   const endsBy = toMinutes(data.time) + service.duration <= closingMinutes(business, data.day);
   if (candidates.length === 0 || startsAt <= now || !endsBy) {
     return { ok: false, error: "unavailable" };
   }
 
   try {
-    // A place the Цагтаа team suspended (or has not approved) takes no bookings.
+    // Цагтаагийн баг түр хаасан (эсвэл зөвшөөрөөгүй) газар захиалга авахгүй.
     if (!(await isBookable(business.slug))) return { ok: false, error: "unavailable" };
 
-    // Points belong to the signed-in account, never to a phone typed in the form.
+    // Оноо нь маягтад бичсэн утсанд биш, нэвтэрсэн бүртгэлд л хамаарна.
     const account = await getCurrentAccount();
     const settings = account ? await getLoyaltySettings() : null;
     const pointsUsed = data.points;
@@ -118,7 +118,7 @@ export async function createBookingAction(input: unknown): Promise<CreateBooking
 
     const { row } = result;
     const member = staff.find((person) => person.id === row.staffId);
-    // Saved in the source language; every screen localizes it when shown.
+    // Эх хэлээр нь хадгална; дэлгэц бүр харуулахдаа орчуулна.
     return {
       ok: true,
       booking: {
@@ -155,7 +155,7 @@ const cancelInput = z.object({ id: z.uuid(), phone: z.string().max(20) });
 
 export type CancelBookingResult = { ok: true } | { ok: false; error: "not_found" | "server" };
 
-/** Cancels a stored booking; the phone number must match the booking's. */
+/** Хадгалсан захиалгыг цуцална; утасны дугаар захиалгынхтай таарах ёстой. */
 export async function cancelBookingAction(input: unknown): Promise<CancelBookingResult> {
   const parsed = cancelInput.safeParse(input);
   const phone = parsed.success ? normalizePhone(parsed.data.phone) : null;

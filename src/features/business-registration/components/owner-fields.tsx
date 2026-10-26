@@ -13,10 +13,11 @@ export type OwnerErrors = Partial<Record<keyof OwnerFields, string>>;
 
 export const EMPTY_OWNER: OwnerFields = { name: "", password: "", confirm: "" };
 
-/** Same rule as the server: 8+ characters and not only digits. */
+/** Сервертэй ижил дүрэм: 8+ тэмдэгт бөгөөд зөвхөн тооноос бүрдээгүй. */
 const acceptable = (password: string): boolean =>
   password.length >= 8 && password.length <= 200 && !/^\d+$/.test(password);
 
+/** Эзэмшигчийн нэр, нууц үг, нууц үгийн давталтын алдаанууд (хоосон бол алдаагүй). */
 export function getOwnerErrors(owner: OwnerFields, t: Dictionary): OwnerErrors {
   const errors: OwnerErrors = {};
   if (owner.name.trim().length < 2) errors.name = t.register.errors.ownerName;
@@ -25,7 +26,7 @@ export function getOwnerErrors(owner: OwnerFields, t: Dictionary): OwnerErrors {
   return errors;
 }
 
-/** 0–3: length, mixed letters and digits, a symbol. A hint, not a rule. */
+/** 0–3: урт, үсэг тоо холилдсон, тэмдэгт. Дүрэм биш, зөвлөмж. */
 export function passwordStrength(password: string): 0 | 1 | 2 | 3 {
   if (!acceptable(password)) return 0;
   let score = 1;
@@ -42,7 +43,7 @@ type OwnerSignInProps = {
   onChange: (change: Partial<OwnerFields>) => void;
 };
 
-/** The registering person's name and dashboard password, on the last step. */
+/** Бүртгүүлж буй хүний нэр, самбарын нууц үг, сүүлийн алхам дээр. */
 export function OwnerSignIn({ owner, errors, phone, t, onChange }: OwnerSignInProps): JSX.Element {
   const words = t.register;
   const [visible, setVisible] = useState(false);

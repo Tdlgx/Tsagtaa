@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+/** Design system: toast-ийн төрлүүдийг дарж туршиж үзэх товчнууд. */
 export function ToastDemo(): JSX.Element {
   return (
     <div className="flex flex-wrap gap-3">

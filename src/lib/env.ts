@@ -3,17 +3,17 @@ import "server-only";
 import { envSchema, parseEnv, type Env } from "@/lib/env-schema";
 
 /**
- * Validated environment variables for server code only
- * (Server Components, Route Handlers, Server Actions).
+ * Зөвхөн серверийн кодод зориулсан шалгагдсан environment хувьсагчид
+ * (Server Component, Route Handler, Server Action).
  *
- * The `server-only` import above turns any attempt to import this file from a
- * Client Component into a build error, so secrets like DATABASE_URL can never
- * end up in the browser bundle. In client code use `publicEnv` instead.
+ * Дээрх `server-only` import нь энэ файлыг Client Component-оос import хийх аливаа
+ * оролдлогыг build-ийн алдаа болгодог тул DATABASE_URL зэрэг нууц мэдээлэл browser
+ * bundle-д хэзээ ч орохгүй. Client кодод оронд нь `publicEnv` ашиглана.
  */
 export const env: Env = parseEnv(envSchema, {
   ...process.env,
-  // Named one by one so the build inlines them, defaults included (see
-  // next.config.ts). On Vercel they are not in the runtime environment.
+  // Build тэднийг анхдагч утгуудын хамт шингээхийн тулд нэг нэгээр нь нэрлэнэ
+  // (next.config.ts-ийг үз). Vercel дээр тэд runtime environment-д байхгүй.
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
 });

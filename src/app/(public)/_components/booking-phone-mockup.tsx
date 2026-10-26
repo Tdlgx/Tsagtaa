@@ -29,9 +29,9 @@ const SLOTS: readonly MockSlot[] = [
 ];
 
 /**
- * Decorative phone showing the booking screen, built with the real design
- * tokens and component styles (no image). `inert` keeps it out of the tab
- * order; the figcaption describes it for screen readers.
+ * Захиалгын дэлгэцийг харуулсан чимэглэлийн утас, жинхэнэ design token болон
+ * компонентын стилээр бүтээсэн (зураг биш). `inert` нь Tab дарааллаас хасна;
+ * figcaption нь screen reader-т тайлбарлана.
  */
 export function BookingPhoneMockup({ className }: { className?: string }): JSX.Element {
   return (
@@ -41,7 +41,7 @@ export function BookingPhoneMockup({ className }: { className?: string }): JSX.E
         aria-hidden
         className="rounded-device border border-border bg-surface p-2 shadow-lg select-none"
       >
-        {/* Screen radius = frame radius − 8px padding: concentric corners. */}
+        {/* Дэлгэцийн радиус = хүрээний радиус − 8px зай: төвлөрсөн булангууд. */}
         <div className="flex flex-col gap-4 overflow-hidden rounded-device-inner bg-background px-4 pt-3 pb-5">
           <div className="flex items-center justify-between text-xs font-medium tabular-nums">
             <span>9:41</span>

@@ -19,14 +19,14 @@ type ChipProps = {
   icon?: LucideIcon;
   checked: boolean;
   onChange: (value: string) => void;
-  /** "sub": smaller pill that sits inside an unfolded group. */
+  /** "sub": задарсан бүлэг дотор байрлах жижиг товч. */
   size?: "main" | "sub";
-  /** The group pill while one of its subcategories is chosen: outlined, not filled. */
+  /** Дэд ангиллын аль нэг нь сонгогдсон үеийн бүлгийн товч: дүүргэлтгүй, хүрээтэй. */
   parentActive?: boolean;
   trailing?: JSX.Element;
 };
 
-/** One native radio styled as a pill, so arrow keys and plain form submit still work. */
+/** Товч хэлбэрээр зурсан нэг native radio, ингэснээр сумтай товч болон энгийн form submit ажилласаар байна. */
 function Chip({
   value,
   label,
@@ -50,7 +50,7 @@ function Chip({
       <span
         className={cn(
           "flex cursor-pointer items-center justify-center gap-2 rounded-full text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors duration-150 ease-soft select-none is-hover:text-foreground",
-          // Hover must not dim the chosen option, so its text color is restated.
+          // Hover сонгосон сонголтыг бүдгэрүүлэх ёсгүй тул текстийн өнгийг дахин зааж өгнө.
           "peer-checked:bg-foreground peer-checked:text-background peer-checked:is-hover:text-background",
           "peer-focus-visible:ring-3 peer-focus-visible:ring-ring",
           size === "main"
@@ -75,9 +75,9 @@ type BranchProps = {
 };
 
 /**
- * A group with subcategories (Салон). Closed, it is a single pill. Once the
- * group or one of its children is chosen, it unfolds sideways: the children
- * slide out of the pill on a tinted track, like a branch splitting.
+ * Дэд ангилалтай бүлэг (Салон). Хаалттай үедээ нэг товч. Бүлэг эсвэл түүний
+ * хүүхдүүдийн аль нэг сонгогдмогц хажуу тийш задарна: хүүхдүүд нь өнгөтэй зам
+ * дээгүүр товчноос гулсаж гарна, мөчир салаалах мэт.
  */
 function Branch({ group, value, open, onChange }: BranchProps): JSX.Element {
   const t = useT();
@@ -106,7 +106,7 @@ function Branch({ group, value, open, onChange }: BranchProps): JSX.Element {
           />
         }
       />
-      {/* 0fr → 1fr animates the width without measuring anything in JS. */}
+      {/* 0fr → 1fr нь JS-д юу ч хэмжилгүйгээр өргөнийг анимэйшн хийнэ. */}
       <div
         inert={!open}
         className={cn(
@@ -114,7 +114,7 @@ function Branch({ group, value, open, onChange }: BranchProps): JSX.Element {
           open ? "grid-cols-[1fr] opacity-100" : "grid-cols-[0fr] opacity-0",
         )}
       >
-        {/* Padding only while open, or the folded track would still leave a gap. */}
+        {/* Зөвхөн нээлттэй үед зай, эс бөгөөс эвхэгдсэн зам ч завсар үлдээх байсан. */}
         <div className={cn("flex min-w-0 items-center gap-1 overflow-hidden py-1", open && "px-1")}>
           {children.map((category) => (
             <Chip
@@ -138,7 +138,7 @@ type CategoryPickerProps = {
   onChange: (value: string) => void;
 };
 
-/** "Бүгд" + one pill per category group; Салон unfolds into its subcategories. */
+/** "Бүгд" + ангиллын бүлэг бүрт нэг товч; Салон дэд ангиллууд руугаа задарна. */
 export function CategoryPicker({ value, onChange }: CategoryPickerProps): JSX.Element {
   const t = useT();
   const openGroup = value === "" ? null : getFilterGroup(value).slug;

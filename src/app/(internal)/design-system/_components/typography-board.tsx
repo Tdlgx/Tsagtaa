@@ -58,6 +58,7 @@ const SPECIMENS = [
 
 const TIMES = ["09:00", "10:30", "11:15", "14:00", "17:45"] as const;
 
+/** Design system: фонтын модуляр хэмжүүр (1.25), жин, гарчгийн жишээнүүд. */
 export function TypographyBoard(): JSX.Element {
   return (
     <>

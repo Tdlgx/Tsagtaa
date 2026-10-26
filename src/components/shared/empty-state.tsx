@@ -8,11 +8,12 @@ type EmptyStateProps = {
   icon: LucideIcon;
   title: string;
   description: string;
-  /** Usually one Button that helps the user move forward. */
+  /** Ихэвчлэн хэрэглэгчийг урагшлуулахад туслах нэг товч. */
   action?: ReactNode;
   className?: string;
 };
 
+/** Хоосон төлөв: өлзий хээтэй icon, гарчиг, тайлбар, сонголтоор үйлдлийн товч. */
 export function EmptyState({
   icon: Icon,
   title,
@@ -22,7 +23,7 @@ export function EmptyState({
 }: EmptyStateProps): JSX.Element {
   return (
     <div className={cn("flex flex-col items-center px-6 py-12 text-center", className)}>
-      {/* Illustration: a faint өлзий knot behind the icon, framed by a soft disc. */}
+      {/* Чимэглэл: icon-ы ард бүдэг өлзий хээ, зөөлөн дугуйгаар хүрээлсэн. */}
       <div aria-hidden className="relative flex size-24 items-center justify-center">
         <span className="absolute inset-2 rounded-full bg-surface-muted" />
         <UlziiKnot

@@ -3,6 +3,7 @@ import {
   CalendarRange,
   ExternalLink,
   Coins,
+  Pencil,
   Phone,
   Store,
   Undo2,
@@ -35,6 +36,7 @@ import {
   getBusinessStats,
   getManagedBusiness,
   getMembers,
+  isSamplePlace,
   staffNameFor,
   type ManagedBooking,
 } from "@/features/manage/manage-db";
@@ -72,7 +74,7 @@ const PHASE_TONE = {
   cancelled: "danger",
 } as const;
 
-/** One place's dashboard, for its owner and managers (and the Цагтаа team). */
+/** Нэг газрын удирдлагын самбар, эзэмшигч болон менежерүүдэд (мөн Цагтаагийн багт). */
 export default async function BusinessDashboard(
   props: PageProps<"/dashboard/[slug]">,
 ): Promise<JSX.Element> {
@@ -100,10 +102,12 @@ export default async function BusinessDashboard(
   const Icon = getBusinessCategory(business.category as BusinessCategorySlug)?.icon ?? Store;
   const cancelRate = stats.total30 ? Math.round((stats.cancelled30 / stats.total30) * 100) : 0;
   const words = t.dashboard;
+  const editHref = (tab: string): string | undefined =>
+    isSamplePlace(slug) ? undefined : `/dashboard/${slug}/edit?tab=${tab}`;
 
   return (
     <Container className="py-8 md:py-12">
-      {/* Who and what --------------------------------------------------------- */}
+      {/* Хэн, юу --------------------------------------------------------- */}
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex items-center gap-4">
           <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-brand-ink text-primary">
@@ -153,7 +157,7 @@ export default async function BusinessDashboard(
         </p>
       ) : null}
 
-      {/* Numbers --------------------------------------------------------------- */}
+      {/* Тоон үзүүлэлт --------------------------------------------------------------- */}
       <ul className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat icon={CalendarCheck} label={words.stats.today} value={String(stats.today)} />
         <Stat icon={Wallet} label={words.stats.revenue} value={formatMNT(stats.todayRevenue)} />
@@ -162,7 +166,7 @@ export default async function BusinessDashboard(
       </ul>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        {/* Schedule ------------------------------------------------------------ */}
+        {/* Хуваарь ------------------------------------------------------------ */}
         <section aria-labelledby="schedule-title">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="schedule-title" className="font-heading text-xl font-medium text-foreground">
@@ -265,7 +269,7 @@ export default async function BusinessDashboard(
         </section>
 
         <div className="flex flex-col gap-8">
-          {/* Team -------------------------------------------------------------- */}
+          {/* Баг -------------------------------------------------------------- */}
           <section aria-labelledby="team-title">
             <h2 id="team-title" className="font-heading text-xl font-medium text-foreground">
               {words.teamTitle}
@@ -306,7 +310,7 @@ export default async function BusinessDashboard(
             </div>
           </section>
 
-          {/* How the place looks, and where it is -------------------------- */}
+          {/* Газар хэрхэн харагдах, хаана байрлах -------------------------- */}
           <section aria-labelledby="media-title">
             <h2 id="media-title" className="font-heading text-xl font-medium text-foreground">
               {t.media.title}
@@ -334,13 +338,13 @@ export default async function BusinessDashboard(
             </div>
           </section>
 
-          {/* About -------------------------------------------------------------- */}
+          {/* Тухай -------------------------------------------------------------- */}
           <section aria-labelledby="info-title">
             <h2 id="info-title" className="font-heading text-xl font-medium text-foreground">
               {words.infoTitle}
             </h2>
             <div className="mt-4 flex flex-col gap-3">
-              <InfoCard title={words.hours}>
+              <InfoCard title={words.hours} editHref={editHref("hours")} editLabel={words.edit}>
                 <ul className="flex flex-col gap-1 text-sm tabular-nums">
                   {t.register.weekdays.map((name, index) => {
                     const hours = business.hours.find((item) => item.weekday === index + 1);
@@ -355,7 +359,11 @@ export default async function BusinessDashboard(
                   })}
                 </ul>
               </InfoCard>
-              <InfoCard title={`${words.services} · ${business.services.length}`}>
+              <InfoCard
+                title={`${words.services} · ${business.services.length}`}
+                editHref={editHref("services")}
+                editLabel={words.edit}
+              >
                 <ul className="flex flex-col gap-1 text-sm">
                   {business.services.map((service) => (
                     <li key={service.name} className="flex justify-between gap-4">
@@ -367,7 +375,11 @@ export default async function BusinessDashboard(
                   ))}
                 </ul>
               </InfoCard>
-              <InfoCard title={`${words.staff} · ${business.staff.length}`}>
+              <InfoCard
+                title={`${words.staff} · ${business.staff.length}`}
+                editHref={editHref("staff")}
+                editLabel={words.edit}
+              >
                 <p className="text-sm text-foreground">
                   {business.staff.map((member) => member.name).join(", ")}
                 </p>
@@ -402,12 +414,35 @@ function Stat({
   );
 }
 
-function InfoCard({ title, children }: { title: string; children: ReactNode }): JSX.Element {
+function InfoCard({
+  title,
+  editHref,
+  editLabel,
+  children,
+}: {
+  title: string;
+  /** Хаана өөрчлөх вэ; жишээ газарт байхгүй. */
+  editHref?: string;
+  editLabel: string;
+  children: ReactNode;
+}): JSX.Element {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
-      <h3 className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {title}
-      </h3>
+      <div className="mb-2 flex items-center justify-between gap-4">
+        <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {title}
+        </h3>
+        {editHref ? (
+          <Link
+            href={editHref}
+            aria-label={`${editLabel}: ${title}`}
+            className="flex items-center gap-1 rounded-sm text-xs font-semibold text-primary-strong outline-none focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground"
+          >
+            <Pencil className="size-3.5" />
+            {editLabel}
+          </Link>
+        ) : null}
+      </div>
       {children}
     </div>
   );

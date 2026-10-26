@@ -12,6 +12,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { formatDateTime } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
+/** Админы хуудасны гарчиг, тайлбар, баруун талд нь нэмэлт товчнууд. */
 export function PageHeader({
   title,
   lead,
@@ -32,6 +33,9 @@ export function PageHeader({
   );
 }
 
+/**
+ * Тоон үзүүлэлтийн карт; `href` өгвөл бүхэлдээ холбоос болж, `highlight` анхаарал татахаар тодорно.
+ */
 export function StatCard({
   icon: Icon,
   label,
@@ -77,7 +81,7 @@ export function StatCard({
   );
 }
 
-/** A plain GET form, so a search is a link that can be shared and reloaded. */
+/** Энгийн GET маягт, ингэснээр хайлт нь хуваалцаж, дахин ачаалж болох холбоос болно. */
 export function SearchBar({
   action,
   value,
@@ -87,7 +91,7 @@ export function SearchBar({
   action: string;
   value: string;
   placeholder: string;
-  /** Other query parameters to carry along (the current filter). */
+  /** Хамт дамжуулах бусад query параметрүүд (одоогийн шүүлтүүр). */
   keep?: Record<string, string>;
 }): JSX.Element {
   return (
@@ -109,6 +113,10 @@ export function SearchBar({
   );
 }
 
+/**
+ * Шүүлтүүрийн сонголтуудыг холбоос болгон харуулна; сонгосон нь `aria-current`-тэй, тоо байвал
+ * хажууд нь.
+ */
 export function FilterLinks<T extends string>({
   options,
   current,
@@ -143,6 +151,7 @@ export function FilterLinks<T extends string>({
   );
 }
 
+/** Жагсаалт хоосон үед харуулах тасархай хүрээтэй мэдэгдэл. */
 export function Empty({ children }: { children: ReactNode }): JSX.Element {
   return (
     <p className="rounded-xl border border-dashed border-border bg-surface px-5 py-10 text-center text-sm text-muted-foreground">
@@ -151,6 +160,9 @@ export function Empty({ children }: { children: ReactNode }): JSX.Element {
   );
 }
 
+/**
+ * Газрын товч мэдээлэл: ангиллын icon, нэр (сонголтоор шалгах хуудас руу холбоос), хаяг, тоонууд.
+ */
 export function PlaceSummary({
   place,
   t,
@@ -158,7 +170,7 @@ export function PlaceSummary({
 }: {
   place: BusinessListItem;
   t: Dictionary;
-  /** The name opens the place's review page. */
+  /** Нэр дээр дарахад газрын шалгах хуудас нээгдэнэ. */
   link?: boolean;
 }): JSX.Element {
   const category = place.category as BusinessCategorySlug;
@@ -202,6 +214,7 @@ export function PlaceSummary({
   );
 }
 
+/** Үйлдлийн түүхийн бичлэгүүд: хэзээ, хэн, юу хийсэн, хэнд/юунд, нэмэлт тайлбартай. */
 export function AuditList({ entries, t }: { entries: AuditEntry[]; t: Dictionary }): JSX.Element {
   const words = t.admin.activity;
   if (entries.length === 0) return <Empty>{words.empty}</Empty>;

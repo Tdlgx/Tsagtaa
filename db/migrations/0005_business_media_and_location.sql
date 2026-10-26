@@ -1,7 +1,7 @@
--- What a place looks like and where it is: a logo, photos, and a map pin.
+-- Газар ямар харагддаг, хаана байрладаг: лого, зураг, газрын зураг дээрх цэг.
 
--- A pin on the map. Both or neither; inside Ulaanbaatar and a margin around
--- it, so a pin dropped on the wrong continent is refused, not stored.
+-- Газрын зураг дээрх цэг. Хоёулаа байна эсвэл хоёулаа байхгүй. Улаанбаатар болон түүний
+-- орчмын хүрээнд байх ёстой, буруу тивд тавьсан цэгийг хадгалахгүй, татгалзана.
 ALTER TABLE businesses
   ADD COLUMN latitude  double precision,
   ADD COLUMN longitude double precision,
@@ -10,14 +10,14 @@ ALTER TABLE businesses
     latitude IS NULL OR (latitude BETWEEN 47.6 AND 48.2 AND longitude BETWEEN 106.4 AND 107.6)
   );
 
--- Images are resized in the browser (logo 256 px, photos up to 1600 px)
--- and kept here: a few hundred KB each, served by /api/business-images/<id>
--- with a long cache, since an image never changes under the same id.
+-- Зургийг browser дээр жижигрүүлж (лого 256 px, зураг 1600 px хүртэл) энд хадгална.
+-- Тус бүр хэдэн зуун KB, /api/business-images/<id>-ээр урт хугацааны cache-тэй
+-- үйлчилнэ, учир нь нэг id-тай зураг хэзээ ч өөрчлөгддөггүй.
 CREATE TABLE business_images (
   id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id  uuid        NOT NULL REFERENCES businesses (id) ON DELETE CASCADE,
   kind         text        NOT NULL,
-  -- Order of the photos; the logo is always 0.
+  -- Зургуудын дараалал; лого үргэлж 0.
   position     smallint    NOT NULL DEFAULT 0,
   content_type text        NOT NULL,
   bytes        bytea       NOT NULL,
@@ -27,11 +27,11 @@ CREATE TABLE business_images (
   created_at   timestamptz NOT NULL DEFAULT now(),
 
   CONSTRAINT business_images_kind_valid CHECK (kind IN ('logo', 'photo')),
-  -- Only formats we produce ourselves; never SVG (it can carry scripts).
+  -- Зөвхөн бидний өөрсдөө үүсгэдэг форматууд; SVG хэзээ ч болохгүй (script агуулж болно).
   CONSTRAINT business_images_type_valid CHECK (content_type IN ('image/webp', 'image/jpeg')),
   CONSTRAINT business_images_size CHECK (octet_length(bytes) BETWEEN 100 AND 800000),
   CONSTRAINT business_images_dimensions CHECK (width BETWEEN 16 AND 4096 AND height BETWEEN 16 AND 4096)
 );
--- One logo per place: uploading a new one replaces it in a transaction.
+-- Нэг газар нэг лого: шинийг оруулахад transaction дотор хуучныг солино.
 CREATE UNIQUE INDEX business_images_one_logo ON business_images (business_id) WHERE kind = 'logo';
 CREATE INDEX business_images_business_idx ON business_images (business_id, kind, position);

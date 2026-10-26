@@ -11,12 +11,12 @@ function toIcsDate(date: Date): string {
     .replace(/\.\d{3}/, "");
 }
 
-/** Commas, semicolons and backslashes are special in iCalendar text. */
+/** iCalendar текстэд таслал, цэг таслал, backslash тусгай утгатай. */
 function escapeText(text: string): string {
   return text.replace(/[\\;,]/g, (char) => `\\${char}`).replace(/\n/g, "\\n");
 }
 
-/** An .ics event with a 1-hour reminder; opens in Apple, Google and Outlook calendars. */
+/** 1 цагийн өмнө сануулгатай .ics үйл явдал; Apple, Google, Outlook хуанлид нээгдэнэ. */
 export function toIcs(stored: Booking, locale: Locale): string {
   const t = getDictionary(locale);
   const booking = localizeBooking(stored, locale);
@@ -45,6 +45,7 @@ export function toIcs(stored: Booking, locale: Locale): string {
   ].join("\r\n");
 }
 
+/** Захиалгыг .ics файл болгон татуулж, хэрэглэгчийн хуанлид нэмэх боломж олгоно. */
 export function downloadIcs(booking: Booking, locale: Locale): void {
   const blob = new Blob([toIcs(booking, locale)], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -52,6 +53,6 @@ export function downloadIcs(booking: Booking, locale: Locale): void {
   link.href = url;
   link.download = `${booking.code}.ics`;
   link.click();
-  // Revoking right away can cancel the download in Safari; give it a moment.
+  // Шууд revoke хийвэл Safari татаж авалтыг цуцалж магадгүй; бага зэрэг хугацаа өгнө.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

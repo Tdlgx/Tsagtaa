@@ -5,8 +5,8 @@ import { controlStyles } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
 /**
- * Styled native <select>. On phones it opens the system picker, which is
- * faster, fully accessible and needs no JavaScript.
+ * Стиль өгсөн native <select>. Утсан дээр системийн сонгогчийг нээнэ: илүү хурдан,
+ * бүрэн хүртээмжтэй, JavaScript хэрэггүй.
  */
 function Select({ className, children, ...props }: ComponentProps<"select">): JSX.Element {
   return (

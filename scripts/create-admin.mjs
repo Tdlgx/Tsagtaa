@@ -1,7 +1,7 @@
-// Creates (or promotes) a Цагтаа platform admin account.
-//   ADMIN_PASSWORD='a long password' npm run admin:create -- 99112233 "Бат-Эрдэнэ"
-// The password comes from the environment, never from the command line,
-// so it does not end up in shell history.
+// Цагтаагийн платформын админ бүртгэл үүсгэнэ (эсвэл байгаа бүртгэлийг админ болгоно).
+//   ADMIN_PASSWORD='урт нууц үг' npm run admin:create -- 99112233 "Бат-Эрдэнэ"
+// Нууц үгийг командын мөрөөс биш environment-ээс авна. Ингэснээр shell-ийн
+// түүхэнд үлдэхгүй.
 import { randomBytes, scrypt } from "node:crypto";
 import { promisify } from "node:util";
 
@@ -18,7 +18,7 @@ if (!/^[6-9]\d{7}$/.test(phone ?? "") || name.length < 2 || password.length < 8)
   process.exit(1);
 }
 
-// Same format as src/lib/auth/password.ts: scrypt$N$r$p$salt$hash.
+// src/lib/auth/password.ts-тэй ижил формат: scrypt$N$r$p$salt$hash.
 const N = 16384;
 const r = 8;
 const p = 1;
@@ -28,9 +28,9 @@ const passwordHash = `scrypt$${N}$${r}$${p}$${salt.toString("base64")}$${hash.to
 
 const url = new URL(process.env.DATABASE_URL);
 url.searchParams.delete("schema");
-// Neon adds this; the driver does not support it (see src/lib/db.ts).
+// Neon үүнийг нэмдэг ч driver нь дэмждэггүй (src/lib/db.ts-ийг үз).
 url.searchParams.delete("channel_binding");
-// One address instead of ::1 + 127.0.0.1 (see src/lib/db.ts).
+// ::1 + 127.0.0.1 хоёрын оронд нэг хаяг (src/lib/db.ts-ийг үз).
 if (url.hostname === "localhost") url.hostname = "127.0.0.1";
 const sql = postgres(url.toString(), { max: 1, onnotice: () => {} });
 

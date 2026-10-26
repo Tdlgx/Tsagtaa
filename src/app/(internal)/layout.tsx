@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** Internal tools (e.g. /design-system) exist only in development; production gets a 404. */
+/** Дотоод хэрэгслүүд (жишээ нь /design-system) зөвхөн хөгжүүлэлтэд байна; production-д 404. */
 export default function InternalLayout({ children }: { children: ReactNode }): ReactNode {
   if (env.NODE_ENV === "production") {
     notFound();

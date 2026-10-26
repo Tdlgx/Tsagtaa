@@ -1,21 +1,21 @@
-/** Largest photo accepted before shrinking (phone cameras produce 3–12 MB). */
+/** Жижигрүүлэхээс өмнө хүлээн авах хамгийн том зураг (утасны камер 3–12 MB үүсгэдэг). */
 export const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
-/** Side of the stored square, px: sharp at 2× for the 80 px avatar. */
+/** Хадгалах дөрвөлжингийн тал, px: 80 px avatar-д 2× дээр хурц. */
 const SIDE = 320;
 
 export type AvatarError = "notImage" | "tooLarge" | "failed";
 
 /**
- * A chosen photo → a centred square JPEG data URL, small enough to keep in
- * localStorage. The photo is decoded and redrawn in the browser, so nothing
- * is uploaded and any EXIF data (location, camera) is left behind.
+ * Сонгосон зураг → голлуулсан дөрвөлжин JPEG data URL, localStorage-д багтахаар
+ * жижиг. Зургийг browser дээр decode хийж дахин зурдаг тул юу ч upload хийгдэхгүй,
+ * EXIF мэдээлэл (байршил, камер) үлдэхгүй.
  */
 export async function toAvatar(file: File): Promise<string | AvatarError> {
   if (!file.type.startsWith("image/")) return "notImage";
   if (file.size > MAX_SOURCE_BYTES) return "tooLarge";
 
   try {
-    // `imageOrientation: "from-image"` keeps phone photos the right way up.
+    // `imageOrientation: "from-image"` утасны зургийг зөв чиглэлтэй байлгана.
     const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
     const side = Math.min(bitmap.width, bitmap.height);
     const canvas = document.createElement("canvas");
@@ -38,7 +38,7 @@ export async function toAvatar(file: File): Promise<string | AvatarError> {
     bitmap.close();
     return canvas.toDataURL("image/jpeg", 0.85);
   } catch {
-    // HEIC on browsers that can't decode it, or a broken file.
+    // Decode хийж чаддаггүй browser дээрх HEIC, эсвэл эвдэрсэн файл.
     return "failed";
   }
 }

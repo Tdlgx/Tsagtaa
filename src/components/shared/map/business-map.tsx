@@ -18,7 +18,7 @@ export type MapPlace = {
   name: string;
   lat: number;
   lng: number;
-  /** /api/business-images/<id>, or null for a lettered pin. */
+  /** /api/business-images/<id>, эсвэл үсэгтэй цэгийн хувьд null. */
   logoUrl: string | null;
 };
 
@@ -26,7 +26,7 @@ type BusinessMapProps = {
   places: readonly MapPlace[];
   selected?: string | null;
   onSelect?: (slug: string) => void;
-  /** Describes the map for screen readers; the list next to it carries the details. */
+  /** Газрын зургийг screen reader-т тайлбарлана; дэлгэрэнгүйг хажуугийн жагсаалт агуулна. */
   label: string;
   className?: string;
 };
@@ -51,9 +51,9 @@ function pinIcon(L: LeafletModule, place: MapPlace, selected: boolean): Leaflet.
 }
 
 /**
- * Businesses as pins on a map of Ulaanbaatar. Choosing a pin calls
- * `onSelect`; the page shows the details beside it. The page scrolls past
- * the map until it is clicked, then the mouse wheel zooms it.
+ * Бизнесүүдийг Улаанбаатарын газрын зураг дээр цэгээр харуулна. Цэг сонгоход
+ * `onSelect` дуудагдах ба хуудас хажууд нь дэлгэрэнгүйг харуулна. Газрын зураг дээр
+ * дарах хүртэл хуудас түүнийг алгасч гүйлгэгдэх ба дарсны дараа хулганы дугуй томруулна.
  */
 export function BusinessMap({
   places,
@@ -74,7 +74,7 @@ export function BusinessMap({
     onSelectRef.current = onSelect;
   });
 
-  // Create the map once.
+  // Газрын зургийг нэг удаа үүсгэнэ.
   useEffect(() => {
     let cancelled = false;
     void loadLeaflet().then((L) => {
@@ -97,7 +97,7 @@ export function BusinessMap({
     };
   }, []);
 
-  // Light or dark tiles with the site theme.
+  // Сайтын theme-ийн дагуу цайвар эсвэл бараан хавтан.
   useEffect(() => {
     const current = state.current;
     if (!ready || !current) return;
@@ -105,7 +105,7 @@ export function BusinessMap({
     current.tiles = tileLayer(current.L, theme).addTo(current.map);
   }, [theme, ready]);
 
-  // Pins: rebuilt when the places change, then the view fits them all.
+  // Цэгүүд: газрууд өөрчлөгдөхөд дахин үүсч, дараа нь харагдац бүгдийг нь багтаана.
   useEffect(() => {
     const current = state.current;
     if (!ready || !current) return;
@@ -134,7 +134,7 @@ export function BusinessMap({
     }
   }, [places, ready]);
 
-  // The chosen pin stands out and comes into view.
+  // Сонгосон цэг тодорч, харагдах хүрээнд орно.
   useEffect(() => {
     const current = state.current;
     if (!ready || !current) return;

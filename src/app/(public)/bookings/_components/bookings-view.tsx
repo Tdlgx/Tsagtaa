@@ -63,6 +63,7 @@ function mapsUrl(booking: Booking): string {
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 
+/** "Миний захиалгууд": ирэх захиалгыг тасалбараар, бусдыг өдрөөр бүлэглэн харуулна. */
 export function BookingsView(): JSX.Element {
   const bookings = useBookings();
   const now = useNow(30_000);
@@ -169,14 +170,14 @@ export function BookingsView(): JSX.Element {
 
 /* -------------------------------------------------------------------------- */
 
-/** The next booking as a ticket, with a live countdown, prep tip and actions. */
+/** Дараагийн захиалгыг тасалбар хэлбэрээр, амьд тоолуур, бэлтгэлийн зөвлөгөө, үйлдлүүдтэй харуулна. */
 function NextUp({ entry, now }: { entry: Entry; now: number }): JSX.Element {
   const locale = useLocale();
   const t = useT();
   const { booking, phase } = entry;
   const start = new Date(booking.startsAt).getTime();
   const created = new Date(booking.createdAt).getTime();
-  // How much of the wait (from booking to start) has passed: fills the bar.
+  // Хүлээлтийн (захиалснаас эхлэх хүртэл) хэр хэсэг өнгөрсөн бэ: зурвасыг дүүргэнэ.
   const progress =
     phase === "now" ? 1 : Math.min(1, Math.max(0.03, (now - created) / (start - created || 1)));
   const dayLabel = formatRelativeDay(booking.startsAt, new Date(now), locale);
@@ -259,7 +260,7 @@ function NextUp({ entry, now }: { entry: Entry; now: number }): JSX.Element {
 
 type TimelineProps = { entries: readonly Entry[]; now: Date; empty: string };
 
-/** Bookings grouped by day, each on a vertical time line. */
+/** Өдрөөр бүлэглэсэн захиалгууд, тус бүр босоо цагийн шугам дээр. */
 function Timeline({ entries, now, empty }: TimelineProps): JSX.Element {
   const locale = useLocale();
   if (entries.length === 0) {
@@ -320,7 +321,7 @@ function TimelineItem({ entry, now }: { entry: Entry; now: Date }): JSX.Element 
         <p className="text-xs text-muted-foreground">{formatTime(getEndsAt(booking))}</p>
       </div>
 
-      {/* Rail: a line through every item, with a dot at each booking. */}
+      {/* Төмөр зам: бүх зүйлийг дайрсан шугам, захиалга бүр дээр цэгтэй. */}
       <div aria-hidden className="relative flex justify-center">
         <span className="absolute inset-y-0 w-px bg-border group-first/item:top-5 group-last/item:bottom-auto group-last/item:h-5" />
         <span

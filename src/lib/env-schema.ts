@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 /**
- * Zod schemas for every environment variable the app reads.
+ * Аппын уншдаг бүх environment хувьсагчийн Zod schema.
  *
- * This module holds no values, only rules, so it is safe to import anywhere:
- * from `next.config.ts` (startup validation), from `env.ts` (server) and
- * from `public-env.ts` (browser).
+ * Энэ модуль утга агуулдаггүй, зөвхөн дүрэм тул хаанаас ч import хийхэд аюулгүй:
+ * `next.config.ts` (эхлэх үеийн шалгалт), `env.ts` (сервер) болон
+ * `public-env.ts` (browser)-ээс.
  */
 
 const EXAMPLE_HINT = "`.env.example` файлыг харна уу.";
@@ -20,7 +20,11 @@ function requiredString(hint: string): z.ZodString {
     .min(1, `Хоосон байна. ${hint}`);
 }
 
-/** Variables that are allowed to reach the browser (must start with NEXT_PUBLIC_). */
+/** .env-д хоосон үлдээсэн `KEY=` нь "тохируулаагүй" гэсэн үг, ингэснээр сонголттой утга сонголттой хэвээр. */
+const emptyAsUnset = (value: unknown): unknown =>
+  typeof value === "string" && value.trim() === "" ? undefined : value;
+
+/** Browser руу очиж болох хувьсагчид (NEXT_PUBLIC_-ээр эхлэх ёстой). */
 export const publicEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: requiredString("Жишээ: http://localhost:3000").pipe(
     z.url({
@@ -31,7 +35,7 @@ export const publicEnvSchema = z.object({
   NEXT_PUBLIC_APP_NAME: requiredString("Жишээ: Цагтаа"),
 });
 
-/** Variables that must never leave the server (secrets, connection strings). */
+/** Серверээс хэзээ ч гарч болохгүй хувьсагчид (нууц мэдээлэл, холболтын string). */
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: requiredString(EXAMPLE_HINT).pipe(
@@ -40,9 +44,22 @@ export const serverEnvSchema = z.object({
       error: "postgresql://-ээр эхэлсэн PostgreSQL холболтын URL байх ёстой.",
     }),
   ),
+  // Имэйлээр нэвтрэх код: SMTP-ээр (App Password-той Gmail бүртгэлд домэйн хэрэггүй)
+  // эсвэл Resend-ээр (өөрийн домэйн шаардана). Аль нь ч байхгүй бол хөгжүүлэлтэд
+  // кодыг terminal-д хэвлэж, production дээр имэйл ашиглах боломжгүй гэж хэлнэ.
+  SMTP_USER: z.preprocess(emptyAsUnset, z.string().trim().optional()),
+  SMTP_PASSWORD: z.preprocess(emptyAsUnset, z.string().optional()),
+  SMTP_HOST: z.preprocess(emptyAsUnset, z.string().trim().default("smtp.gmail.com")),
+  SMTP_PORT: z.preprocess(emptyAsUnset, z.coerce.number().int().default(465)),
+  RESEND_API_KEY: z.preprocess(
+    emptyAsUnset,
+    z.string().trim().startsWith("re_", "re_-ээр эхэлсэн Resend API key байх ёстой.").optional(),
+  ),
+  // Inbox-д харагдах илгээгч. Анхдагчаар SMTP бүртгэл, эсвэл Resend-ийн туршилтын илгээгч.
+  EMAIL_FROM: z.preprocess(emptyAsUnset, z.string().trim().min(3).optional()),
 });
 
-/** Full schema used on the server and at startup. */
+/** Сервер дээр болон эхлэх үед ашиглагдах бүрэн schema. */
 export const envSchema = serverEnvSchema.extend(publicEnvSchema.shape);
 
 export type PublicEnv = z.output<typeof publicEnvSchema>;
@@ -69,8 +86,8 @@ function formatEnvError(error: z.ZodError): string {
 }
 
 /**
- * Validates `source` against `schema` and returns typed, parsed values.
- * Throws one readable error listing every invalid variable at once.
+ * `source`-ийг `schema`-тай тулгаж, төрөлтэй, parse хийсэн утгуудыг буцаана.
+ * Буруу бүх хувьсагчийг нэг дор жагсаасан нэг уншигдахуйц алдаа шиднэ.
  */
 export function parseEnv<TSchema extends z.ZodType>(
   schema: TSchema,

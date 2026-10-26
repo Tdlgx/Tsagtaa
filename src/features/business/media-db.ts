@@ -4,8 +4,8 @@ import type { LatLng } from "@/features/business/locations";
 import { sql } from "@/lib/db";
 
 /*
- * A place's logo, photos and map pin. Callers check who is asking first
- * (`requireBusinessAccess`); these functions only store and read.
+ * Газрын лого, зураг, байршлын цэг. Дуудагчид эхлээд хэн асууж байгааг шалгана
+ * (`requireBusinessAccess`); эдгээр функцууд зөвхөн хадгалж, уншина.
  */
 
 export const MAX_PHOTOS = 6;
@@ -27,9 +27,9 @@ export type ImageUpload = {
 };
 
 /**
- * The type is read from the file itself, never taken from the browser:
- * only WebP and JPEG (what our resizer produces) get through. Anything else,
- * SVG included, which can carry scripts, is refused.
+ * Төрлийг browser-оос хэзээ ч авахгүй, файлаас өөрөөс нь уншина: зөвхөн WebP
+ * болон JPEG (манай жижигрүүлэгчийн үүсгэдэг) нэвтэрнэ. Бусад бүх зүйл, тэр дундаа
+ * script агуулж болох SVG татгалзагдана.
  */
 export function sniffImageType(bytes: Uint8Array): "image/webp" | "image/jpeg" | null {
   const ascii = (from: number, to: number): string => String.fromCharCode(...bytes.slice(from, to));
@@ -40,6 +40,7 @@ export function sniffImageType(bytes: Uint8Array): "image/webp" | "image/jpeg" |
   return null;
 }
 
+/** Газрын бүх зураг (лого эхэнд, дараа нь зургууд дарааллаар). */
 export async function listImages(businessId: string): Promise<BusinessImage[]> {
   return sql<BusinessImage[]>`
     SELECT id, kind, position, width, height FROM business_images
@@ -48,7 +49,7 @@ export async function listImages(businessId: string): Promise<BusinessImage[]> {
   `;
 }
 
-/** A new logo replaces the old one in one transaction (the index allows one). */
+/** Шинэ лого хуучныг нэг transaction дотор орлоно (index нэгийг л зөвшөөрнө). */
 export async function saveLogo(
   businessId: string,
   upload: ImageUpload,
@@ -70,8 +71,8 @@ export async function saveLogo(
 export type AddPhotoResult = { ok: true; id: string } | { ok: false; reason: "limit" };
 
 /**
- * Adds a photo at the end. The place's row is locked first, so two uploads
- * at the same moment cannot both squeeze in as the sixth.
+ * Зургийг төгсгөлд нэмнэ. Эхлээд газрын мөрийг lock хийдэг тул яг нэг мөчид
+ * хоёр upload хоёулаа зургаа дахь болж багтах боломжгүй.
  */
 export async function addPhoto(
   businessId: string,
@@ -97,6 +98,7 @@ export async function addPhoto(
   });
 }
 
+/** Газрын нэг зургийг устгана; өөр газрын зургийг устгаж чадахгүй. */
 export async function deleteImage(businessId: string, imageId: string): Promise<boolean> {
   const rows = await sql`
     DELETE FROM business_images WHERE id = ${imageId} AND business_id = ${businessId}
@@ -105,7 +107,7 @@ export async function deleteImage(businessId: string, imageId: string): Promise<
   return rows.length > 0;
 }
 
-/** Sets the pin, or removes it with `null`. The database also checks the area. */
+/** Цэгийг тохируулна, эсвэл `null`-оор хасна. DB мөн бүсийг шалгана. */
 export async function setLocation(businessId: string, location: LatLng | null): Promise<boolean> {
   const rows = await sql`
     UPDATE businesses
@@ -123,7 +125,7 @@ export type StoredImage = {
   slug: string;
 };
 
-/** For the image route: the bytes, and whose they are (to decide who may see them). */
+/** Зургийн route-д: byte-ууд болон хэнийх вэ (хэн харж болохыг шийдэхэд). */
 export async function getStoredImage(id: string): Promise<StoredImage | null> {
   const [row] = await sql<StoredImage[]>`
     SELECT i.content_type AS "contentType", i.bytes, b.status, b.slug
@@ -147,7 +149,7 @@ export type MapBusiness = {
   createdAt: Date;
 };
 
-/** Every live place with a pin, newest first, with its logo and first photo. */
+/** Цэгтэй бүх идэвхтэй газар, шинэ нь эхэндээ, лого болон эхний зурагтайгаа. */
 export async function getMapBusinesses(): Promise<MapBusiness[]> {
   return sql<MapBusiness[]>`
     SELECT b.slug, b.name, b.category, b.district, b.address, b.phone,

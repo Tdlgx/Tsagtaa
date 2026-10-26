@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const first = (value: string | string[] | undefined): string =>
   (Array.isArray(value) ? value[0] : value) ?? "";
 
-/** Support desk: find a booking by its code, the customer's phone or the place. */
+/** Тусламжийн хэсэг: захиалгыг кодоор, үйлчлүүлэгчийн утсаар эсвэл газраар нь хайна. */
 export default async function AdminBookingsPage(
   props: PageProps<"/admin/bookings">,
 ): Promise<JSX.Element> {

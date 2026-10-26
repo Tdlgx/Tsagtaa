@@ -15,10 +15,10 @@ import { getStaff } from "@/features/staff/sample-staff";
 import type { Locale } from "@/i18n/config";
 import { withDeadline } from "@/lib/db";
 
-/** A start time on the board; `taken` = someone booked it since the schedule was made. */
+/** Самбар дээрх эхлэх цаг; `taken` = хуваарь гарснаас хойш хэн нэгэн захиалсан. */
 export type BoardSlot = { time: string; taken: boolean };
 
-/** One place on the home page board, already in the visitor's language. */
+/** Нүүр хуудасны самбар дээрх нэг газар, аль хэдийн зочны хэл дээр. */
 export type BoardRow = {
   slug: string;
   name: string;
@@ -28,23 +28,22 @@ export type BoardRow = {
   group: CategoryGroupSlug;
   rating: number;
   reviewCount: number;
-  /** The row shows the place's first (most booked) service. */
+  /** Мөр газрын эхний (хамгийн их захиалагддаг) үйлчилгээг харуулна. */
   serviceIndex: number;
   service: string;
   price: number;
-  /** Minutes. */
+  /** Минут. */
   duration: number;
   slots: Record<SearchDay, BoardSlot[]>;
 };
 
 /**
- * Every place's open times for today and tomorrow, with the ones already
- * booked in the database marked, using the same rule as the booking page: a
- * time is free while someone on duty then has the whole service length free.
- * If the database cannot be reached, the plain schedule is shown.
+ * Газар бүрийн өнөөдөр, маргаашийн сул цагууд, DB-д аль хэдийн захиалагдсаныг нь
+ * тэмдэглэсэн, захиалгын хуудастай ижил дүрмээр: тэр үед ажиллаж буй хэн нэгэнд
+ * үйлчилгээний бүтэн хугацаа сул байвал цаг сул. DB-д хүрч чадахгүй бол энгийн хуваарийг харуулна.
  */
 export async function getBoardRows(locale: Locale, now: Date): Promise<BoardRow[]> {
-  // The samples and every approved registered place.
+  // Жишээ газрууд болон зөвшөөрөгдсөн бүх бүртгэлтэй газар.
   const listings = await getListings();
   const { from, to } = getBookableWindow(now);
   let ranges: Awaited<ReturnType<typeof getTakenRangesForMany>> = [];

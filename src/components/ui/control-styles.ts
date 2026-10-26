@@ -1,7 +1,7 @@
 /**
- * Shared look of text-like form controls (Input, Textarea, Select).
- * 16px text on every screen: iOS Safari zooms the page into any field whose
- * font is smaller than 16px, which breaks the layout on phones.
+ * Текст төрлийн маягтын удирдлагуудын (Input, Textarea, Select) нийтлэг харагдац.
+ * Бүх дэлгэцэнд 16px текст: iOS Safari фонт нь 16px-ээс жижиг талбар руу хуудсыг
+ * томруулдаг тул утсан дээр layout эвдэрнэ.
  */
 export const controlStyles = [
   "w-full min-w-0 rounded-md border border-input bg-surface px-4 text-base text-foreground",

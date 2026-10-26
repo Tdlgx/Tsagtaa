@@ -4,9 +4,9 @@ import type { LedgerEntry, LoyaltySettings, PointsSummary } from "@/features/poi
 import { sql } from "@/lib/db";
 
 /**
- * A booking's points arrive when the place marks the customer as having come,
- * or, if nobody marks it, a day after the visit ends. Within that day the
- * place can still mark a no-show, which earns nothing.
+ * Захиалгын оноо газар үйлчлүүлэгчийг ирсэн гэж тэмдэглэхэд, эсвэл хэн ч
+ * тэмдэглээгүй бол айлчлал дууссанаас нэг өдрийн дараа ирнэ. Тэр нэг өдрийн дотор
+ * газар ирээгүй гэж тэмдэглэж чадах бөгөөд тэр нь юу ч олгохгүй.
  */
 export const SETTLE_AFTER_HOURS = 24;
 
@@ -17,6 +17,7 @@ const DISABLED: LoyaltySettings = {
   maxRedeemPercent: 0,
 };
 
+/** Онооны дүрмүүд; хүснэгтэд мөр байхгүй бол оноо унтраалттай гэж үзнэ. */
 export async function getLoyaltySettings(): Promise<LoyaltySettings> {
   const [row] = await sql<LoyaltySettings[]>`
     SELECT enabled, earn_percent AS "earnPercent", min_redeem AS "minRedeem",
@@ -27,11 +28,11 @@ export async function getLoyaltySettings(): Promise<LoyaltySettings> {
 }
 
 /**
- * Credits the points of this customer's visits that are past the marking
- * window. Safe to run any number of times, even concurrently: the ledger
- * allows one "earn" per booking, so a second run inserts nothing.
+ * Тэмдэглэх хугацаа нь өнгөрсөн энэ үйлчлүүлэгчийн айлчлалуудын оноог олгоно.
+ * Хэдэн ч удаа, тэр байтугай зэрэг ажиллуулахад аюулгүй: ledger захиалга бүрт нэг
+ * "earn" зөвшөөрдөг тул хоёр дахь удаа юу ч оруулахгүй.
  */
-/** Returns the points credited now (0 when nothing was due). */
+/** Одоо олгосон оноог буцаана (олгох юм байхгүй бол 0). */
 export async function settleEarnedPoints(accountId: string): Promise<number> {
   const rows = await sql<{ delta: number }[]>`
     INSERT INTO points_ledger (account_id, delta, kind, booking_id)
@@ -48,6 +49,9 @@ export async function settleEarnedPoints(accountId: string): Promise<number> {
   return rows.reduce((sum, row) => sum + row.delta, 0);
 }
 
+/**
+ * Профайлд зориулсан онооны мэдээлэл: үлдэгдэл, хүлээгдэж буй, нийт олсон/зарцуулсан, түүх, дүрэм.
+ */
 export async function getPointsSummary(accountId: string): Promise<PointsSummary> {
   await settleEarnedPoints(accountId);
   const [[totals], history, settings] = await Promise.all([
@@ -79,6 +83,7 @@ export async function getPointsSummary(accountId: string): Promise<PointsSummary
   };
 }
 
+/** Бүртгэлийн онооны түүх, шинэ нь эхэндээ, холбогдох захиалгын мэдээлэлтэй. */
 export async function getLedger(accountId: string, limit: number): Promise<LedgerEntry[]> {
   const rows = await sql<
     (Omit<LedgerEntry, "createdAt" | "id"> & { id: bigint | string; createdAt: Date })[]
@@ -100,7 +105,7 @@ export async function getLedger(accountId: string, limit: number): Promise<Ledge
   }));
 }
 
-/** The balance to offer on a booking form, with any due visits credited first. */
+/** Захиалгын маягтад санал болгох үлдэгдэл, хугацаа нь болсон айлчлалуудыг эхлээд олгоно. */
 export async function getSpendableBalance(accountId: string): Promise<number> {
   await settleEarnedPoints(accountId);
   const [row] = await sql<{ balance: number }[]>`

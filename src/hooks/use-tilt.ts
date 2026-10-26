@@ -14,11 +14,11 @@ type TiltProps<T extends HTMLElement> = {
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 
 /**
- * Drives the `tilt-3d` utility: the point under the cursor or finger sinks
- * back (so each corner can be pressed in) and a light follows it. Spread the
- * result on the element. Writes CSS variables directly, at most once a frame,
- * so moving never re-renders React. A touch drag that turns into a scroll
- * fires `pointercancel`, which lets the card settle back.
+ * `tilt-3d` utility-г удирдана: курсор эсвэл хурууны доорх цэг хойшоо шигдэнэ (булан
+ * бүрийг дарж болно) ба гэрэл түүнийг дагана. Үр дүнг элемент дээр задалж тавина.
+ * CSS хувьсагчдыг шууд, кадрт хамгийн ихдээ нэг удаа бичдэг тул хөдлөх нь React-ийг
+ * хэзээ ч дахин render хийлгэхгүй. Гүйлгэлт болж хувирсан мэдрэгчийн чирэлт
+ * `pointercancel` үүсгэх ба карт буцаж тогтоно.
  */
 export function useTilt<T extends HTMLElement>(maxDegrees = 8): TiltProps<T> {
   const ref = useRef<T>(null);
@@ -47,7 +47,7 @@ export function useTilt<T extends HTMLElement>(maxDegrees = 8): TiltProps<T> {
     const node = ref.current;
     if (!node) return;
     delete node.dataset.tilt;
-    // The light keeps its last position so it fades out where it was.
+    // Гэрэл сүүлийн байрлалаа хадгалдаг тул байсан газраа бүдгэрч алга болно.
     for (const name of ["--tilt-rx", "--tilt-ry", "--tilt-scale"]) {
       node.style.removeProperty(name);
     }

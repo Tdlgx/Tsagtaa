@@ -1,12 +1,11 @@
 import { parseEnv, publicEnvSchema, type PublicEnv } from "@/lib/env-schema";
 
 /**
- * Validated NEXT_PUBLIC_* variables, safe to use in both Server and Client Components.
+ * Шалгагдсан NEXT_PUBLIC_* хувьсагчид, Server болон Client Component-д хоёуланд аюулгүй.
  *
- * Each variable is referenced explicitly (`process.env.NEXT_PUBLIC_...`) because
- * Next.js only inlines public variables into the browser bundle when it can see
- * the full name at build time. `parseEnv(publicEnvSchema, process.env)` would be
- * empty in the browser.
+ * Хувьсагч бүрийг тодорхой (`process.env.NEXT_PUBLIC_...`) нэрлэдэг, учир нь Next.js
+ * нийтийн хувьсагчдыг зөвхөн build хийх үед бүтэн нэрийг нь харж чадвал browser
+ * bundle-д шингээдэг. `parseEnv(publicEnvSchema, process.env)` browser дээр хоосон байна.
  */
 export const publicEnv: PublicEnv = parseEnv(publicEnvSchema, {
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

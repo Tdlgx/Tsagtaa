@@ -113,6 +113,9 @@ const BRIEF = [
   { label: "Grid", value: "4pt · 4/8/12 багана · 1200px · 20/32px зах" },
 ] as const;
 
+/**
+ * Дизайн системийн бүх artboard-ыг нэг canvas дээр харуулах дотоод хуудас (зөвхөн хөгжүүлэлтэд).
+ */
 export default function DesignSystemPage(): JSX.Element {
   return (
     <>

@@ -4,10 +4,10 @@ import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { isPgError, PG, sql } from "@/lib/db";
 
-/** Thrown inside the transaction to undo it: the phone has an account with another password. */
+/** Transaction-ийг буцаахын тулд дотор нь шиддэг: утас өөр нууц үгтэй бүртгэлтэй. */
 class WrongOwnerPassword extends Error {}
 
-/** Addresses already used by the sample listings, which live in code, not in the table. */
+/** Жишээ газруудын аль хэдийн эзэлсэн хаягууд, тэд хүснэгтэд биш, кодонд байдаг. */
 const RESERVED_SLUGS = new Set(SAMPLE_BUSINESSES.map((business) => business.slug));
 
 export type NewBusiness = {
@@ -22,14 +22,14 @@ export type NewBusiness = {
   registerNumber: string | null;
   description: string;
   slotMinutes: number;
-  /** Index 0 = Monday; closed days are left out. */
+  /** Индекс 0 = Даваа; амралтын өдрүүдийг оруулахгүй. */
   hours: readonly { weekday: number; opens: string; closes: string }[];
   services: readonly { name: string; duration: number; price: number }[];
   staff: readonly string[];
-  /** Map pin, already checked to be in the city. */
+  /** Газрын зургийн цэг, хотод байгаа эсэхийг аль хэдийн шалгасан. */
   location: { lat: number; lng: number } | null;
   consentedAt: Date;
-  /** The person registering: they become the owner and can sign in with the business phone. */
+  /** Бүртгүүлж буй хүн: эзэмшигч болж, бизнесийн утсаар нэвтэрч чадна. */
   owner: { name: string; password: string };
 };
 
@@ -39,10 +39,10 @@ export type RegisterResult =
   | { ok: false; reason: "register_taken" | "request_reused" | "owner_password" };
 
 /**
- * Stores a registration in one transaction: the business, its hours,
- * services and staff go in together or not at all. Uniqueness is left to the
- * database (no "is the address free?" check first, which two owners could
- * pass at the same moment); a violated constraint becomes a clear answer.
+ * Бүртгэлийг нэг transaction-оор хадгална: бизнес, түүний цагийн хуваарь,
+ * үйлчилгээ, ажилтан хамт орно, эсвэл огт орохгүй. Давтагдашгүй байдлыг DB-д
+ * үлдээнэ (хоёр эзэмшигч зэрэг давж болох "хаяг сул уу?" гэсэн урьдчилсан
+ * шалгалт байхгүй); зөрчигдсөн constraint ойлгомжтой хариу болж хувирна.
  */
 export async function insertBusiness(business: NewBusiness): Promise<RegisterResult> {
   if (RESERVED_SLUGS.has(business.slug)) {
@@ -67,7 +67,7 @@ export async function insertBusiness(business: NewBusiness): Promise<RegisterRes
           RETURNING id, slug, created_at AS "createdAt"
         `;
 
-        // Sent before (double click, retry after a lost answer): return what is stored.
+        // Өмнө илгээсэн (давхар дарах, хариу алдагдсаны дараах дахин оролдлого): хадгалсныг буцаана.
         if (!row) {
           const [existing] = await tx<
             { id: string; slug: string; phone: string; createdAt: Date }[]
@@ -110,7 +110,7 @@ export async function insertBusiness(business: NewBusiness): Promise<RegisterRes
         await tx`INSERT INTO staff ${tx(
           business.staff.map((name, position) => ({ business_id: id, position, name })),
         )}`;
-        // The owner account: new for a new phone; an existing one must prove its password.
+        // Эзэмшигчийн бүртгэл: шинэ утсанд шинээр; байгаа бүртгэл нууц үгээ батлах ёстой.
         const [account] = await tx<{ id: string; passwordHash: string }[]>`
           SELECT id, password_hash AS "passwordHash" FROM accounts
           WHERE phone = ${business.phone} FOR UPDATE
@@ -144,7 +144,7 @@ export async function insertBusiness(business: NewBusiness): Promise<RegisterRes
       if (isPgError(error, PG.uniqueViolation, "businesses_register_number_key")) {
         return { ok: false, reason: "register_taken" };
       }
-      // Two copies of the same request at once can deadlock; the retry finds the stored one.
+      // Нэг хүсэлтийн хоёр хуулбар зэрэг deadlock үүсгэж болно; дахин оролдлого хадгалагдсаныг олно.
       const retryable =
         isPgError(error, PG.deadlockDetected) || isPgError(error, PG.serializationFailure);
       if (!retryable || attempt >= 3) throw error;
@@ -152,14 +152,14 @@ export async function insertBusiness(business: NewBusiness): Promise<RegisterRes
   }
 }
 
-/** Is the address free right now? Only a hint while typing; the insert has the final say. */
+/** Хаяг яг одоо сул уу? Бичих явцын зөвлөмж л; эцсийн шийдвэрийг insert гаргана. */
 export async function isSlugFree(slug: string): Promise<boolean> {
   if (RESERVED_SLUGS.has(slug)) return false;
   const [row] = await sql`SELECT 1 FROM businesses WHERE slug = ${slug}`;
   return !row;
 }
 
-/** "ongo-salon" taken → "ongo-salon-2" (or the next free number). */
+/** "ongo-salon" эзэлсэн → "ongo-salon-2" (эсвэл дараагийн сул дугаар). */
 export async function suggestSlug(base: string): Promise<string> {
   const stem = base.slice(0, 56).replace(/-+$/, "");
   const rows = await sql<{ slug: string }[]>`

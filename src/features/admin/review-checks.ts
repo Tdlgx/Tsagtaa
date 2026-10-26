@@ -5,8 +5,8 @@ import type { BusinessStatus } from "@/lib/auth/session";
 import { sql } from "@/lib/db";
 
 /*
- * Automatic checks on a registration, so a reviewer looks first where it
- * matters. They advise; the decision stays with a person.
+ * Бүртгэлийн автомат шалгалтууд, ингэснээр шалгагч хамгийн чухал газраас эхэлж харна.
+ * Эдгээр нь зөвхөн зөвлөнө; шийдвэрийг хүн гаргана.
  */
 
 export type CheckLevel = "pass" | "warn" | "fail";
@@ -15,7 +15,7 @@ export type DuplicateMatch = {
   slug: string;
   name: string;
   status: BusinessStatus;
-  /** 0–1, trigram similarity of the names. */
+  /** 0–1, нэрсийн trigram төстэй байдал. */
   similarity: number;
   samePhone: boolean;
   sameOwner: boolean;
@@ -46,21 +46,21 @@ export type ReviewCheck =
 
 export type ReviewReport = {
   checks: ReviewCheck[];
-  /** 0–100: passes count fully, warnings half. */
+  /** 0–100: давсан шалгалт бүтнээрээ, анхааруулга хагасаар тооцогдоно. */
   score: number;
   verdict: "ready" | "look" | "fix";
 };
 
-/** Names this alike are probably the same place ("Тулгаа салон" / "Tulgaa salon" aside). */
+/** Ийм төстэй нэрс магадгүй нэг газар ("Тулгаа салон" / "Tulgaa salon" гэх мэтийг эс тооцвол). */
 const SIMILAR = 0.45;
 const SAME = 0.75;
-/** Prices this far from the category's middle are worth a second look. */
+/** Ангиллын дунджаас ийм хол үнэ дахин харах шаардлагатай. */
 const PRICE_LOW = 0.25;
 const PRICE_HIGH = 4;
-/** Enough prices in the category to say what is normal. */
+/** Ангилалд юу хэвийн болохыг хэлэхэд хангалттай тооны үнэ. */
 const PRICE_SAMPLE = 5;
 const OVERDUE_HOURS = 48;
-/** Sample places share a placeholder number; it says nothing about duplicates. */
+/** Жишээ газрууд нэг түр дугаартай; давхардлын талаар юу ч хэлэхгүй. */
 const SAMPLE_PHONE = "99000000";
 
 const minutes = (clock: string): number => {
@@ -68,6 +68,10 @@ const minutes = (clock: string): number => {
   return (h ?? 0) * 60 + (m ?? 0);
 };
 
+/**
+ * Бүртгэлийн автомат шалгалтын тайлан: давхардал (төстэй нэр, ижил утас/эзэмшигч/
+ * регистр), үнэ ангиллын дунджаас хэт зөрсөн эсэх, цагийн хуваарь, зураг, байршил.
+ */
 export async function getReviewReport(
   business: ManagedBusiness,
   members: readonly Member[],
@@ -123,7 +127,7 @@ export async function getReviewReport(
     kind: !register ? null : /^\d{7}$/.test(register) ? "company" : "person",
   });
 
-  // The same place twice: very alike and still live, or tied by phone, owner or register.
+  // Нэг газар хоёр удаа: маш төстэй бөгөөд идэвхтэй, эсвэл утас, эзэмшигч, регистрээрээ холбоотой.
   const live = matches.filter((match) => match.status === "pending" || match.status === "active");
   const strong = live.some(
     (match) =>
@@ -150,7 +154,7 @@ export async function getReviewReport(
     length: address.length,
   });
 
-  // A day under 2 hours or over 16 is more likely a typo than a schedule.
+  // 2 цагаас бага эсвэл 16 цагаас их өдөр нь хуваариас илүү үсгийн алдаа байх магадлалтай.
   const odd = business.hours
     .filter((day) => {
       const length = minutes(day.closes) - minutes(day.opens);
@@ -207,8 +211,8 @@ export async function getReviewReport(
     length: description,
   });
 
-  // A pin and some pictures: not required, but they make a place easy to
-  // find and easy to check against reality.
+  // Байршлын цэг болон хэдэн зураг: заавал биш, гэхдээ газрыг олоход амар болгож,
+  // бодит байдалтай тулгаж шалгахад хялбар болгоно.
   const hasPin = business.latitude !== null;
   checks.push({ id: "location", level: hasPin ? "pass" : "warn", set: hasPin });
   const logo = images?.logo ?? false;

@@ -9,6 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.errors.notFoundTitle };
 }
 
+/** Олдоогүй хуудас (404). */
 export default function NotFound(): JSX.Element {
   return (
     <main className="flex flex-1 flex-col">

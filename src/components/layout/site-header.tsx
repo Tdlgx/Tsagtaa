@@ -18,9 +18,10 @@ type SiteHeaderProps = {
   sticky?: boolean;
 };
 
+/** Нийтийн хуудсуудын header: лого, цэс, удирдлага руу холбоос, оноо, хэл, theme. */
 export async function SiteHeader({ forceScrolled, sticky }: SiteHeaderProps): Promise<JSX.Element> {
   const { t } = await getI18n();
-  // Only owners, managers and the Цагтаа team see a way into management.
+  // Зөвхөн эзэмшигч, менежер болон Цагтаагийн баг удирдлага руу орох замыг харна.
   const account = await getCurrentAccount();
   const manageHref = account?.memberships.length
     ? "/dashboard"
@@ -44,7 +45,7 @@ export async function SiteHeader({ forceScrolled, sticky }: SiteHeaderProps): Pr
               <span className="max-lg:sr-only">{t.manage.dashboard}</span>
             </Link>
           ) : account ? (
-            // A signed-in customer: their points, one tap from the profile.
+            // Нэвтэрсэн үйлчлүүлэгч: оноо нь профайлаас нэг товшилтын зайтай.
             <Link
               href="/profile"
               title={t.points.title}
@@ -55,13 +56,13 @@ export async function SiteHeader({ forceScrolled, sticky }: SiteHeaderProps): Pr
               <span className="sr-only">{t.points.unit}</span>
             </Link>
           ) : null}
-          {/* Phones keep the header to the essentials: the tour and the language
-              switch are one tap away in Profile. */}
+          {/* Утсан дээр header-т зөвхөн хамгийн чухлыг үлдээнэ: аялал болон хэл солигч
+              Профайлд нэг товшилтын зайтай. */}
           <div className="contents max-sm:hidden">
             <TourButton />
           </div>
           <LanguageToggle className="max-sm:hidden" />
-          {/* Phones get a one-tap switch; the three-way control needs more room. */}
+          {/* Утсанд нэг товшилтын солигч; гурван сонголттой удирдлагад илүү зай хэрэгтэй. */}
           <ThemeSwitch className="sm:hidden" />
           <ThemeToggle className="max-sm:hidden" />
         </div>

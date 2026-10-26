@@ -46,6 +46,7 @@ const DISTRICTS = [
   "Чингэлтэй",
 ] as const;
 
+/** Design system: товчны хувилбар бүрийг төлөв бүрээр (хүснэгт хэлбэрээр) харуулна. */
 export function ButtonBoard(): JSX.Element {
   return (
     <>
@@ -137,6 +138,7 @@ export function ButtonBoard(): JSX.Element {
   );
 }
 
+/** Design system: Input, Select, Textarea-ийн бүх төлөв (hover, focus, алдаа, идэвхгүй). */
 export function FormBoard(): JSX.Element {
   return (
     <>
@@ -203,6 +205,7 @@ export function FormBoard(): JSX.Element {
   );
 }
 
+/** Design system: картын хувилбарууд (стандарт, дарагддаг, хөвөгч, дотор байрлах). */
 export function CardBoard(): JSX.Element {
   return (
     <>

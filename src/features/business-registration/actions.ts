@@ -22,7 +22,7 @@ export type SlugCheck =
   | { slug: string; status: "taken"; suggestion: string }
   | { slug: string; status: "invalid" | "unknown" };
 
-/** Live "is this address free?" while the owner types. */
+/** Эзэмшигч бичих явцад "энэ хаяг сул уу?" гэдгийг шууд шалгана. */
 export async function checkSlugAction(slug: unknown): Promise<SlugCheck> {
   const value = typeof slug === "string" ? slug : "";
   if (!isValidSlug(value)) return { slug: value, status: "invalid" };
@@ -40,14 +40,14 @@ export type RegisterBusinessResult =
   | {
       ok: false;
       error: "invalid" | "slug_taken" | "register_taken" | "owner_password" | "password" | "server";
-      /** Which step to send the owner back to. */
+      /** Эзэмшигчийг аль алхам руу буцаах вэ. */
       step?: number;
       suggestion?: string;
     };
 
 /**
- * Registers a business. Anyone can POST to a Server Action, so the input is
- * parsed and every rule from the form is checked again here.
+ * Бизнесийг бүртгэнэ. Server Action руу хэн ч POST хийж болох тул оролтыг parse
+ * хийж, маягтын дүрэм бүрийг энд дахин шалгана.
  */
 export async function registerBusinessAction(input: unknown): Promise<RegisterBusinessResult> {
   const parsed = registrationInput.safeParse(input);
@@ -91,7 +91,7 @@ export async function registerBusinessAction(input: unknown): Promise<RegisterBu
     });
 
     if (result.ok) {
-      // Signed in straight away, so the dashboard is one tap from the success screen.
+      // Шууд нэвтэрнэ, ингэснээр амжилтын дэлгэцээс самбар нэг товшилтын зайтай.
       await startSession(result.ownerId);
       return { ok: true, slug: result.slug, createdAt: result.createdAt.toISOString() };
     }

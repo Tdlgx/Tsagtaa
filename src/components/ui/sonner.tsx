@@ -6,8 +6,8 @@ import type { JSX } from "react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 /**
- * App-wide toast container. Call `toast.success("…")` from "sonner" anywhere
- * in client code. Styled with design tokens, announced to screen readers.
+ * Аппын хэмжээний toast-ийн сав. Client кодын хаанаас ч "sonner"-ийн
+ * `toast.success("…")`-ийг дуудна. Design token-оор стиль өгсөн, screen reader-т зарлагдана.
  */
 function Toaster(props: ToasterProps): JSX.Element {
   const { theme = "system" } = useTheme();

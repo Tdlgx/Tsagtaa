@@ -35,11 +35,15 @@ import { formatMNT } from "@/lib/currency";
 import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
-/** The signed-in customer, as the profile page gets it from the server. */
+/** Профайл хуудас серверээс авдаг нэвтэрсэн үйлчлүүлэгч. */
 export type ProfileAccount = {
   name: string;
   phone: string;
-  /** null when the points could not be loaded (database down). */
+  /** Нэвтэрч болох имэйл, нэмсэн бол. */
+  email: string | null;
+  /** Кодоо оруулахыг хүлээж буй хаяг. */
+  pendingEmail: string | null;
+  /** Оноог ачаалж чадаагүй бол null (DB ажиллахгүй байна). */
   points: PointsSummary | null;
 };
 
@@ -50,7 +54,7 @@ const KIND_ICON: Record<LedgerKind, LucideIcon> = {
   adjust: Wrench,
 };
 
-/** Points: the card, how it works, and the history. Signed out, an invitation to start. */
+/** Оноо: карт, хэрхэн ажилладаг, түүх. Нэвтрээгүй бол эхлэх урилга. */
 export function PointsSection({ account }: { account: ProfileAccount | null }): JSX.Element {
   const t = useT();
   const locale = useLocale();
@@ -106,7 +110,7 @@ function LoyaltyCard({
 
   return (
     <TiltCard className="rounded-2xl flex min-h-56 flex-col justify-between bg-brand-ink p-6 text-brand-ink-foreground">
-      {/* Engraved dots, like the profile banner. */}
+      {/* Профайлын баннер шиг сийлбэр цэгүүд. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(color-mix(in_srgb,var(--primary)_22%,transparent)_1px,transparent_1.5px)] mask-[linear-gradient(135deg,transparent_40%,black)] bg-size-[12px_12px]"
@@ -337,7 +341,7 @@ function SignedOut({ t }: { t: Dictionary }): JSX.Element {
   );
 }
 
-/** "Signed in as …" with a way out, under the profile card. */
+/** Профайлын картын доор "… нэвтэрсэн", гарах товчтой. */
 export function AccountStrip({ account }: { account: ProfileAccount }): JSX.Element {
   const t = useT();
   return (

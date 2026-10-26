@@ -1,12 +1,12 @@
 import { TIME_ZONE } from "@/lib/constants";
 
 /**
- * Date helpers that always show Ulaanbaatar wall-clock time, no matter which
- * time zone the server (usually UTC) or the visitor's device is in.
+ * Сервер (ихэвчлэн UTC) эсвэл зочны төхөөрөмж аль цагийн бүсэд байхаас үл хамааран
+ * үргэлж Улаанбаатарын цагийг харуулдаг огнооны туслах функцууд.
  *
- * Output strings are assembled by hand instead of `Intl.DateTimeFormat("mn-MN")`
- * because ICU data differs between Node.js and browsers; identical output on
- * server and client avoids React hydration mismatches.
+ * Гаралтын текстийг `Intl.DateTimeFormat("mn-MN")`-ийн оронд гараар угсардаг,
+ * учир нь ICU өгөгдөл Node.js болон browser-т ялгаатай; сервер, client дээр ижил
+ * гаралт React-ийн hydration-ий зөрүүнээс сэргийлнэ.
  */
 
 export type DateInput = Date | string | number;
@@ -21,13 +21,13 @@ export type ZonedDateParts = {
   hour: number;
   /** 0–59 */
   minute: number;
-  /** 0 = Sunday … 6 = Saturday */
+  /** 0 = Ням … 6 = Бямба */
   weekday: number;
 };
 
 const WEEKDAY_NAMES = ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"] as const;
 
-// "en-US" + numeric parts gives stable, locale-independent digits for parsing.
+// "en-US" + тоон хэсгүүд нь parse хийхэд тогтвортой, locale-оос хамаарахгүй цифр өгнө.
 const partsFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: TIME_ZONE,
   year: "numeric",
@@ -42,7 +42,7 @@ function pad2(value: number): string {
   return value.toString().padStart(2, "0");
 }
 
-/** Converts any supported input into a valid `Date`, or throws. */
+/** Дэмжигдсэн аливаа оролтыг хүчинтэй `Date` болгоно, эсвэл алдаа шиднэ. */
 export function toDate(input: DateInput): Date {
   const date = input instanceof Date ? input : new Date(input);
 
@@ -53,7 +53,7 @@ export function toDate(input: DateInput): Date {
   return date;
 }
 
-/** Calendar and clock parts of `input` as seen on a wall clock in Ulaanbaatar. */
+/** `input`-ийн Улаанбаатарын цагаар харагдах хуанли, цагийн хэсгүүд. */
 export function getZonedParts(input: DateInput): ZonedDateParts {
   const parts = partsFormatter.formatToParts(toDate(input));
 
@@ -91,7 +91,7 @@ export function formatDateLong(input: DateInput): string {
   return `${year} оны ${month}-р сарын ${day}`;
 }
 
-/** "14:30" (24-hour clock) */
+/** "14:30" (24 цагийн формат) */
 export function formatTime(input: DateInput): string {
   const { hour, minute } = getZonedParts(input);
   return `${pad2(hour)}:${pad2(minute)}`;
@@ -112,13 +112,13 @@ export function formatWeekday(input: DateInput): string {
   return name;
 }
 
-/** "2026-10-04" — the Ulaanbaatar calendar day, handy as a stable key. */
+/** "2026-10-04" — Улаанбаатарын хуанлийн өдөр, тогтвортой түлхүүр болгоход тохиромжтой. */
 export function toDateKey(input: DateInput): string {
   const { year, month, day } = getZonedParts(input);
   return `${year}-${pad2(month)}-${pad2(day)}`;
 }
 
-/** Service length for display: 45 → "45 мин", 60 → "1 цаг", 90 → "1 цаг 30 мин". */
+/** Харуулах үйлчилгээний хугацаа: 45 → "45 мин", 60 → "1 цаг", 90 → "1 цаг 30 мин". */
 export function formatDuration(totalMinutes: number): string {
   if (!Number.isInteger(totalMinutes) || totalMinutes <= 0) {
     throw new RangeError(`Invalid duration: ${totalMinutes}`);

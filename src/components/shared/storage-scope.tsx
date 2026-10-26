@@ -5,9 +5,9 @@ import { useEffect, type JSX, type ReactNode } from "react";
 import { announceStorageScope, setStorageScope } from "@/lib/local-store";
 
 /**
- * Tells the browser stores whose data to show: each account keeps its own
- * profile and booking list on this device, and signed out has one more. It
- * wraps the page so the scope is set before any store below it reads.
+ * Browser-ийн store-уудад хэний өгөгдлийг харуулахыг хэлнэ: бүртгэл бүр энэ
+ * төхөөрөмж дээр өөрийн профайл, захиалгын жагсаалттай, нэвтрээгүй үед дахиад нэг.
+ * Хуудсыг ороодог тул доорх store-ууд уншихаас өмнө хамрах хүрээ тохирно.
  */
 export function StorageScope({
   accountId,
@@ -17,7 +17,7 @@ export function StorageScope({
   children: ReactNode;
 }): JSX.Element {
   setStorageScope(accountId ?? "");
-  // Signed in or out without a full reload: stores already on screen re-read.
+  // Бүтэн дахин ачаалалгүйгээр нэвтэрсэн эсвэл гарсан: дэлгэц дээрх store-ууд дахин уншина.
   useEffect(() => {
     announceStorageScope();
   }, [accountId]);

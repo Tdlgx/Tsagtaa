@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.admin.nav.points, robots: { index: false } };
 }
 
-/** The points programme: what it costs, who holds what, the rules. */
+/** Онооны хөтөлбөр: зардал, хэнд хэдэн оноо байгаа, дүрмүүд. */
 export default async function AdminPointsPage(): Promise<JSX.Element> {
   await requirePlatformAdmin("/admin/points");
   const { t } = await getI18n();

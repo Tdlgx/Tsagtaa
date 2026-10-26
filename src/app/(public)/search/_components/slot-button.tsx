@@ -7,11 +7,11 @@ type SlotButtonProps = {
   time: string;
   day: SearchDay;
   businessSlug: string;
-  /** Screen-reader text after the time, e.g. "book at Ongo Salon". */
+  /** Цагийн дараах screen reader-ийн текст, жишээ нь "Өнгө салонд захиалах". */
   bookLabel: string;
 };
 
-/** One open start time in a search result: opens the booking with this time already chosen. */
+/** Хайлтын үр дүн дэх нэг сул эхлэх цаг: энэ цагийг сонгосон байдлаар захиалгыг нээнэ. */
 export function SlotButton({ time, day, businessSlug, bookLabel }: SlotButtonProps): JSX.Element {
   const params = new URLSearchParams({ day, time });
 

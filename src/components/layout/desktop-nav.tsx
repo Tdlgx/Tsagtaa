@@ -9,6 +9,7 @@ import { useT } from "@/i18n/client";
 import { UpcomingCount } from "@/features/booking/components/upcoming-count";
 import { cn } from "@/lib/utils";
 
+/** Компьютерийн header дахь үндсэн цэс; идэвхтэй хуудсыг тэмдэглэнэ. */
 export function DesktopNav({ className }: { className?: string }): JSX.Element {
   const pathname = usePathname();
   const t = useT();
@@ -26,7 +27,7 @@ export function DesktopNav({ className }: { className?: string }): JSX.Element {
                 "relative flex h-9 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-muted-foreground outline-none",
                 "focus-visible:ring-3 focus-visible:ring-ring is-hover:text-foreground",
                 "aria-[current=page]:text-foreground",
-                // Active marker: 1px line under the label.
+                // Идэвхтэй тэмдэг: нэрийн доорх 1px шугам.
                 "after:absolute after:inset-x-3 after:-bottom-px after:h-px after:bg-primary after:opacity-0 aria-[current=page]:after:opacity-100",
               )}
             >

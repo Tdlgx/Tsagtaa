@@ -10,9 +10,9 @@ type HealthResponse = {
 };
 
 /**
- * GET /api/health — liveness probe for uptime monitors and deploy checks.
- * Returns only non-sensitive data. GET Route Handlers are dynamic by default,
- * so `time` is fresh on every request.
+ * GET /api/health — uptime monitor болон deploy шалгалтад зориулсан амьд эсэхийн шалгалт.
+ * Зөвхөн нууц бус мэдээлэл буцаана. GET Route Handler анхдагчаар dynamic тул
+ * `time` хүсэлт бүрт шинэ байна.
  */
 export function GET(): NextResponse<HealthResponse> {
   return NextResponse.json(

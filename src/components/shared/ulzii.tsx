@@ -3,20 +3,21 @@ import { useId, type ComponentProps, type JSX } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Simplified "өлзий" (endless knot): a woven diamond lattice with a loop at
- * each corner. Drawn on a 48×48 grid so it can be reused as an icon-sized mark,
- * an illustration or a repeating pattern. Stroke only, colored by currentColor.
+ * Хялбаршуулсан "өлзий" хээ: булан бүрт гогцоотой нэхмэл ромбо тор. 48×48 тор дээр
+ * зурсан тул icon хэмжээний тэмдэг, чимэглэл эсвэл давтагдах хээ болгон ашиглаж
+ * болно. Зөвхөн зураас, өнгө нь currentColor.
  */
 const ULZII_PATH = [
-  // Outer ring: diamond edges joined by four corner loops.
+  // Гадна цагираг: ромбын ирмэгүүд дөрвөн булангийн гогцоогоор холбогдоно.
   "M21 9 A4.25 4.25 0 1 1 27 9 L39 21 A4.25 4.25 0 1 1 39 27",
   "L27 39 A4.25 4.25 0 1 1 21 39 L9 27 A4.25 4.25 0 1 1 9 21 Z",
-  // Inner lattice: two strands in each diagonal direction.
+  // Дотор тор: диагональ чиглэл бүрт хоёр утас.
   "M12 18 L30 36 M18 12 L36 30 M12 30 L30 12 M18 36 L36 18",
 ].join(" ");
 
 type UlziiKnotProps = Omit<ComponentProps<"svg">, "children" | "viewBox">;
 
+/** Өлзий хээ (SVG), өнгө нь currentColor. */
 export function UlziiKnot({
   className,
   strokeWidth = 1.25,
@@ -41,13 +42,13 @@ export function UlziiKnot({
 
 type UlziiPatternProps = {
   className?: string;
-  /** Tile size in px; the knot sits in the middle of each tile. */
+  /** Хавтангийн хэмжээ px-ээр; хээ хавтан бүрийн голд байрлана. */
   tile?: number;
 };
 
 /**
- * Repeating өлзий texture. Keep it barely visible (opacity 4–6%) and use it
- * only in the hero and empty-state art, never as a general background.
+ * Давтагдах өлзий хээ. Арай ядан харагдахаар (тунгалаг байдал 4–6%) байлгаж, зөвхөн
+ * hero болон хоосон төлөвийн зурагт ашиглана, ерөнхий дэвсгэр болгож хэзээ ч болохгүй.
  */
 export function UlziiPattern({ className, tile = 72 }: UlziiPatternProps): JSX.Element {
   const id = useId();

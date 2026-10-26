@@ -1,4 +1,4 @@
-"use client"; // Error boundaries must be Client Components.
+"use client"; // Error boundary нь Client Component байх ёстой.
 
 import { CircleAlert, RotateCcw } from "lucide-react";
 import Link from "next/link";
@@ -13,10 +13,11 @@ type ErrorPageProps = {
   retry: () => void;
 };
 
+/** Хуудас дээр алдаа гарахад харагдах дэлгэц, дахин оролдох товчтой. */
 export default function ErrorPage({ error, retry }: ErrorPageProps): JSX.Element {
   const t = useT();
   useEffect(() => {
-    // Replace with an error reporting service (e.g. Sentry) in a later step.
+    // Дараагийн шатанд алдаа мэдээлэх үйлчилгээгээр (жишээ нь Sentry) солино.
     console.error(error);
   }, [error]);
 

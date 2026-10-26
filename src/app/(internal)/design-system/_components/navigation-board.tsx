@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 
+/** Design system: header (гүйлгэхээс өмнө/дараа) болон утасны доод цэс. */
 export function NavigationBoard(): JSX.Element {
   return (
     <>

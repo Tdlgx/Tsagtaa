@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.admin.nav.review, robots: { index: false } };
 }
 
-/** New registrations, oldest first (they have waited longest), each with its check score. */
+/** Шинэ бүртгэлүүд, хуучин нь эхэндээ (хамгийн удаан хүлээсэн), шалгалтын оноотойгоо. */
 export default async function ReviewQueuePage(): Promise<JSX.Element> {
   await requirePlatformAdmin("/admin/review");
   const { t } = await getI18n();

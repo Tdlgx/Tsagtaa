@@ -6,15 +6,15 @@ import { env } from "@/lib/env";
 
 function connect(): postgres.Sql {
   const url = new URL(env.DATABASE_URL);
-  // Options PostgreSQL itself rejects: `?schema=public` is Prisma-style, and
-  // Neon adds `channel_binding=require`, which this driver does not support
-  // and would send to the server as an unknown setting. TLS still comes from `sslmode`.
+  // PostgreSQL өөрөө татгалздаг сонголтууд: `?schema=public` бол Prisma-гийн хэв маяг,
+  // Neon нэмдэг `channel_binding=require`-ийг энэ driver дэмждэггүй бөгөөд серверт
+  // үл мэдэгдэх тохиргоо болгож илгээнэ. TLS нь `sslmode`-оос ирсээр байна.
   url.searchParams.delete("schema");
   url.searchParams.delete("channel_binding");
-  // "localhost" makes Node try ::1 and 127.0.0.1 in turn; when that attempt
-  // is cut short (connect timeout, database down) Node can throw an
-  // uncatchable "object null is not iterable" from its AggregateError.
-  // One address, one attempt: the local Docker database listens on IPv4.
+  // "localhost" нь Node-ийг ::1 болон 127.0.0.1-ийг ээлжлэн оролдоход хүргэнэ; тэр
+  // оролдлого тасарвал (холбогдох хугацаа дуусах, DB унтарсан) Node AggregateError-оос
+  // барьж болохгүй "object null is not iterable" алдаа шидэж болно.
+  // Нэг хаяг, нэг оролдлого: local Docker DB IPv4 дээр сонсдог.
   if (url.hostname === "localhost") url.hostname = "127.0.0.1";
   return postgres(url.toString(), {
     max: 10,
@@ -24,14 +24,14 @@ function connect(): postgres.Sql {
   });
 }
 
-// One pool per server process. In development, hot reload re-runs this
-// module, so the pool is kept on globalThis instead of opening a new one.
+// Серверийн процесс бүрт нэг pool. Хөгжүүлэлтэд hot reload энэ модулийг дахин
+// ажиллуулдаг тул шинийг нээхийн оронд pool-ыг globalThis дээр хадгална.
 const globalForDb = globalThis as typeof globalThis & { tsagtaaSql?: postgres.Sql };
 
 export const sql = globalForDb.tsagtaaSql ?? connect();
 if (env.NODE_ENV !== "production") globalForDb.tsagtaaSql = sql;
 
-/** PostgreSQL error codes this app reacts to. */
+/** Энэ аппын хариу үйлдэл үзүүлдэг PostgreSQL алдааны кодууд. */
 export const PG = {
   uniqueViolation: "23505",
   checkViolation: "23514",
@@ -41,10 +41,10 @@ export const PG = {
 } as const;
 
 /**
- * Checks the error's fields rather than `instanceof PostgresError`: server
- * pages and Server Actions can load separate copies of the driver, while the
- * pool (kept on globalThis in development) is shared, so the class an error
- * was made with need not be the one imported here.
+ * `instanceof PostgresError`-ийн оронд алдааны талбаруудыг шалгана: серверийн хуудас
+ * болон Server Action driver-ийн тусдаа хуулбарыг ачаалж болох ч pool (хөгжүүлэлтэд
+ * globalThis дээр хадгалагддаг) хуваалцагддаг тул алдааг үүсгэсэн класс энд
+ * импортолсонтой ижил байх албагүй.
  */
 export function isPgError(
   error: unknown,
@@ -59,11 +59,11 @@ export function isPgError(
 }
 
 /**
- * Gives up on a read after `ms`. For reads a page can do without (it then
- * shows the plain schedule, or treats the visitor as signed out): when the
- * database host accepts the connection but never answers (a stopped Docker
- * container, a network hiccup), the driver would otherwise wait forever and
- * the page with it. The connect timeout only covers opening the socket.
+ * `ms`-ийн дараа уншилтаас татгалзана. Хуудас түүнгүйгээр ч болох уншилтуудад
+ * (тэр үед энгийн хуваарь харуулах, эсвэл зочныг нэвтрээгүй гэж үзнэ): DB-ийн
+ * сервер холболтыг хүлээн авсан ч хэзээ ч хариулахгүй үед (зогссон Docker контейнер,
+ * сүлжээний доголдол) driver үгүй бол үүрд хүлээж, хуудас ч түүнтэй хамт хүлээнэ.
+ * Холбогдох хугацааны хязгаар зөвхөн socket нээхийг хамардаг.
  */
 export function withDeadline<T>(work: PromiseLike<T>, ms = 4000): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;

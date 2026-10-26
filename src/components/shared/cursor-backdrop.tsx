@@ -2,19 +2,19 @@
 
 import { useEffect, useRef, useSyncExternalStore, type JSX } from "react";
 
-/** Grid pitch of the dot field, px. */
+/** Цэгэн талбайн торын алхам, px. */
 const GAP = 22;
-/** How far from the cursor dots light up, px. */
+/** Курсороос хэр хол хүртэл цэгүүд гэрэлтэх вэ, px. */
 const RADIUS = 280;
-/** Dots this close draw a hairline to the cursor, px. */
+/** Ийм ойрхон цэгүүд курсор руу нарийн шугам татна, px. */
 const LINK = 74;
-/** Outward push at the centre of the lens, px. */
+/** Линзийн төвд гадагш түлхэх хэмжээ, px. */
 const PUSH = 9;
-/** Per-frame catch-up (0–1) of the dot lens and of the glow behind it. */
+/** Кадр тутмын гүйцэлт (0–1), цэгэн линз болон түүний ард байх гэрэлтэлтийнх. */
 const EASE = 0.16;
 const GLOW_EASE = 0.08;
 const GLOW_SIZE = 560;
-/** Click ring: speed (px per ms), reach (px), thickness (px). */
+/** Дарахад гарах цагираг: хурд (px/ms), хүрээ (px), зузаан (px). */
 const RING_SPEED = 0.55;
 const RING_REACH = 460;
 const RING_BAND = 28;
@@ -22,7 +22,7 @@ const RING_BAND = 28;
 type Point = { x: number; y: number };
 type Ring = Point & { start: number };
 
-/** A mouse or trackpad, and the person has not asked for less motion. */
+/** Хулгана эсвэл trackpad, мөн хүн бага хөдөлгөөн хүсээгүй. */
 const QUERY = "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
 
 function subscribeToQuery(onChange: () => void): () => void {
@@ -35,7 +35,7 @@ function readQuery(): boolean {
   return window.matchMedia(QUERY).matches;
 }
 
-/** The theme's accent as "r, g, b" (olive in light mode, lime in dark). */
+/** Theme-ийн тодотгол өнгө "r, g, b" хэлбэрээр (light-д чидун, dark-д шар-ногоон). */
 function readAccent(): string {
   const value = getComputedStyle(document.documentElement)
     .getPropertyValue("--primary-strong")
@@ -49,16 +49,16 @@ function readAccent(): string {
 const smooth = (x: number): number => x * x * (3 - 2 * x);
 
 /**
- * Decorative page background that answers the mouse. Under the cursor a dot
- * grid swells like a lens: dots fade in, grow toward the centre and lean
- * outward, the nearest few are tied to the cursor by hairlines, and a soft
- * lime glow drifts behind. A click sends a ring through the dots.
+ * Хулганад хариу үйлдэл үзүүлдэг чимэглэлийн дэвсгэр. Курсорын доор цэгэн тор
+ * линз шиг томорно: цэгүүд гарч ирж, төв рүү томорч, гадагш хазайна, хамгийн ойрын
+ * хэдэн цэг курсортой нарийн шугамаар холбогдож, ард нь зөөлөн шар-ногоон гэрэлтэлт
+ * хөвнө. Дарахад цэгүүдээр цагираг тархана.
  *
- * Drawn on one canvas, only while something moves (the loop sleeps when the
- * cursor rests), and skipped on touch screens and for "reduce motion".
+ * Нэг canvas дээр зөвхөн ямар нэг зүйл хөдлөх үед зурна (курсор зогсоход давталт
+ * унтана), мэдрэгчтэй дэлгэц болон "reduce motion" үед алгасна.
  */
 export function CursorBackdrop(): JSX.Element | null {
-  // The server (and hydration) always renders nothing; the browser decides after.
+  // Сервер (болон hydration) үргэлж юу ч render хийхгүй; дараа нь browser шийднэ.
   const enabled = useSyncExternalStore(subscribeToQuery, readQuery, () => false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -82,7 +82,7 @@ export function CursorBackdrop(): JSX.Element | null {
     resize();
 
     let accent = readAccent();
-    // The theme switches by a class on <html>: pick up the new accent.
+    // Theme <html> дээрх классаар солигддог: шинэ тодотгол өнгийг авна.
     const themeWatch = new MutationObserver(() => {
       accent = readAccent();
       wake();
@@ -92,7 +92,7 @@ export function CursorBackdrop(): JSX.Element | null {
     const target: Point = { x: width / 2, y: height / 3 };
     const lens: Point = { ...target };
     const glowAt: Point = { ...target };
-    let strength = 0; // 0 = hidden, 1 = cursor on the page
+    let strength = 0; // 0 = нуугдсан, 1 = курсор хуудсан дээр
     let present = false;
     const rings: Ring[] = [];
     let frame = 0;
@@ -119,7 +119,7 @@ export function CursorBackdrop(): JSX.Element | null {
       ctx.strokeStyle = `rgb(${accent})`;
       ctx.lineWidth = 0.6;
 
-      // Lens: dots around the cursor.
+      // Линз: курсорын эргэн тойрны цэгүүд.
       if (strength > 0.01) {
         const minX = Math.max(0, Math.floor((lens.x - RADIUS) / GAP));
         const maxX = Math.ceil((lens.x + RADIUS) / GAP);
@@ -149,7 +149,7 @@ export function CursorBackdrop(): JSX.Element | null {
         }
       }
 
-      // Click rings: dots flare as the ring passes over them.
+      // Дарахад гарах цагираг: цагираг дээгүүр өнгөрөхөд цэгүүд тодорно.
       for (let i = rings.length - 1; i >= 0; i -= 1) {
         const ring = rings[i]!;
         const r = (now - ring.start) * RING_SPEED;
@@ -190,7 +190,7 @@ export function CursorBackdrop(): JSX.Element | null {
 
     const onMove = (event: PointerEvent): void => {
       if (!present && strength < 0.05) {
-        // Coming back onto the page: start where the cursor is.
+        // Хуудас руу буцаж орж ирэх: курсор байгаа газраас эхэлнэ.
         lens.x = glowAt.x = event.clientX;
         lens.y = glowAt.y = event.clientY;
       }

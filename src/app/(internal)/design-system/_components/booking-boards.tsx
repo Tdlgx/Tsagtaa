@@ -43,6 +43,7 @@ const LEGEND = [
   { label: "Өнгөрсөн", state: "past" },
 ] as const;
 
+/** Design system: цагийн товчны төлөвүүд (сул, сонгосон, дүүрсэн, өнгөрсөн) болон тор. */
 export function TimeSlotBoard(): JSX.Element {
   return (
     <>
@@ -101,6 +102,7 @@ export function TimeSlotBoard(): JSX.Element {
   );
 }
 
+/** Design system: үйлчилгээний карт болон бизнесийн картын жишээнүүд. */
 export function CatalogBoard(): JSX.Element {
   return (
     <>
@@ -166,6 +168,7 @@ export function CatalogBoard(): JSX.Element {
   );
 }
 
+/** Design system: skeleton, toast, хоосон төлөв зэрэг хариу үзүүлэх элементүүд. */
 export function FeedbackBoard(): JSX.Element {
   return (
     <>

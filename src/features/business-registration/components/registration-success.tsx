@@ -17,7 +17,7 @@ export type RegisteredBusiness = {
   category: BusinessCategorySlug;
 };
 
-/** After sending: an ink "membership card" for the new place, then what happens next. */
+/** Илгээсний дараа: шинэ газрын бэхэн "гишүүнчлэлийн карт", дараа нь юу болохыг. */
 export function RegistrationSuccess({
   business,
   onAnother,
@@ -30,7 +30,7 @@ export function RegistrationSuccess({
   const { icon: Icon } = getBusinessCategory(business.category);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
-  // Bring the new card into view (it replaces the form, far below the page top).
+  // Шинэ картыг харагдах хүрээнд оруулна (маягтыг орлох ба хуудасны оройгоос хол доор байдаг).
   useEffect(() => {
     const heading = headingRef.current;
     heading?.focus({ preventScroll: true });

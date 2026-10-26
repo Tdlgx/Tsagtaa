@@ -10,7 +10,7 @@ import { clearBookings } from "@/features/booking/booking-store";
 import { clearProfile } from "@/features/profile/profile-store";
 import { useT } from "@/i18n/client";
 
-/** Wipes the profile and every booking stored on this device, after confirming. */
+/** Баталгаажуулсны дараа энэ төхөөрөмж дээрх профайл болон бүх захиалгыг устгана. */
 export function ClearDataDialog({ bookingCount }: { bookingCount: number }): JSX.Element {
   const t = useT();
 

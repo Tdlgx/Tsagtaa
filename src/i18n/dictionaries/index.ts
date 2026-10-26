@@ -3,8 +3,8 @@ import { en } from "@/i18n/dictionaries/en";
 import { mn, type Dictionary } from "@/i18n/dictionaries/mn";
 
 /**
- * Both dictionaries are small, so they ship together and switching language
- * needs no extra download. Usable from server and client code alike.
+ * Хоёр толь бичиг хоёулаа жижиг тул хамт ирдэг бөгөөд хэл солиход нэмэлт татах
+ * шаардлагагүй. Сервер, client кодын аль алинд нь ашиглана.
  */
 const DICTIONARIES: Record<Locale, Dictionary> = { mn, en };
 

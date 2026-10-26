@@ -10,9 +10,9 @@ import { sql, withDeadline } from "@/lib/db";
 import { env } from "@/lib/env";
 
 /**
- * Data access layer for sign-in. Every page and Server Action that shows or
- * changes management data calls one of the `require…` functions below, so
- * the check sits next to the data rather than only in the UI.
+ * Нэвтрэлтийн өгөгдлийн хандалтын давхарга. Удирдлагын өгөгдлийг харуулдаг эсвэл
+ * өөрчилдөг хуудас, Server Action бүр доорх `require…` функцуудын аль нэгийг дууддаг
+ * тул шалгалт зөвхөн UI-д биш, өгөгдлийн хажууд байрлана.
  */
 
 const COOKIE = "tsagtaa_session";
@@ -34,15 +34,17 @@ export type Account = {
   id: string;
   name: string;
   phone: string;
+  /** Нэвтрэх хоёр дахь зам; хүн нэмэх хүртэл null. */
+  email: string | null;
   isPlatformAdmin: boolean;
-  /** Loyalty points (1 point = 1 ₮ off a booking). */
+  /** Урамшууллын оноо (1 оноо = захиалгаас 1 ₮ хямдрал). */
   pointsBalance: number;
   memberships: Membership[];
 };
 
 const hashToken = (token: string): string => createHash("sha256").update(token).digest("hex");
 
-/** Signs this browser in: a random token in an httpOnly cookie, its hash in the database. */
+/** Энэ browser-ийг нэвтрүүлнэ: httpOnly cookie-д санамсаргүй token, DB-д түүний hash. */
 export async function startSession(accountId: string): Promise<void> {
   const token = randomBytes(32).toString("base64url");
   const expires = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
@@ -59,6 +61,7 @@ export async function startSession(accountId: string): Promise<void> {
   });
 }
 
+/** Энэ browser-ийг гаргана: session-ыг DB-ээс устгаж, cookie-г арилгана. */
 export async function endSession(): Promise<void> {
   const store = await cookies();
   const token = store.get(COOKIE)?.value;
@@ -66,30 +69,30 @@ export async function endSession(): Promise<void> {
   store.delete(COOKIE);
 }
 
-/** The signed-in account, or null. Memoized per request, so many callers cost one query. */
+/** Нэвтэрсэн бүртгэл, эсвэл null. Хүсэлт бүрт memoize хийдэг тул олон дуудагч нэг query-ийн өртөгтэй. */
 export const getCurrentAccount = cache(async (): Promise<Account | null> => {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
   try {
     return await withDeadline(readAccount(token));
   } catch (error) {
-    // No database: treat as signed out rather than breaking (or stalling) every page.
+    // DB байхгүй: хуудас бүрийг эвдэх (эсвэл гацаах)-ын оронд нэвтрээгүй гэж үзнэ.
     console.error("Could not read the session", error);
     return null;
   }
 });
 
-/** The account behind a session token, with its memberships. */
+/** Session token-ий ард байгаа бүртгэл, гишүүнчлэлүүдийн хамт. */
 async function readAccount(token: string): Promise<Account | null> {
   const [account] = await sql<Omit<Account, "memberships">[]>`
-    SELECT a.id, a.name, a.phone, a.is_platform_admin AS "isPlatformAdmin",
+    SELECT a.id, a.name, a.phone, a.email, a.is_platform_admin AS "isPlatformAdmin",
         a.points_balance AS "pointsBalance"
     FROM sessions s JOIN accounts a ON a.id = s.account_id
     WHERE s.token_hash = ${hashToken(token)} AND s.expires_at > now()
   `;
   if (!account) return null;
-  // Credit visits that are due before anything shows a balance, so the
-  // header and the page agree. A failure here only delays the points.
+  // Аливаа зүйл үлдэгдэл харуулахаас өмнө хугацаа нь болсон айлчлалуудыг олгоно, ингэснээр
+  // header ба хуудас таарна. Энд алдаа гарвал зөвхөн оноо хоцорно.
   try {
     account.pointsBalance += await settleEarnedPoints(account.id);
   } catch (error) {
@@ -104,7 +107,7 @@ async function readAccount(token: string): Promise<Account | null> {
   return { ...account, memberships };
 }
 
-/** Only a same-site path, so `?next=` cannot send people to another site. */
+/** Зөвхөн ижил сайтын зам, ингэснээр `?next=` хүмүүсийг өөр сайт руу явуулж чадахгүй. */
 export function safeNext(next: unknown, fallback: string): string {
   return typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
     ? next
@@ -112,29 +115,29 @@ export function safeNext(next: unknown, fallback: string): string {
 }
 
 /**
- * Where someone lands after signing in: the people who run a place go to
- * its dashboard, the Цагтаа team to admin, customers to their profile.
+ * Нэвтэрсний дараа хүн хаашаа очих вэ: газар эрхэлдэг хүмүүс самбар руугаа,
+ * Цагтаагийн баг админ руу, үйлчлүүлэгчид профайл руугаа.
  */
 export function homeFor(account: { memberships: number; isPlatformAdmin: boolean }): string {
   if (account.memberships > 0) return "/dashboard";
   return account.isPlatformAdmin ? "/admin" : "/profile";
 }
 
-/** Signed in, or off to the sign-in page (and back here afterwards). */
+/** Нэвтэрсэн байх, эсвэл нэвтрэх хуудас руу (дараа нь энд буцна). */
 export async function requireAccount(returnTo: string): Promise<Account> {
   const account = await getCurrentAccount();
   if (!account) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
   return account;
 }
 
-/** The Цагтаа team only. Anyone else gets "not found", which does not reveal the page exists. */
+/** Зөвхөн Цагтаагийн баг. Бусдад "олдсонгүй" гэж харагдах тул хуудас байгаа эсэхийг ч илчлэхгүй. */
 export async function requirePlatformAdmin(returnTo = "/admin"): Promise<Account> {
   const account = await requireAccount(returnTo);
   if (!account.isPlatformAdmin) notFound();
   return account;
 }
 
-/** The owner or a manager of this place (the Цагтаа team may look too). */
+/** Энэ газрын эзэмшигч эсвэл менежер (Цагтаагийн баг ч харж болно). */
 export async function requireBusinessAccess(
   slug: string,
   returnTo: string,

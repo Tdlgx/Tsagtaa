@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 type MemberError = keyof Dictionary["dashboard"]["memberErrors"];
 
-/** Toast for a member action; the page itself refreshes from the action. */
+/** Багийн үйлдлийн toast; хуудас өөрөө action-оор шинэчлэгдэнэ. */
 export function reportMember(result: ActionResult, t: Dictionary): boolean {
   if (result.ok) {
     toast.success(
@@ -33,9 +33,9 @@ export function reportMember(result: ActionResult, t: Dictionary): boolean {
   return false;
 }
 
-/* Bookings ------------------------------------------------------------------------- */
+/* Захиалгууд ------------------------------------------------------------------------- */
 
-/** Two taps: "Cancel" arms it for 4 seconds, "Yes, cancel" does it. */
+/** Хоёр товшилт: "Цуцлах" 4 секунд бэлэн болгоно, "Тийм, цуцлах" хэрэгжүүлнэ. */
 export function CancelBookingButton({
   slug,
   bookingId,
@@ -77,7 +77,7 @@ export function CancelBookingButton({
   );
 }
 
-/* Team ----------------------------------------------------------------------------- */
+/* Баг ----------------------------------------------------------------------------- */
 
 export function MemberFields({ idPrefix, t }: { idPrefix: string; t: Dictionary }): JSX.Element {
   return (
@@ -116,6 +116,7 @@ export function MemberFields({ idPrefix, t }: { idPrefix: string; t: Dictionary 
 
 export const field = (form: FormData, name: string): string => String(form.get(name) ?? "");
 
+/** Эзэмшигчид зориулсан менежер нэмэх маягт (нэр, утас, шинэ утсанд анхны нууц үг). */
 export function AddManagerForm({ slug }: { slug: string }): JSX.Element {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -166,6 +167,7 @@ export function AddManagerForm({ slug }: { slug: string }): JSX.Element {
   );
 }
 
+/** Менежерийг багаас хасах товч. */
 export function RemoveManagerButton({
   slug,
   accountId,
@@ -195,9 +197,9 @@ export function RemoveManagerButton({
   );
 }
 
-/* Attendance ------------------------------------------------------------------------ */
+/* Ирц ------------------------------------------------------------------------ */
 
-/** "Came" settles the customer's points now; "did not come" gives back any they spent. */
+/** "Ирсэн" үйлчлүүлэгчийн оноог одоо шийднэ; "Ирээгүй" зарцуулсан оноог нь буцаана. */
 export function AttendanceButtons({
   slug,
   bookingId,

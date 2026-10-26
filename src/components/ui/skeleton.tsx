@@ -2,7 +2,7 @@ import type { ComponentProps, JSX } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** Loading placeholder with a soft light sweep (transform-only animation). */
+/** Зөөлөн гэрлийн шилжилттэй ачааллын орлуулагч (зөвхөн transform анимэйшн). */
 function Skeleton({ className, ...props }: ComponentProps<"div">): JSX.Element {
   return (
     <div

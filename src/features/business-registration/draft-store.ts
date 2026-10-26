@@ -8,8 +8,8 @@ import {
 import { createLocalStore } from "@/lib/local-store";
 
 /**
- * The registration form, autosaved on this device: closing the tab or
- * losing the connection never loses what was typed.
+ * Бүртгэлийн маягт, энэ төхөөрөмж дээр автоматаар хадгалагдана: табыг хаах эсвэл
+ * холболт тасрах нь бичсэн зүйлийг хэзээ ч алдуулахгүй.
  */
 const store = createLocalStore<RegistrationDraft>(
   "tsagtaa.business-draft.v1",
@@ -20,12 +20,12 @@ const store = createLocalStore<RegistrationDraft>(
   },
 );
 
-/** `null` while rendering on the server / hydrating. */
+/** Сервер дээр render / hydrate хийх үед `null`. */
 export function useDraft(): RegistrationDraft | null {
   return store.use();
 }
 
-/** Applies a change; the first change also gives the form its request id. */
+/** Өөрчлөлтийг хэрэгжүүлнэ; эхний өөрчлөлт маягтад request id-г нь мөн өгнө. */
 export function updateDraft(change: (draft: RegistrationDraft) => RegistrationDraft): void {
   const next = change(store.read());
   store.write(next.requestId ? next : { ...next, requestId: crypto.randomUUID() });
@@ -35,14 +35,14 @@ export function clearDraft(): void {
   store.clear();
 }
 
-/** True when the visitor has typed or chosen anything worth restoring. */
+/** Зочин сэргээх үнэ цэнтэй ямар нэг зүйл бичсэн эсвэл сонгосон бол true. */
 export function hasProgress(draft: RegistrationDraft): boolean {
   return draft.category !== null || draft.name.trim() !== "" || draft.services.length > 0;
 }
 
 const TOUR_SEEN_KEY = "tsagtaa.business-tour.v1";
 
-/** The registration tour starts by itself once; afterwards only from its button. */
+/** Бүртгэлийн аялал нэг удаа өөрөө эхэлнэ; дараа нь зөвхөн товчноос нь. */
 export function takeFirstTourVisit(): boolean {
   try {
     if (window.localStorage.getItem(TOUR_SEEN_KEY)) return false;

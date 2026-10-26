@@ -1,6 +1,6 @@
 import type { Dictionary } from "@/i18n/dictionaries/mn";
 
-/** English interface text. Same shape as `mn.ts`; TypeScript flags anything missing. */
+/** Англи интерфейсийн текст. `mn.ts`-тэй ижил бүтэцтэй; дутуу зүйлийг TypeScript илрүүлнэ. */
 export const en: Dictionary = {
   brand: "Tsagtaa",
   meta: {
@@ -78,7 +78,7 @@ export const en: Dictionary = {
       },
     ],
     benefits: {
-      // Filled in later; until then each section shows empty slots.
+      // Дараа нь бөглөнө; тэр болтол хэсэг бүр хоосон хайрцаг харуулна.
       customers: { title: "Benefits for customers", items: [] },
       business: { title: "Benefits for businesses", items: [] },
     },
@@ -825,14 +825,27 @@ export const en: Dictionary = {
     title: "Sign in",
     lead: "Collect points and pay less for your next booking. If you run a place, your dashboard is here too.",
     phone: "Phone number",
+    login: "Phone or email",
+    loginPlaceholder: "9911 2233 or name@gmail.com",
     password: "Password",
     show: "Show password",
     hide: "Hide password",
     submit: "Sign in",
+    emailHint: "No password needed: we'll email you a 6-digit code.",
+    getCode: "Get a code",
+    code: "Sign-in code",
+    codeSent: (email) =>
+      `We sent a 6-digit code to ${email}. Enter it within 10 minutes. Not there? Check your spam folder.`,
+    resend: "Send again",
+    otherLogin: "Use another phone or email",
     errors: {
-      invalid: "Enter your phone and password.",
+      invalid: "Enter your phone (with its password) or your email.",
       wrong: "Wrong phone number or password.",
       locked: "Too many wrong tries. Locked for 15 minutes.",
+      code: "That code is wrong or has expired. Try again or get a new one.",
+      tooSoon: "A code was just sent. Wait a minute before asking again.",
+      tooMany: "Too many codes sent to this address. Try again in an hour.",
+      mail: "We couldn't send the email. Try again shortly, or sign in with your phone.",
       server: "Connection problem. Please try again.",
     },
     noAccount: "No account yet?",
@@ -849,7 +862,11 @@ export const en: Dictionary = {
     title: "Create an account",
     lead: "Earn points with every booking and pay less for the next one.",
     name: "Name",
-    consent: "I agree to my name and phone number being used for my account and points.",
+    email: "Email",
+    optional: "(optional)",
+    emailHint:
+      "After signing up we'll send it a code to confirm it. Then you can sign in with a code, no password.",
+    consent: "I agree to my name, phone and email being used for my account and points.",
     submit: "Create account",
     haveAccount: "Already have an account?",
     perkEarn: (percent) => `${percent}% of every booking back as points`,
@@ -862,8 +879,54 @@ export const en: Dictionary = {
       confirm: "The passwords don't match.",
       consent: "Please give your consent to continue.",
       taken: "This number already has an account. Please sign in.",
+      email: "That email doesn't look right. For example: name@gmail.com",
+      emailTaken: "This email belongs to another account. Please sign in.",
       server: "Connection problem. Please try again.",
     },
+  },
+
+  accountEmail: {
+    label: "Sign-in email",
+    none: "Not added",
+    add: "Add",
+    change: "Change",
+    password: "Current password",
+    removeHint:
+      "A code to confirm goes to the new address. Leave it empty to remove the email; you can still sign in with your phone.",
+    codeHint: "A code to confirm it goes to this address.",
+    next: "Continue",
+    cancel: "Cancel",
+    code: "Confirmation code",
+    codeSent: (email) =>
+      `We sent a 6-digit code to ${email}. Once it's entered, you can sign in with this address.`,
+    confirm: "Confirm",
+    resend: "Send again",
+    saved: {
+      added: "Email confirmed. You can now sign in with a code sent to it.",
+      changed: "Email changed.",
+      removed: "Email removed.",
+    },
+    errors: {
+      email: "That email doesn't look right. For example: name@gmail.com",
+      password: "Wrong password.",
+      locked: "Too many wrong tries. Locked for 15 minutes.",
+      same: "This email is already on your account.",
+      taken: "This email belongs to another account.",
+      code: "That code is wrong. Please try again.",
+      codeExpired: "The code has expired. Tap “Send again” for a new one.",
+      tooSoon: "A code was just sent. Wait a minute before asking again.",
+      tooMany: "Too many codes sent to this address. Try again in an hour.",
+      mail: "We couldn't send the email. Please try again shortly.",
+      server: "Connection problem. Please try again.",
+    },
+  },
+
+  emailCode: {
+    subject: (code) => `Tsagtaa code: ${code}`,
+    loginLead: "Your Tsagtaa sign-in code:",
+    setEmailLead: "Your code to add this email to your Tsagtaa account:",
+    expires: (minutes) => `It works once, for ${minutes} minutes.`,
+    ignore: "If you didn't ask for it, ignore this email. Never share the code with anyone.",
   },
 
   points: {
@@ -924,6 +987,7 @@ export const en: Dictionary = {
     dashboard: "Dashboard",
     admin: "Admin",
     backToSite: "Back to site",
+    account: "My account",
     roles: { owner: "Owner", manager: "Manager" },
     status: {
       pending: "Under review",
@@ -999,6 +1063,28 @@ export const en: Dictionary = {
     staff: "Staff",
     closed: "Closed",
     viewAs: "You are viewing as a Tsagtaa admin.",
+    edit: "Edit",
+    editor: {
+      metaTitle: "Edit details",
+      title: "Hours, services, staff",
+      back: "Back to the dashboard",
+      tabsLabel: "What to edit",
+      save: "Save",
+      discard: "Discard",
+      saved: "Saved. New bookings follow it straight away.",
+      notes: {
+        hours: "Bookings already made keep their times.",
+        services: "Bookings already made keep the price and length they were made with.",
+        staff: "To remove someone with upcoming bookings, cancel those bookings first.",
+      },
+      samplePlace: "A sample place's details live in the code, so they cannot be edited here.",
+      errors: {
+        invalid: "Check the details and try again.",
+        not_found: "Place not found.",
+        has_bookings: (names: string) =>
+          `${names} still has upcoming bookings, so they cannot be removed yet. Cancel those bookings first.`,
+      },
+    },
   },
 
   admin: {

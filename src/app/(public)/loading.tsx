@@ -4,7 +4,7 @@ import { Container } from "@/components/layout/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getI18n } from "@/i18n/server";
 
-/** Skeleton shown while a public page loads; header and tab bar stay visible. */
+/** Нийтийн хуудас ачаалагдах үеийн skeleton; header болон доод цэс харагдсаар байна. */
 export default async function PublicLoading(): Promise<JSX.Element> {
   const { t } = await getI18n();
 

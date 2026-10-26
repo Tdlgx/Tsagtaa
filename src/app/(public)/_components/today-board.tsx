@@ -33,27 +33,27 @@ import { formatMNT } from "@/lib/currency";
 import { getZonedParts } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
-/** The board shows one working day, 09:00–21:00 Ulaanbaatar time. */
+/** Самбар нэг ажлын өдрийг харуулна, Улаанбаатарын цагаар 09:00–21:00. */
 const DAY_START = 9 * 60;
 const DAY_END = 21 * 60;
 const HOURS = Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, i) => 9 + i);
-/** After this time today has nothing left worth showing, so the board opens on tomorrow. */
+/** Энэ цагаас хойш өнөөдөр харуулах зүйлгүй болох тул самбар маргаашаар нээгдэнэ. */
 const FLIP_TO_TOMORROW = 20 * 60 + 30;
-/** Rows shown at once; the rest are a link to search. */
+/** Нэг дор харуулах мөр; үлдсэн нь хайлт руу холбоос болно. */
 const MAX_ROWS = 6;
-/** Phones show fewer places; the rest are one tap away in search. */
+/** Утсан дээр цөөн газар харуулна; үлдсэн нь хайлтад нэг товшилтын зайтай. */
 const PHONE_ROWS = 4;
 const MINUTE = 60_000;
 
 type GroupFilter = CategoryGroupSlug | "all";
 
-/** Position on the track, in hours from 09:00 (multiplied by --hour in CSS). */
+/** Зам дээрх байрлал, 09:00-өөс хойших цагаар (CSS-д --hour-оор үржүүлнэ). */
 const toTrackHours = (minutes: number): number => (minutes - DAY_START) / 60;
 
 /*
- * A minute-precision clock shared by every subscriber: React re-renders once
- * a minute at most. On the server it is null, so the board renders without
- * "now" and fills it in after hydration (no server/browser time mismatch).
+ * Бүх subscriber хуваалцдаг минутын нарийвчлалтай цаг: React хамгийн ихдээ минутад
+ * нэг удаа дахин render хийнэ. Сервер дээр null тул самбар "одоо"-гүйгээр render
+ * хийгдэж, hydration-ий дараа бөглөгдөнө (сервер/browser-ийн цаг зөрөхгүй).
  */
 function subscribeToMinute(onChange: () => void): () => void {
   const id = window.setInterval(onChange, 10_000);
@@ -62,7 +62,7 @@ function subscribeToMinute(onChange: () => void): () => void {
 const getMinute = (): number => Math.floor(Date.now() / MINUTE);
 const getServerMinute = (): null => null;
 
-/** Minutes since midnight in Ulaanbaatar. */
+/** Улаанбаатарын цагаар шөнө дундаас хойш өнгөрсөн минут. */
 function ubMinutes(minute: number): number {
   const { hour, minute: mins } = getZonedParts(new Date(minute * MINUTE));
   return hour * 60 + mins;
@@ -74,11 +74,11 @@ function dayLabel(minute: number, day: SearchDay, locale: Locale): string {
 }
 
 /**
- * Open times across nearby places on one shared clock, with the ones booked
- * in the database hatched out. Filter by kind, sort by soonest, rating or
- * price, jump through the day, and see each place's next free time and how
- * full its day is. Every open time is a radio button, so Tab reaches the
- * board and the arrow keys walk through the slots.
+ * Ойролцоох газруудын сул цагуудыг нэг нийтлэг цагийн шугам дээр, DB-д
+ * захиалагдсанийг нь зураасаар дарж харуулна. Төрлөөр шүүх, хамгийн ойр, үнэлгээ
+ * эсвэл үнээр эрэмбэлэх, өдрийн дундуур үсрэх, газар бүрийн дараагийн сул цаг болон
+ * өдөр нь хэр дүүрснийг харах боломжтой. Сул цаг бүр radio товч тул Tab-аар самбарт
+ * хүрч, сумтай товчоор цагуудаар явна.
  */
 export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[] }): JSX.Element {
   const locale = useLocale();
@@ -106,7 +106,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
       .filter((slot) => !slot.taken && !isPast(toMinutes(slot.time)))
       .map((slot) => slot.time);
 
-  // Kinds of place on the board, each with how many free times it has.
+  // Самбар дээрх газрын төрлүүд, тус бүр хэдэн сул цагтай.
   const groups = CATEGORY_GROUPS.filter((item) => rows.some((row) => row.group === item.slug));
   const freeIn = (filter: GroupFilter): number =>
     rows
@@ -129,7 +129,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
   const hiddenOnPhone = sorted.length - Math.min(visible.length, PHONE_ROWS);
   const openCount = freeIn(group);
 
-  // The soonest free time among the shown places gets a pulse.
+  // Харагдаж буй газруудын хамгийн ойрын сул цаг лугшиж харагдана.
   const soonest = visible.reduce<{ row: BoardRow; start: number } | null>((best, row) => {
     const start = firstFree(row);
     return Number.isFinite(start) && (!best || start < best.start) ? { row, start } : best;
@@ -165,7 +165,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
     });
   };
 
-  // Once the time is known (and whenever the day changes), bring the useful part into view.
+  // Цаг тодорхой болмогц (мөн өдөр солигдох бүрт) хэрэгтэй хэсгийг харагдах хүрээнд оруулна.
   useEffect(() => {
     const key = `${day}:${needle ? "now" : "start"}`;
     if (minute === null || scrolledFor.current === key) return;
@@ -190,11 +190,11 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
       aria-labelledby="today-board-title"
       className="scroll-mt-20 overflow-hidden rounded-xl border border-border bg-surface shadow-md"
     >
-      {/* Header: which day, the live Ulaanbaatar time, and the soonest free time */}
+      {/* Толгой: аль өдөр, Улаанбаатарын амьд цаг, хамгийн ойрын сул цаг */}
       <div className="flex items-end justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
         <div className="min-w-0">
           <p className="text-sm text-muted-foreground">
-            {/* Non-breaking space keeps the line height before hydration. */}
+            {/* Тасардаггүй зай hydration-оос өмнө мөрийн өндрийг хадгална. */}
             {minute !== null ? dayLabel(minute, day, locale) : " "}
           </p>
           <h2
@@ -235,7 +235,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
         </p>
       </div>
 
-      {/* Controls: day, kind of place, jump, sort */}
+      {/* Удирдлага: өдөр, газрын төрөл, үсрэх, эрэмбэлэх */}
       <div className="flex flex-col gap-3 border-b border-border px-5 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="-mx-1 flex min-w-0 scrollbar-none items-center gap-2 overflow-x-auto mask-[linear-gradient(to_right,black_calc(100%-2rem),transparent)] px-1 py-0.5 pr-8">
           <fieldset className="flex shrink-0 rounded-full border border-border bg-background p-0.5">
@@ -325,7 +325,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
         </div>
       </div>
 
-      {/* Schedule: names stay pinned on the left, the day scrolls */}
+      {/* Хуваарь: нэрс зүүн талд наалттай үлдэж, өдөр гүйлгэгдэнэ */}
       <fieldset className="min-w-0">
         <legend className="sr-only">{t.board.legend}</legend>
         <div
@@ -336,7 +336,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
             key={`${day}-${group}-${sort}`}
             className="relative w-max animate-in duration-300 ease-soft fade-in"
           >
-            {/* Hour ruler */}
+            {/* Цагийн шугам */}
             <div aria-hidden className="flex border-b border-border">
               <div className="sticky left-0 z-20 w-(--names) shrink-0 bg-surface" />
               <div className="relative h-9 w-[calc(var(--hour)*12)]">
@@ -346,7 +346,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
                     style={{ "--at": index } as CSSProperties}
                     className="absolute top-0 bottom-0 left-[calc(var(--hour)*var(--at))] flex items-center border-l border-border pl-2 text-xs text-muted-foreground tabular-nums first:border-l-0"
                   >
-                    {/* The needle carries its own time label; hide the hour it would cover. */}
+                    {/* Зүү өөрийн цагийн шошготой; түүний халхлах цагийг нууна. */}
                     <span
                       className={cn(
                         needle &&
@@ -380,7 +380,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
               />
             ))}
 
-            {/* The now-line: one saffron needle across every row */}
+            {/* Одоогийн шугам: бүх мөрийг дайрсан гүргэм өнгийн нэг зүү */}
             {needle && nowMinutes !== null ? (
               <div
                 aria-hidden
@@ -413,7 +413,7 @@ export function TodayBoard({ id, rows }: { id?: string; rows: readonly BoardRow[
         </Link>
       ) : null}
 
-      {/* Footer: what is selected, and the one action */}
+      {/* Доод хэсэг: юу сонгогдсон, мөн цорын ганц үйлдэл */}
       <div
         aria-live="polite"
         className="flex min-h-20 flex-col gap-3 border-t border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
@@ -477,7 +477,7 @@ type BoardRowViewProps = {
   soonestId: string | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
-  /** Beyond the phone's row limit. */
+  /** Утасны мөрийн хязгаараас цаашхи. */
   phoneHidden?: boolean;
 };
 
@@ -496,7 +496,7 @@ function BoardRowView({
 }: BoardRowViewProps): JSX.Element {
   const t = useT();
   const slots = row.slots[day];
-  // How full the day is: the share of opening hours not offered as free times.
+  // Өдөр хэр дүүрсэн бэ: ажлын цагийн сул цаг болгон санал болгоогүй хувь.
   const freeMinutes = slots.filter((slot) => !slot.taken).length * row.duration;
   const load = Math.round(
     Math.min(98, Math.max(5, (1 - freeMinutes / (DAY_END - DAY_START)) * 100)),
@@ -544,7 +544,7 @@ function BoardRowView({
         </span>
       </div>
       <div ref={trackRef} className="relative h-20 w-[calc(var(--hour)*12)] bg-hours">
-        {/* Time that has already gone today */}
+        {/* Өнөөдөр аль хэдийн өнгөрсөн цаг */}
         {needle && nowMinutes !== null ? (
           <div
             aria-hidden
@@ -556,7 +556,7 @@ function BoardRowView({
         {slots.map((slot, index) => {
           const start = toMinutes(slot.time);
           const nextStart = slots[index + 1] ? toMinutes(slots[index + 1]!.time) : DAY_END;
-          // A slot is as wide as the service, but never runs into the next start time.
+          // Цаг нь үйлчилгээний урттай ижил өргөн, гэхдээ дараагийн эхлэх цаг руу хэзээ ч орохгүй.
           const length = Math.min(row.duration, nextStart - start);
           const slotId = `${row.slug}@${slot.time}`;
           const past = isPast(start);

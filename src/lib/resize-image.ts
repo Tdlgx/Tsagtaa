@@ -1,6 +1,6 @@
-/** Largest file accepted before shrinking (phone cameras produce 3–12 MB). */
+/** Жижигрүүлэхээс өмнө хүлээн авах хамгийн том файл (утасны камер 3–12 MB үүсгэдэг). */
 export const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
-/** What the server accepts after shrinking (the database allows a little more). */
+/** Жижигрүүлсний дараа серверийн хүлээн авах хэмжээ (DB арай илүүг зөвшөөрнө). */
 export const MAX_UPLOAD_BYTES = 700 * 1024;
 
 export type ResizedImage = {
@@ -17,10 +17,10 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promi
 }
 
 /**
- * A chosen image → a smaller WebP (JPEG where WebP cannot be written), the
- * longest side at most `maxSide`. Redrawing it in the browser leaves EXIF
- * data (location, camera) behind and means only our own formats are sent.
- * Transparency survives in WebP, which suits logos.
+ * Сонгосон зураг → урт тал нь хамгийн ихдээ `maxSide` байх жижиг WebP (WebP бичиж
+ * чадахгүй бол JPEG). Browser дээр дахин зурснаар EXIF мэдээлэл (байршил, камер)
+ * үлдэхгүй бөгөөд зөвхөн манай форматууд илгээгдэнэ. WebP тунгалаг байдлыг
+ * хадгалдаг нь логонд тохиромжтой.
  */
 export async function resizeImage(
   file: File,
@@ -30,11 +30,11 @@ export async function resizeImage(
   if (file.size > MAX_SOURCE_BYTES) return "tooLarge";
 
   try {
-    // `imageOrientation: "from-image"` keeps phone photos the right way up.
+    // `imageOrientation: "from-image"` утасны зургийг зөв чиглэлтэй байлгана.
     const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
     let side = maxSide;
     let q = quality;
-    // Shrink further if a detailed photo is still too heavy.
+    // Нарийн зураг хүнд хэвээр байвал улам жижигрүүлнэ.
     for (let attempt = 0; attempt < 4; attempt += 1) {
       const scale = Math.min(1, side / Math.max(bitmap.width, bitmap.height));
       const width = Math.max(16, Math.round(bitmap.width * scale));
@@ -48,7 +48,7 @@ export async function resizeImage(
       ctx.drawImage(bitmap, 0, 0, width, height);
 
       let blob = await toBlob(canvas, "image/webp", q);
-      // Browsers that cannot write WebP hand back PNG instead.
+      // WebP бичиж чаддаггүй browser-ууд оронд нь PNG буцаадаг.
       if (!blob || blob.type !== "image/webp") blob = await toBlob(canvas, "image/jpeg", q);
       if (!blob) return "failed";
       if (blob.size <= MAX_UPLOAD_BYTES) {
@@ -61,7 +61,7 @@ export async function resizeImage(
     bitmap.close();
     return "tooLarge";
   } catch {
-    // HEIC on browsers that can't decode it, or a broken file.
+    // Decode хийж чаддаггүй browser дээрх HEIC, эсвэл эвдэрсэн файл.
     return "failed";
   }
 }

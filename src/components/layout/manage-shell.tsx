@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import Link from "next/link";
 import type { JSX, ReactNode } from "react";
 
@@ -11,9 +11,9 @@ import { getI18n } from "@/i18n/server";
 import { getCurrentAccount } from "@/lib/auth/session";
 
 /**
- * Shell for the management side (sign-in in `(auth)`, the business dashboard
- * in `(business)`, admin in `(admin)`): a plain header with the signed-in
- * person and the links their roles allow. No splash, backdrop or tab bar.
+ * Удирдлагын хэсгийн хүрээ (`(auth)` дахь нэвтрэлт, `(business)` дахь бизнесийн
+ * самбар, `(admin)` дахь админ): нэвтэрсэн хүн болон түүний эрхэд зөвшөөрөгдсөн
+ * холбоосуудтай энгийн header. Splash, дэвсгэр, доод цэс байхгүй.
  */
 export async function ManageShell({ children }: { children: ReactNode }): Promise<JSX.Element> {
   const { t } = await getI18n();
@@ -54,9 +54,15 @@ export async function ManageShell({ children }: { children: ReactNode }): Promis
             <ThemeSwitch />
             {account ? (
               <form action={logoutAction} className="flex items-center gap-2">
-                <span className="max-w-32 truncate text-sm text-muted-foreground max-md:hidden">
-                  {account.name}
-                </span>
+                {/* Өөрийн бүртгэл (нэвтрэх имэйл, оноо) профайл хуудсанд байдаг. */}
+                <Link
+                  href="/profile"
+                  title={t.manage.account}
+                  className="flex h-9 max-w-40 items-center gap-1.5 rounded-full px-3 text-sm text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring is-hover:bg-surface-muted is-hover:text-foreground"
+                >
+                  <UserRound className="size-4 shrink-0" />
+                  <span className="truncate max-md:sr-only">{account.name}</span>
+                </Link>
                 <button
                   type="submit"
                   title={t.auth.logout}

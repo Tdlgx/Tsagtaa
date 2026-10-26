@@ -21,7 +21,7 @@ const VERDICT_TONE = {
   fix: "bg-danger-soft text-danger-foreground",
 } as const;
 
-/** The score as a ring with the verdict next to it. */
+/** Оноог цагираг хэлбэрээр, хажууд нь дүгнэлтийг харуулна. */
 export function ScoreBadge({
   report,
   t,
@@ -78,7 +78,7 @@ export function ScoreBadge({
   );
 }
 
-/** Each check as a line: icon, what was checked, what was found. Problems first. */
+/** Шалгалт бүр нэг мөр: тэмдэг, юуг шалгасан, юу илэрсэн. Асуудалтайг нь эхэнд. */
 export function CheckList({ report, t }: { report: ReviewReport; t: Dictionary }): JSX.Element {
   const order: Record<CheckLevel, number> = { fail: 0, warn: 1, pass: 2 };
   const checks = [...report.checks].sort((a, b) => order[a.level] - order[b.level]);

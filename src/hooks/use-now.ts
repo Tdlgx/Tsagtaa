@@ -4,12 +4,12 @@ type Clock = {
   now: number;
   listeners: Set<() => void>;
   timer?: number;
-  /** Stable per interval: a new function each render would make React resubscribe forever. */
+  /** Интервал бүрт тогтвортой: render бүрт шинэ функц бол React дахин дахин subscribe хийнэ. */
   subscribe: (onChange: () => void) => () => void;
   getSnapshot: () => number;
 };
 
-/** One shared timer per interval, however many components read it. */
+/** Хэдэн компонент уншсан ч интервал бүрт нэг нийтлэг timer. */
 const clocks = new Map<number, Clock>();
 
 function getClock(intervalMs: number): Clock {
@@ -22,7 +22,7 @@ function getClock(intervalMs: number): Clock {
     subscribe: (onChange) => {
       clock.listeners.add(onChange);
       if (clock.timer === undefined) {
-        // The clock may have slept with no readers; catch up before ticking again.
+        // Уншигчгүй үед цаг унтсан байж магадгүй; дахин цохихоос өмнө гүйцнэ.
         clock.now = Date.now();
         clock.timer = window.setInterval(() => {
           clock.now = Date.now();
@@ -46,8 +46,8 @@ function getClock(intervalMs: number): Clock {
 const getServerSnapshot = (): null => null;
 
 /**
- * Current time in ms, refreshed every `intervalMs`. `null` on the server and
- * during hydration, so nothing time-dependent renders twice with different values.
+ * Одоогийн цаг ms-ээр, `intervalMs` тутамд шинэчлэгдэнэ. Сервер дээр болон
+ * hydration-ий үед `null`, ингэснээр цагаас хамаарах юу ч ялгаатай утгатайгаар хоёр удаа render хийгдэхгүй.
  */
 export function useNow(intervalMs = 30_000): number | null {
   const clock = getClock(intervalMs);

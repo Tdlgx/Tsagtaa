@@ -9,19 +9,19 @@ import {
   type RefObject,
 } from "react";
 
-/** Degrees the card turns per pixel dragged. */
+/** Чирсэн пиксел тутамд карт эргэх градус. */
 const DEG_PER_PX = 0.45;
-/** Up/down drag leans the card forward or back, never past this. */
+/** Дээш/доош чирэх нь картыг урагш эсвэл хойш хазайлгана, үүнээс хэтрэхгүй. */
 const MAX_LEAN = 28;
-/** Movement before a press counts as a drag (so taps on buttons stay taps). */
+/** Дарсан үйлдэл чирэлт гэж тооцогдох хөдөлгөөн (ингэснээр товч дээр товших нь товшилт хэвээр). */
 const DRAG_START_PX = 6;
-/** Fraction of the spin kept every 16 ms after letting go. */
+/** Суллаад 16 ms тутамд хадгалагдах эргэлтийн хувь. */
 const FRICTION = 0.95;
-/** Below this speed (degrees per ms) the glide ends and the card settles. */
+/** Энэ хурднаас (ms тутамд градус) доош гулсалт дуусч, карт тогтоно. */
 const STOP_SPEED = 0.05;
-/** A release this long after the last move has no throw left in it. */
+/** Сүүлийн хөдөлгөөнөөс ийм удаан хойш суллавал шидэх хүч үлдэхгүй. */
 const STILL_MS = 80;
-/** Mouse hover lean, as on the other cards. */
+/** Хулганы hover-ийн хазайлт, бусад карт дээрхтэй адил. */
 const HOVER_DEG = 7;
 
 type SpinProps<T extends HTMLElement> = {
@@ -39,21 +39,21 @@ const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
 /**
- * Drives the `spin-3d` utility: drag a card sideways to turn it all the way
- * round, up/down to lean it, and let go to throw it; it glides, slows and
- * settles on whichever face is nearer. The element needs a front and a back
- * face (`data-face="front" | "back"`); the hidden one is made `inert`.
+ * `spin-3d` utility-г удирдана: картыг хажуу тийш чирж бүтэн эргүүлэх, дээш/доош
+ * чирж хазайлгах, суллаж шидэх; гулсаж, удаашраад аль ойрхон тал дээрээ тогтоно.
+ * Элемент урд, ар талтай байх ёстой (`data-face="front" | "back"`); нуугдсан тал
+ * нь `inert` болно.
  *
- * Touch: the element has `touch-action: pan-y`, so an up/down swipe still
- * scrolls the page and only a sideways swipe spins. Everything is written as
- * CSS variables, at most once a frame, so spinning never re-renders React.
+ * Мэдрэгч: элемент `touch-action: pan-y`-тай тул дээш/доош шудрах нь хуудсыг гүйлгэсээр,
+ * зөвхөн хажуу тийш шудрах нь эргүүлнэ. Бүгдийг CSS хувьсагчаар кадрт хамгийн ихдээ
+ * нэг удаа бичдэг тул эргүүлэх нь React-ийг хэзээ ч дахин render хийлгэхгүй.
  */
 export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 1 | -1) => void } {
   const ref = useRef<T>(null);
   const s = useRef({
-    lean: 0, // rotateX, degrees
-    turn: 0, // rotateY, degrees (unbounded: several full turns are fine)
-    speed: 0, // degrees per ms, while gliding
+    lean: 0, // rotateX, градусаар
+    turn: 0, // rotateY, градусаар (хязгааргүй: хэд хэдэн бүтэн эргэлт ч болно)
+    speed: 0, // гулсах үеийн хурд, ms тутамд градус
     pointer: null as number | null,
     dragging: false,
     startX: 0,
@@ -73,7 +73,7 @@ export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 
   const reducedMotion = (): boolean =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /** Writes the angles, moves the light with the turn, and marks the visible face. */
+  /** Өнцгүүдийг бичиж, эргэлтээр гэрлийг хөдөлгөн, харагдах талыг тэмдэглэнэ. */
   const paint = (): void => {
     const node = ref.current;
     if (!node) return;
@@ -89,13 +89,13 @@ export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 
     if (back !== s.current.back) {
       s.current.back = back;
       node.dataset.side = back ? "back" : "front";
-      // The side turned away can be neither read nor tabbed into.
+      // Эргэж харсан талыг унших ч, Tab-аар орох ч боломжгүй.
       node.querySelector('[data-face="front"]')?.toggleAttribute("inert", back);
       node.querySelector('[data-face="back"]')?.toggleAttribute("inert", !back);
     }
   };
 
-  /** Ends on the nearer face, upright, with the CSS spring doing the last bit. */
+  /** Ойрхон тал дээр босоо байдлаар дуусах ба сүүлийн хэсгийг CSS пүрш хийнэ. */
   const settle = (): void => {
     const node = ref.current;
     cancelAnimationFrame(s.current.frame);
@@ -153,7 +153,7 @@ export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 
       const state = s.current;
       if (!node) return;
 
-      // Mouse just passing over: a gentle lean toward the cursor, as on other cards.
+      // Хулгана зүгээр дайрч өнгөрөх: бусад карт шиг курсор руу зөөлөн хазайна.
       if (state.pointer === null) {
         if (event.pointerType !== "mouse") return;
         const box = node.getBoundingClientRect();
@@ -182,7 +182,7 @@ export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 
       const dt = Math.max(event.timeStamp - state.lastT, 1);
       state.turn += dx * DEG_PER_PX;
       state.lean = clamp(state.lean - dy * DEG_PER_PX * 0.6, -MAX_LEAN, MAX_LEAN);
-      // Smoothed, so one jittery frame does not decide the throw.
+      // Зөөлрүүлсэн, ингэснээр нэг чичиргээтэй кадр шидэлтийг шийдэхгүй.
       state.speed = 0.75 * ((dx * DEG_PER_PX) / dt) + 0.25 * state.speed;
       state.lastX = event.clientX;
       state.lastY = event.clientY;
@@ -201,7 +201,7 @@ export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 
       if (reducedMotion() || Math.abs(state.speed) <= STOP_SPEED) settle();
       else glide();
     },
-    // The browser took the gesture (an up/down scroll): put the card back.
+    // Browser үйлдлийг авсан (дээш/доош гүйлгэлт): картыг буцааж тавина.
     onPointerCancel: () => {
       s.current.pointer = null;
       if (s.current.dragging) {
@@ -212,7 +212,7 @@ export function useSpin<T extends HTMLElement>(): SpinProps<T> & { flip: (dir?: 
     onPointerLeave: (event) => {
       if (event.pointerType === "mouse" && s.current.pointer === null) clearHover();
     },
-    // Double tap or double click turns it over.
+    // Хоёр товших эсвэл давхар дарах нь эргүүлнэ.
     onDoubleClick: (event) => {
       if ((event.target as HTMLElement).closest("button, a")) return;
       flip(1);

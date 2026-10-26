@@ -1,5 +1,5 @@
-// Applies db/migrations/*.sql in name order, each once, each in its own
-// transaction (a failing file leaves nothing half-applied).
+// db/migrations/*.sql файлуудыг нэрийн дарааллаар, тус бүрийг нэг удаа, өөрийн
+// transaction дотор хэрэгжүүлнэ (алдаатай файл хагас хэрэгжсэн зүйл үлдээхгүй).
 //   npm run db:migrate
 import { readdir, readFile } from "node:fs/promises";
 
@@ -11,17 +11,17 @@ if (!process.env.DATABASE_URL) {
 }
 
 const url = new URL(process.env.DATABASE_URL);
-// `?schema=public` is a Prisma-style option; PostgreSQL itself rejects it.
+// `?schema=public` бол Prisma-гийн сонголт; PostgreSQL өөрөө үүнийг хүлээн авахгүй.
 url.searchParams.delete("schema");
-// Neon adds this; the driver does not support it (see src/lib/db.ts).
+// Neon үүнийг нэмдэг ч driver нь дэмждэггүй (src/lib/db.ts-ийг үз).
 url.searchParams.delete("channel_binding");
-// One address instead of ::1 + 127.0.0.1 (see src/lib/db.ts).
+// ::1 + 127.0.0.1 хоёрын оронд нэг хаяг (src/lib/db.ts-ийг үз).
 if (url.hostname === "localhost") url.hostname = "127.0.0.1";
 const sql = postgres(url.toString(), { max: 1, onnotice: () => {} });
 const dir = new URL("../db/migrations/", import.meta.url);
 
 try {
-  // One runner at a time, even if two deploys start together.
+  // Хоёр deploy зэрэг эхэлсэн ч нэг удаад зөвхөн нэг migration ажиллана.
   await sql`SELECT pg_advisory_lock(hashtext('tsagtaa.migrate'))`;
   await sql`
     CREATE TABLE IF NOT EXISTS schema_migrations (

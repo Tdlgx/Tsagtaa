@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils";
 type CategoryStepProps = { draft: RegistrationDraft; errors: StepErrors; t: Dictionary };
 
 /**
- * Picking a kind of place also prepares the usual hours and booking grid
- * for it, unless the owner already set their own hours.
+ * Газрын төрлийг сонгоход түүнд тохирох ердийн цагийн хуваарь, захиалгын торыг
+ * бэлдэнэ, эзэмшигч өөрийн цагийг аль хэдийн тохируулаагүй бол.
  */
 function choose(category: BusinessCategorySlug): void {
   updateDraft((draft) => {
@@ -39,6 +39,7 @@ function choose(category: BusinessCategorySlug): void {
   });
 }
 
+/** Бүртгэлийн 1-р алхам: газрын төрлийг сонгох (салоны дэд ангиллууд тусдаа бүлэгт). */
 export function CategoryStep({ draft, errors, t }: CategoryStepProps): JSX.Element {
   const salon = BUSINESS_CATEGORIES.filter((category) => category.group === "salon");
   const others = BUSINESS_CATEGORIES.filter((category) => category.group !== "salon");

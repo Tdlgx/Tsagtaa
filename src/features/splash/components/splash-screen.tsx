@@ -12,11 +12,11 @@ const LETTERS_AT = 1000;
 const LETTER_STAGGER = 60;
 
 /**
- * App-style launch screen: the logo sequence played large on ink, then the
- * screen lifts away to the page. It is server-rendered and driven by CSS, so
- * it covers the first paint and plays even before hydration. A tap skips it.
- * The layout renders it only until the session cookie is set; "reduce
- * motion" hides it altogether.
+ * Апп маягийн нээлтийн дэлгэц: логоны дарааллыг бэхэн дэвсгэр дээр томоор тоглуулж,
+ * дараа нь дэлгэц дээш хөөрч хуудас гарч ирнэ. Сервер дээр render хийгдэж CSS-ээр
+ * удирдагддаг тул анхны зурагдалтыг бүрхэж, hydration-оос өмнө ч тоглоно. Товшвол
+ * алгасна. Layout үүнийг session cookie тохирох хүртэл л render хийнэ; "reduce motion"
+ * бүрмөсөн нууна.
  */
 export function SplashScreen(): JSX.Element | null {
   const locale = useLocale();
@@ -26,7 +26,7 @@ export function SplashScreen(): JSX.Element | null {
   const [gone, setGone] = useState(false);
 
   useEffect(() => {
-    // Session cookie (no expiry): the next page load in this visit skips the splash.
+    // Session cookie (хугацаагүй): энэ айлчлалын дараагийн хуудас ачаалахад splash алгасна.
     document.cookie = `${SPLASH_COOKIE}=1; path=/; samesite=lax`;
   }, []);
 
@@ -49,7 +49,7 @@ export function SplashScreen(): JSX.Element | null {
         skipping ? "animate-[splash-exit_250ms_var(--ease-soft)_forwards]" : "animate-splash-exit",
       )}
     >
-      {/* Faint lime dot grid, fading out toward the edges. */}
+      {/* Ирмэг рүү бүдгэрсэн бүдэг шар-ногоон цэгэн тор. */}
       <div className="absolute inset-0 bg-[radial-gradient(color-mix(in_srgb,var(--primary)_18%,transparent)_1px,transparent_1.5px)] mask-[radial-gradient(closest-side,black,transparent)] bg-size-[18px_18px]" />
 
       <div className="relative flex animate-splash-zoom flex-col items-center gap-7">
@@ -68,7 +68,7 @@ export function SplashScreen(): JSX.Element | null {
               {letter}
             </span>
           ))}
-          {/* Shine: the word again in lime, seen only through a moving band. */}
+          {/* Гялбаа: үг дахин шар-ногоон өнгөөр, зөвхөн хөдлөх туузаар харагдана. */}
           <span
             className="pointer-events-none absolute inset-0 animate-splash-shine mask-[linear-gradient(110deg,transparent_42%,black_50%,transparent_58%)] mask-size-[250%_100%] mask-position-[100%_0] mask-no-repeat text-(--shine) opacity-0"
             style={{ "--shine": "var(--primary)" } as CSSProperties}

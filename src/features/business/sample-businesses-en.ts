@@ -1,7 +1,7 @@
 /**
- * English text for the sample businesses, keyed by slug. Services are listed
- * in the same order as in `sample-businesses.ts`. Names keep their Mongolian
- * sound (they are brand names); kinds of place and services are translated.
+ * Жишээ бизнесүүдийн англи текст, slug-аар түлхүүрлэсэн. Үйлчилгээнүүд
+ * `sample-businesses.ts`-тэй ижил дарааллаар. Нэрс Монгол дуудлагаа хадгална
+ * (брэнд нэр учраас); газрын төрөл, үйлчилгээг орчуулна.
  */
 export const SAMPLE_BUSINESSES_EN: Record<
   string,

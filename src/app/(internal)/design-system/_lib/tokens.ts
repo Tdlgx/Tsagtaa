@@ -1,7 +1,7 @@
 /**
- * Metadata for the color artboard. Values are NOT duplicated here: the page
- * reads the live CSS variables, so light/dark numbers are always the truth.
- * Class names are written out in full so Tailwind can find them.
+ * Өнгөний artboard-ийн мэдээлэл. Утгуудыг энд давхардуулахгүй: хуудас CSS
+ * хувьсагчдыг шууд уншдаг тул light/dark тоонууд үргэлж үнэн байна.
+ * Tailwind олж чадахын тулд класс нэрсийг бүтнээр нь бичсэн.
  */
 
 export type CssVar = `--${string}`;
@@ -11,7 +11,7 @@ export type ColorToken = {
   cssVar: CssVar;
   swatchClass: string;
   usage: string;
-  /** Background the color is measured against (for text/UI colors). */
+  /** Өнгийг аль дэвсгэртэй харьцуулж хэмжих вэ (текст/UI өнгөнд). */
   measuredOn?: CssVar;
 };
 
@@ -164,11 +164,11 @@ export type ContrastPair = {
   label: string;
   fg: CssVar;
   bg: CssVar;
-  /** Renders the sample in the real token classes. */
+  /** Жишээг жинхэнэ token классуудаар зурна. */
   sampleClass: string;
 };
 
-/** Every text/background combination used in the UI. All must reach 4.5:1. */
+/** UI-д хэрэглэгддэг текст/дэвсгэрийн бүх хослол. Бүгд 4.5:1-д хүрэх ёстой. */
 export const CONTRAST_PAIRS: readonly ContrastPair[] = [
   {
     label: "Үндсэн текст",

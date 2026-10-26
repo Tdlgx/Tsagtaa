@@ -25,9 +25,9 @@ function first(value: string | string[] | undefined): string | undefined {
 }
 
 /**
- * Times already booked, so they show as taken. If the database cannot be
- * reached the page still opens with the sample schedule; booking itself then
- * fails with a clear message instead of a broken page.
+ * Аль хэдийн захиалагдсан цагууд, ингэснээр тэдгээр нь "авсан" гэж харагдана.
+ * DB-тэй холбогдож чадахгүй бол хуудас жишээ хуваарьтайгаар нээгдэх ба захиалга
+ * өөрөө эвдэрсэн хуудасны оронд ойлгомжтой мессежээр амжилтгүй болно.
  */
 async function loadTakenSlots(slug: string, now: Date): Promise<TakenSlot[]> {
   const { from, to } = getBookableWindow(now);
@@ -40,9 +40,9 @@ async function loadTakenSlots(slug: string, now: Date): Promise<TakenSlot[]> {
 }
 
 /**
- * Points on offer: the rules for everyone (to show what a booking earns), and
- * the balance for a signed-in customer. Without a database the form simply
- * has no points part.
+ * Санал болгож буй оноо: бүх хүнд зориулсан дүрэм (захиалга хэдэн оноо өгөхийг
+ * харуулахад), нэвтэрсэн үйлчлүүлэгчийн үлдэгдэл. DB байхгүй бол маягтад онооны
+ * хэсэг гарахгүй.
  */
 async function loadPoints(): Promise<BookingPoints | null> {
   try {
@@ -64,7 +64,7 @@ async function loadPoints(): Promise<BookingPoints | null> {
   }
 }
 
-/** A stored place the Цагтаа team suspended (or has not approved) takes no bookings. */
+/** Цагтаагийн баг түр хаасан (эсвэл зөвшөөрөөгүй) хадгалагдсан газар захиалга авахгүй. */
 async function loadBookable(slug: string): Promise<boolean> {
   try {
     return await withDeadline(isBookable(slug));
@@ -81,9 +81,13 @@ export async function generateMetadata(props: PageProps<"/book/[slug]">): Promis
   };
 }
 
+/**
+ * Захиалгын хуудас. Газрыг slug-аар олж, URL-аас өдөр, цаг, үйлчилгээг урьдчилан
+ * сонгоод, захиалагдсан цагууд, оноо, газар захиалга авдаг эсэхийг зэрэг ачаална.
+ */
 export default async function BookPage(props: PageProps<"/book/[slug]">): Promise<JSX.Element> {
   const { locale, t } = await getI18n();
-  // A sample place or an approved registered one.
+  // Жишээ газар эсвэл зөвшөөрөгдсөн бүртгэлтэй газар.
   const canonical = await findListing((await props.params).slug);
   if (!canonical) notFound();
   const business = localizeBusiness(canonical, locale);
@@ -149,7 +153,7 @@ export default async function BookPage(props: PageProps<"/book/[slug]">): Promis
       </header>
 
       {bookable ? (
-        // The flow gets the stored (Mongolian) data and localizes what it shows.
+        // Урсгал хадгалагдсан (Монгол) өгөгдлийг авч, харуулах хэсгээ орчуулна.
         <BookingFlow
           business={canonical}
           initial={{ day, time, serviceIndex }}

@@ -15,7 +15,7 @@ import { useLocale, useT } from "@/i18n/client";
 
 const PARTICLES = 18;
 
-/** A one-off burst of lime and saffron dots from the check mark. Skipped for "reduce motion". */
+/** Чагтын тэмдгээс нэг удаа цацрах шар-ногоон, гүргэм өнгийн цэгүүд. "Reduce motion" үед алгасна. */
 function useBurst(origin: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     const host = origin.current;
@@ -54,7 +54,7 @@ function useBurst(origin: RefObject<HTMLElement | null>): void {
   }, [origin]);
 }
 
-/** Shown in place of the form once a booking is saved. */
+/** Захиалга хадгалагдмагц маягтын оронд харагдана. */
 export function BookingSuccess({ booking: stored }: { booking: Booking }): JSX.Element {
   const locale = useLocale();
   const t = useT();

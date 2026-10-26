@@ -17,20 +17,20 @@ import { formatMNT } from "@/lib/currency";
 
 type PointsBoxProps = {
   settings: LoyaltySettings;
-  /** null: signed out, so only what the booking would earn is shown. */
+  /** null: нэвтрээгүй тул зөвхөн захиалгаас олох оноог харуулна. */
   balance: number | null;
   price: number;
-  /** Points chosen; 0 = not using any. */
+  /** Сонгосон оноо; 0 = ашиглахгүй. */
   value: number;
   onChange: (points: number) => void;
-  /** Sign-in link that comes back to this booking with the same choices. */
+  /** Нэвтрэх холбоос, нэвтэрсний дараа ижил сонголттойгоор энэ захиалга руу буцна. */
   signInHref: string;
   t: Dictionary;
 };
 
 /**
- * Spend points on this booking and see what it earns. Only a preview: the
- * server applies the same rules, and the database checks the balance.
+ * Энэ захиалгад оноо зарцуулж, хэдэн оноо олохыг харна. Зөвхөн урьдчилсан харагдац:
+ * сервер ижил дүрмийг мөрдөж, үлдэгдлийг DB шалгана.
  */
 export function PointsBox({
   settings,

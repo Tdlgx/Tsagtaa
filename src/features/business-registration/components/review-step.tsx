@@ -39,6 +39,10 @@ type ReviewStepProps = {
 const hoursText = (minutes: number): string =>
   `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
 
+/**
+ * Бүртгэлийн сүүлийн алхам: бүх мэдээллийн хураангуй, анхааруулга, эзэмшигчийн нэвтрэх мэдээлэл,
+ * зөвшөөрөл.
+ */
 export function ReviewStep({
   draft,
   t,
@@ -74,7 +78,7 @@ export function ReviewStep({
         </div>
       ) : null}
 
-      {/* On wide screens the preview already sits beside the form. */}
+      {/* Өргөн дэлгэцэнд урьдчилсан харагдац аль хэдийн маягтын хажууд байна. */}
       <div className="lg:hidden">
         <ListingPreview draft={draft} t={t} />
       </div>
@@ -170,7 +174,7 @@ export function ReviewStep({
         onChange={onOwnerChange}
       />
 
-      {/* The owner's statement, never pre-ticked. */}
+      {/* Эзэмшигчийн мэдэгдэл, урьдчилан чагтлахгүй. */}
       <div className="mt-2">
         <div className="flex items-start gap-3">
           <input

@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(
   [
     "relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium whitespace-nowrap select-none",
-    // Hover: a tinted layer fades in. Only opacity animates (cheap for the GPU).
+    // Hover: өнгөтэй давхарга аажуухан гарч ирнэ. Зөвхөн тунгалаг байдал анимэйшн хийгдэнэ (GPU-д хөнгөн).
     "after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-150 after:ease-soft is-hover:after:opacity-100",
-    // Press: a 2% shrink feels physical without moving the layout.
+    // Дарах: 2% жижгэрэх нь layout-ыг хөдөлгөхгүйгээр бодит мэдрэмж өгнө.
     "transition-transform duration-150 ease-soft is-active:scale-98",
-    // Keyboard focus: clear ring with a background-colored gap.
+    // Гарын focus: дэвсгэрийн өнгөтэй завсартай тод цагираг.
     "outline-none is-focus:ring-3 is-focus:ring-ring is-focus:ring-offset-2 is-focus:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -25,11 +25,11 @@ const buttonVariants = cva(
         outline: "border border-border bg-surface text-foreground shadow-sm after:bg-surface-muted",
         ghost: "text-foreground after:bg-surface-muted",
         destructive: "bg-danger text-surface shadow-sm after:bg-foreground/10",
-        /** On a primary-colored band: the colors swap. */
+        /** Primary өнгөтэй туузан дээр: өнгөнүүд байраа солино. */
         inverse: "bg-primary-foreground text-primary after:bg-primary/15",
       },
       size: {
-        // Icons sit 4px closer to the edge than text does: optically the padding then looks equal.
+        // Icon ирмэг рүү текстээс 4px ойр байрлана: нүдэнд зай нь тэнцүү харагдана.
         sm: "h-9 gap-1.5 px-3 text-sm has-data-[icon=end]:pr-2 has-data-[icon=start]:pl-2 [&_svg]:size-4",
         md: "h-11 gap-2 px-5 text-sm has-data-[icon=end]:pr-4 has-data-[icon=start]:pl-4 [&_svg]:size-4",
         lg: "h-13 gap-2 px-6 text-base has-data-[icon=end]:pr-5 has-data-[icon=start]:pl-5 [&_svg]:size-5",
@@ -47,9 +47,9 @@ const buttonVariants = cva(
 
 type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    /** Render the child element (e.g. a Next.js <Link>) with button styles. */
+    /** Хүүхэд элементийг (жишээ нь Next.js <Link>) товчны стилээр render хийнэ. */
     asChild?: boolean;
-    /** Shows a spinner, keeps the button's width and blocks clicks. */
+    /** Эргэлдэх тэмдэг харуулж, товчны өргөнийг хадгалан, дарахыг хаана. */
     loading?: boolean;
   };
 
@@ -84,7 +84,7 @@ function Button({
       {...props}
     >
       {loading ? <LoaderCircle className="absolute animate-spin" /> : null}
-      {/* Content stays in the layout (just transparent) so the width never jumps. */}
+      {/* Агуулга layout-д үлдэнэ (зөвхөн тунгалаг болно), ингэснээр өргөн хэзээ ч үсрэхгүй. */}
       <span className={cn("inline-flex items-center gap-[inherit]", loading && "opacity-0")}>
         {children}
       </span>

@@ -6,7 +6,6 @@ import { useState, type JSX } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FieldError, FieldHint } from "@/components/ui/field";
-import { updateDraft } from "@/features/business-registration/draft-store";
 import {
   CATEGORY_DEFAULTS,
   HOURS_PRESETS,
@@ -16,6 +15,7 @@ import {
   toMinutes,
   weeklyMinutes,
   type DayHours,
+  type DraftUpdate,
   type HoursPreset,
   type RegistrationDraft,
   type StepErrors,
@@ -23,23 +23,16 @@ import {
 import type { Dictionary } from "@/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
-type HoursStepProps = { draft: RegistrationDraft; errors: StepErrors; t: Dictionary };
+type HoursStepProps = {
+  draft: RegistrationDraft;
+  update: DraftUpdate;
+  errors: StepErrors;
+  t: Dictionary;
+};
 
-/** The week chart spans 06:00–24:00. */
+/** Долоо хоногийн график 06:00–24:00-ыг хамарна. */
 const CHART_FROM = 6 * 60;
 const CHART_SPAN = 18 * 60;
-
-function setHours(hours: DayHours[]): void {
-  updateDraft((draft) => ({ ...draft, hours, hoursEdited: true }));
-}
-
-function setDay(index: number, change: Partial<DayHours>): void {
-  updateDraft((draft) => ({
-    ...draft,
-    hoursEdited: true,
-    hours: draft.hours.map((item, i) => (i === index ? { ...item, ...change } : item)),
-  }));
-}
 
 const sameHours = (a: readonly DayHours[], b: readonly DayHours[]): boolean =>
   a.every(
@@ -48,8 +41,20 @@ const sameHours = (a: readonly DayHours[], b: readonly DayHours[]): boolean =>
       (!item.open || (item.opens === b[i]?.opens && item.closes === b[i]?.closes)),
   );
 
-export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
+/**
+ * Бүртгэлийн цагийн хуваарийн алхам: бэлэн загвар, өдөр бүрийн цаг, долоо хоногийн график,
+ * захиалгын тор.
+ */
+export function HoursStep({ draft, update, errors, t }: HoursStepProps): JSX.Element {
   const words = t.register;
+  const setHours = (hours: DayHours[]): void =>
+    update((current) => ({ ...current, hours, hoursEdited: true }));
+  const setDay = (index: number, change: Partial<DayHours>): void =>
+    update((current) => ({
+      ...current,
+      hoursEdited: true,
+      hours: current.hours.map((item, i) => (i === index ? { ...item, ...change } : item)),
+    }));
   const suggested: HoursPreset = draft.category ? CATEGORY_DEFAULTS[draft.category].hours : "daily";
   const presets: { key: string; label: string; hours: DayHours[] }[] = [
     { key: "suggested", label: words.presets.suggested, hours: HOURS_PRESETS[suggested] },
@@ -60,7 +65,7 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      {/* Presets */}
+      {/* Бэлэн загварууд */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm text-muted-foreground">{words.presetsLabel}:</span>
         {presets.map((preset) => {
@@ -86,7 +91,7 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
 
       <WeekChart hours={draft.hours} t={t} />
 
-      {/* Day rows */}
+      {/* Өдрийн мөрүүд */}
       <fieldset id="reg-hours" tabIndex={-1} className="outline-none">
         <legend className="sr-only">{words.headings.hours}</legend>
         <FieldError className="mb-3">{errors.hours ? words.errors.hoursNone : null}</FieldError>
@@ -165,7 +170,7 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
         ) : null}
       </fieldset>
 
-      {/* Booking grid */}
+      {/* Захиалгын тор */}
       <fieldset>
         <legend className="text-sm font-medium text-foreground">{words.slot}</legend>
         <FieldHint className="mt-1">{words.slotHint}</FieldHint>
@@ -176,7 +181,7 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
                 type="radio"
                 name="slotMinutes"
                 checked={draft.slotMinutes === minutes}
-                onChange={() => updateDraft((d) => ({ ...d, slotMinutes: minutes }))}
+                onChange={() => update((d) => ({ ...d, slotMinutes: minutes }))}
                 className="peer sr-only"
               />
               <span className="flex h-9 cursor-pointer items-center rounded-full px-4 text-sm font-medium text-muted-foreground tabular-nums transition-colors duration-150 ease-soft peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-3 peer-focus-visible:ring-ring is-hover:text-foreground peer-checked:is-hover:text-background">
@@ -190,7 +195,7 @@ export function HoursStep({ draft, errors, t }: HoursStepProps): JSX.Element {
   );
 }
 
-/** Seven bars on a 06–24 timeline: the shape of the week at a glance. */
+/** 06–24 цагийн шугам дээрх долоон зурвас: долоо хоногийн дүр төрх нэг харахад. */
 function WeekChart({ hours, t }: { hours: readonly DayHours[]; t: Dictionary }): JSX.Element {
   const total = Math.round(weeklyMinutes(hours) / 6) / 10;
 
@@ -226,10 +231,10 @@ function WeekChart({ hours, t }: { hours: readonly DayHours[]; t: Dictionary }):
   );
 }
 
-/** Suggestions shared by every hour field. */
+/** Цагийн бүх талбарын хуваалцдаг санал. */
 const TIME_LIST_ID = "reg-time-options";
 
-/** One shared list of suggested times; rendered once by the hours step. */
+/** Санал болгох цагуудын нэг нийтлэг жагсаалт; цагийн хуваарийн алхам нэг удаа render хийнэ. */
 function TimeSuggestions(): JSX.Element {
   return (
     <datalist id={TIME_LIST_ID}>
@@ -250,9 +255,9 @@ type TimeInputProps = {
 };
 
 /**
- * A time of day: pick a suggestion or type any time. Typing is forgiving
- * ("845", "8.45", "8:45" all become 08:45); only a real time is saved, so the
- * autosaved draft never holds a half-typed value.
+ * Өдрийн цаг: саналаас сонгох эсвэл дурын цаг бичнэ. Бичихэд уян хатан ("845",
+ * "8.45", "8:45" бүгд 08:45 болно); зөвхөн жинхэнэ цаг хадгалагдах тул автоматаар
+ * хадгалагдах ноорогт хагас бичсэн утга хэзээ ч үлдэхгүй.
  */
 function TimeInput({
   value,
@@ -265,7 +270,7 @@ function TimeInput({
   const [text, setText] = useState(value);
   const [shown, setShown] = useState(value);
   const [bad, setBad] = useState(false);
-  // A preset or "copy Monday" changed the value from outside: show it.
+  // Preset эсвэл "Даваагийнхыг хуулах" утгыг гаднаас өөрчилсөн: түүнийг харуулна.
   if (value !== shown) {
     setShown(value);
     setText(value);
@@ -305,7 +310,7 @@ function TimeInput({
         onChange={(event) => {
           const raw = event.target.value;
           setText(raw);
-          // A suggestion picked from the list arrives complete: save it straight away.
+          // Жагсаалтаас сонгосон санал бүтэн ирдэг: шууд хадгална.
           if (/^\d{2}:\d{2}$/.test(raw)) commit(raw);
         }}
         onBlur={(event) => commit(event.target.value)}

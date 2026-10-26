@@ -4,7 +4,7 @@ import { useMemo, useSyncExternalStore } from "react";
 
 import type { CssVar } from "@/app/(internal)/design-system/_lib/tokens";
 
-// Re-read when next-themes toggles the `.dark` class on <html>.
+// next-themes <html> дээр `.dark` класс солих бүрт дахин уншина.
 function subscribe(onChange: () => void): () => void {
   const observer = new MutationObserver(onChange);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
@@ -12,9 +12,9 @@ function subscribe(onChange: () => void): () => void {
 }
 
 /**
- * Live values of CSS custom properties on <html>, e.g. "--primary" → "#1f4d3f".
- * Returns null on the server (values exist only in the browser).
- * Pass a module-level constant array so its identity stays stable.
+ * <html> дээрх CSS хувьсагчийн одоогийн утгууд, жишээ нь "--primary" → "#1f4d3f".
+ * Сервер дээр null буцаана (утгууд зөвхөн browser-т байдаг).
+ * Модулийн түвшний тогтмол массив дамжуулна, ингэснээр identity нь тогтвортой байна.
  */
 export function useTokenValues(names: readonly CssVar[]): ReadonlyMap<CssVar, string> | null {
   const snapshot = useSyncExternalStore(

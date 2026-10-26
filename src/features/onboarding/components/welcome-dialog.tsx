@@ -17,15 +17,15 @@ import { SPLASH_MS } from "@/features/splash/splash";
 import { useLocale, useT } from "@/i18n/client";
 import { APP_NAME } from "@/lib/constants";
 
-/** Icons for `t.onboarding.points`, in the same order. */
+/** `t.onboarding.points`-ийн icon-ууд, ижил дарааллаар. */
 const POINT_ICONS = [Search, MousePointerClick, Ticket] as const;
 
-/** Delay before greeting, so the page is seen first. */
+/** Мэндлэхээс өмнөх хүлээлт, ингэснээр эхлээд хуудсыг харна. */
 const GREET_AFTER_MS = 900;
 
 /**
- * Greets a first-time visitor once and offers the guided tour. Never shown
- * mid-booking or while the tour itself is running.
+ * Анх ирсэн зочинтой нэг удаа мэндэлж, заавартай аялал санал болгоно. Захиалгын
+ * дундуур эсвэл аялал өөрөө явагдаж байхад хэзээ ч харагдахгүй.
  */
 export function WelcomeDialog(): JSX.Element {
   const [open, setOpen] = useState(false);
@@ -38,7 +38,7 @@ export function WelcomeDialog(): JSX.Element {
   const touring = searchParams.get(TOUR_PARAM) === "1";
 
   useEffect(() => {
-    // Not mid-booking, and not for business owners: their page has its own tour.
+    // Захиалгын дундуур биш, бизнес эзэмшигчдэд ч биш: тэдний хуудас өөрийн аялалтай.
     if (
       touring ||
       pathname.startsWith("/book/") ||
@@ -47,7 +47,7 @@ export function WelcomeDialog(): JSX.Element {
     ) {
       return;
     }
-    // On the first page of a visit, wait for the launch splash to lift first.
+    // Айлчлалын эхний хуудсан дээр нээлтийн splash арилахыг эхлээд хүлээнэ.
     const splashing = document.querySelector("[data-splash]") !== null;
     const timer = window.setTimeout(
       () => setOpen(true),
@@ -66,7 +66,7 @@ export function WelcomeDialog(): JSX.Element {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-brand-ink/50 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in" />
         <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-surface shadow-lg duration-400 ease-soft outline-none data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=open]:fade-in data-[state=open]:slide-in-from-bottom-4">
-          {/* Ink header: the logo's hourglass turning over, on a faint dot grid. */}
+          {/* Бэхэн толгой: бүдэг цэгэн тор дээр эргэж буй логоны элсэн цаг. */}
           <div className="relative flex h-40 items-center justify-center bg-brand-ink">
             <div
               aria-hidden

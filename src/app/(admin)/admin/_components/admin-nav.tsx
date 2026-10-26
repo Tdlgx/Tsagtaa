@@ -30,7 +30,7 @@ const TABS: Tab[] = [
   { href: "/admin/activity", icon: Activity, key: "activity" },
 ];
 
-/** Sections of admin. Scrolls sideways on phones rather than wrapping. */
+/** Админы хэсгүүд. Утсан дээр мөр шилжихийн оронд хажуу тийш гүйлгэнэ. */
 export function AdminNav({ pending }: { pending: number }): JSX.Element {
   const t = useT();
   const pathname = usePathname();

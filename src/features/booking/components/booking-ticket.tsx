@@ -31,22 +31,22 @@ type BookingTicketProps = {
   booking: TicketData;
   /** "Өнөөдөр", "Маргааш", … */
   dayLabel: string;
-  /** Top-right of the dark stub, e.g. a countdown. */
+  /** Бараан хэсгийн баруун дээд талд, жишээ нь тоолуур. */
   stubAside?: ReactNode;
-  /** Bottom-right of the paper part, e.g. a status badge. */
+  /** Цаасан хэсгийн баруун доод талд, жишээ нь төлөвийн badge. */
   footer?: ReactNode;
-  /** Color behind the ticket, so the perforation notches look cut out. */
+  /** Тасалбарын ард байх өнгө, ингэснээр цоолсон ховилууд хайчилсан мэт харагдана. */
   notchClassName?: string;
-  /** Dims the ticket (cancelled or past). */
+  /** Тасалбарыг бүдгэрүүлнэ (цуцлагдсан эсвэл өнгөрсөн). */
   muted?: boolean;
   className?: string;
 };
 
 /**
- * A booking drawn as a paper ticket: an ink stub with the time in lime (the
- * logo's colors), a perforated tear line, and the details underneath. It can
- * be turned round in 3D with a finger or the mouse (see `useSpin`); the back
- * shows the front-desk code large, with a barcode strip.
+ * Цаасан тасалбар хэлбэрээр зурсан захиалга: цагийг шар-ногоноор бичсэн бэхэн
+ * хэсэг (логоны өнгө), цоолсон таслах шугам, доор нь дэлгэрэнгүй. Хуруу эсвэл
+ * хулганаар 3D-ээр эргүүлж болно (`useSpin`-ийг үз); ар талд нь ресепшний кодыг
+ * томоор, barcode туузтайгаар харуулна.
  */
 export function BookingTicket({
   booking,
@@ -78,7 +78,7 @@ export function BookingTicket({
           {t.ticket.howTo}
         </span>
 
-        {/* Front ------------------------------------------------------- */}
+        {/* Урд тал ------------------------------------------------------- */}
         <div data-face="front" className="relative overflow-hidden rounded-xl shadow-md spin-face">
           <div className="relative bg-brand-ink px-6 pt-5 pb-7 text-brand-ink-foreground">
             <BrandMark
@@ -104,7 +104,7 @@ export function BookingTicket({
             <FlipButton label={t.ticket.flip} onFlip={() => flip(1)} />
           </div>
 
-          {/* Tear line: two notches + dashes ------------------------------ */}
+          {/* Таслах шугам: хоёр ховил + зураас ------------------------------ */}
           <div aria-hidden className="relative h-0">
             <span className={cn("absolute -top-3 -left-3 size-6 rounded-full", notchClassName)} />
             <span className={cn("absolute -top-3 -right-3 size-6 rounded-full", notchClassName)} />
@@ -145,7 +145,7 @@ export function BookingTicket({
           <Glare />
         </div>
 
-        {/* Back: what the front desk asks for --------------------------- */}
+        {/* Ар тал: ресепшинд юу асуудаг вэ --------------------------- */}
         <div
           data-face="back"
           inert
@@ -185,7 +185,7 @@ export function BookingTicket({
   );
 }
 
-/** Turns the ticket over without dragging (keyboard, or anyone who prefers a tap). */
+/** Чирэхгүйгээр тасалбарыг эргүүлнэ (гар, эсвэл товшихыг илүүд үздэг хүнд). */
 function FlipButton({ label, onFlip }: { label: string; onFlip: () => void }): JSX.Element {
   return (
     <button
@@ -200,7 +200,7 @@ function FlipButton({ label, onFlip }: { label: string; onFlip: () => void }): J
   );
 }
 
-/** Light that sweeps across the card as it turns, or follows the mouse. */
+/** Эргэх үед картын дээгүүр гүйх эсвэл хулганыг дагах гэрэл. */
 function Glare(): JSX.Element {
   return (
     <span
@@ -215,8 +215,8 @@ function Glare(): JSX.Element {
 }
 
 /**
- * A barcode-style strip drawn from the code, the same bars every time. It is
- * decoration: the front desk reads the code printed above it.
+ * Кодоос зурсан barcode маягийн тууз, үргэлж ижил зураасууд. Энэ бол чимэглэл:
+ * ресепшин дээр нь хэвлэсэн кодыг уншина.
  */
 function Barcode({ value, className }: { value: string; className?: string }): JSX.Element {
   const widths: number[] = [];

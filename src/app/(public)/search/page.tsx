@@ -25,13 +25,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.search.metaTitle, description: t.search.metaDescription };
 }
 
+/** Хайлтын хуудас: URL-ын шүүлтүүрээр бүх газрыг шүүж, эрэмбэлэн харуулна. */
 export default async function SearchPage(props: PageProps<"/search">): Promise<JSX.Element> {
   const { locale, t } = await getI18n();
   const filters = parseSearchParams(await props.searchParams);
   const clock = getSearchClock(new Date(), locale);
   const nowMinutes = filters.day === "today" ? clock.nowMinutes : null;
 
-  // The samples and every approved registered place.
+  // Жишээ газрууд болон зөвшөөрөгдсөн бүх бүртгэлтэй газар.
   const results = searchBusinesses(filters, nowMinutes, await getListings());
   const withTime = results.filter((result) => result.openCount > 0).length;
   const full = results.length - withTime;
@@ -57,7 +58,7 @@ export default async function SearchPage(props: PageProps<"/search">): Promise<J
       </div>
 
       <SearchShell filters={filters}>
-        {/* Kept in the DOM (only hidden when empty) so screen readers hear every new count. */}
+        {/* DOM-д үлдээдэг (хоосон үед л нуугдана), ингэснээр screen reader шинэ тоо бүрийг сонсгоно. */}
         <div
           className={cn(
             results.length > 0

@@ -26,6 +26,7 @@ type Filter = (typeof FILTERS)[number];
 const first = (value: string | string[] | undefined): string =>
   (Array.isArray(value) ? value[0] : value) ?? "";
 
+/** Бүх газрын жагсаалт: төлөвөөр шүүх, нэр/утас/регистрээр хайх. Шүүлтүүр URL-д хадгалагдана. */
 export default async function PlacesPage(props: PageProps<"/admin/places">): Promise<JSX.Element> {
   await requirePlatformAdmin("/admin/places");
   const { t } = await getI18n();

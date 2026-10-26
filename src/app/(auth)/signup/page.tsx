@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.signup.metaTitle };
 }
 
-/** A customer account, for collecting and spending points. */
+/** Оноо цуглуулж, зарцуулах үйлчлүүлэгчийн бүртгэл. */
 export default async function SignupPage(props: PageProps<"/signup">): Promise<JSX.Element> {
   const { t } = await getI18n();
   const params = await props.searchParams;

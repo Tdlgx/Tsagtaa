@@ -1,7 +1,7 @@
 /**
- * Mongolian Cyrillic → Latin, following the common everyday romanization
- * (Өнгө → Ongo, Хулан → Khulan). Used for people's names, which are not
- * translated, only written in Latin letters.
+ * Монгол кирилл → латин, өдөр тутмын түгээмэл галиглалаар
+ * (Өнгө → Ongo, Хулан → Khulan). Хүний нэрэнд хэрэглэнэ: тэдгээрийг орчуулдаггүй,
+ * зөвхөн латин үсгээр бичдэг.
  */
 const MAP: Record<string, string> = {
   а: "a",
@@ -41,12 +41,13 @@ const MAP: Record<string, string> = {
   я: "ya",
 };
 
-/** Titles that are words, not names: translated rather than spelled out. */
+/** Нэр биш, үг болох цолууд: үсэглэхийн оронд орчуулна. */
 const PREFIXES: readonly [RegExp, string][] = [
   [/^Др\.\s*/, "Dr. "],
   [/^Бокс\s*/, "Bay "],
 ];
 
+/** Монгол кирилл текстийг латин болгоно ("Өнгө" → "Ongo"); "Др." мэт цолыг орчуулна. */
 export function transliterate(text: string): string {
   let prefix = "";
   let rest = text;
@@ -63,7 +64,7 @@ export function transliterate(text: string): string {
       const lower = char.toLowerCase();
       const mapped = MAP[lower];
       if (mapped === undefined) return char;
-      // Keep capitals: "Х" → "Kh", not "KH".
+      // Том үсгийг хадгална: "Х" → "Kh", "KH" биш.
       return char === lower ? mapped : mapped.charAt(0).toUpperCase() + mapped.slice(1);
     })
     .join("");

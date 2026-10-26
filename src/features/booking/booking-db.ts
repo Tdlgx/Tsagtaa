@@ -17,7 +17,7 @@ export type BookingRow = {
 export type NewBooking = {
   requestId: string;
   businessSlug: string;
-  /** People who can take the time, in order of preference; the first free one gets it. */
+  /** Цагийг авч чадах хүмүүс, давуу эрхийн дарааллаар; эхний сул нь авна. */
   staffIds: readonly string[];
   serviceName: string;
   durationMin: number;
@@ -27,7 +27,7 @@ export type NewBooking = {
   phone: string;
   note: string;
   consentedAt: Date;
-  /** Signed-in customer: the booking can spend and earn points. */
+  /** Нэвтэрсэн үйлчлүүлэгч: захиалга оноо зарцуулж, олж болно. */
   customerAccountId: string | null;
   pointsUsed: number;
   pointsEarn: number;
@@ -36,34 +36,33 @@ export type NewBooking = {
 export type InsertResult =
   { ok: true; row: BookingRow } | { ok: false; reason: "slot_taken" | "request_reused" | "points" };
 
-/** A deadlock or serialization failure means "try again", not "failed". */
+/** Deadlock эсвэл serialization failure нь "амжилтгүй" биш, "дахин оролд" гэсэн утгатай. */
 const MAX_ATTEMPTS = 3;
 const MAX_CODE_TRIES = 3;
 
 /**
- * Stores a booking. Correctness comes from the table's constraints, not from
- * checking first: there is no "is it free?" query, because between that
- * check and the insert someone else could take the time.
+ * Захиалгыг хадгална. Зөв байдал нь урьдчилан шалгахаас биш, хүснэгтийн
+ * constraint-уудаас ирнэ: "сул байна уу?" гэсэн query байхгүй, учир нь тэр шалгалт
+ * ба insert-ийн хооронд өөр хүн цагийг авч болно.
  *
- * - `bookings_no_overlap` rejects any overlap for the same person (23P01).
- *   With several people to choose from, each is tried in turn inside one
- *   transaction; a savepoint per try keeps the transaction usable after a
- *   rejected insert.
- * - `request_id` is unique: a repeated request (double click, retry after
- *   a lost response) returns the booking already stored instead of a second one.
+ * - `bookings_no_overlap` нэг хүний аливаа давхцлыг татгалзана (23P01).
+ *   Сонгох хэд хэдэн хүн байвал нэг transaction дотор ээлжлэн оролдоно; оролдлого
+ *   бүрт savepoint ашигласнаар татгалзсан insert-ийн дараа ч transaction ажилласаар байна.
+ * - `request_id` давтагдашгүй: давтагдсан хүсэлт (давхар дарах, хариу алдагдсаны
+ *   дараах дахин оролдлого) хоёр дахь захиалгын оронд аль хэдийн хадгалсныг буцаана.
  */
 export async function insertBooking(booking: NewBooking): Promise<InsertResult> {
   for (let attempt = 1; ; attempt += 1) {
     try {
       return await insertOnce(booking);
     } catch (error) {
-      // Two copies of the same request at the same moment can deadlock on the
-      // request_id and overlap indexes; PostgreSQL aborts one. Retry it: the
-      // second time round it finds the stored booking.
+      // Нэг хүсэлтийн хоёр хуулбар яг нэг мөчид request_id болон давхцлын index дээр
+      // deadlock үүсгэж болох ба PostgreSQL нэгийг нь зогсооно. Дахин оролдоно:
+      // хоёр дахь удаад хадгалагдсан захиалгыг олно.
       const retryable =
         isPgError(error, PG.deadlockDetected) || isPgError(error, PG.serializationFailure);
-      // Spending more points than the balance holds: the CHECK on the balance
-      // rejected it, and the whole transaction (booking included) rolled back.
+      // Үлдэгдлээс их оноо зарцуулах гэсэн: үлдэгдлийн CHECK татгалзаж, бүх
+      // transaction (захиалгын хамт) буцаагдсан.
       if (isPgError(error, PG.checkViolation, "accounts_points_not_negative")) {
         return { ok: false, reason: "points" };
       }
@@ -99,8 +98,8 @@ async function insertOnce(booking: NewBooking): Promise<InsertResult> {
           );
           const inserted = rows[0];
           if (inserted) {
-            // Points are spent in the same transaction as the booking is stored:
-            // both happen, or neither does.
+            // Оноог захиалга хадгалагдах transaction дотор зарцуулна:
+            // хоёулаа болно, эсвэл аль нь ч болохгүй.
             if (booking.pointsUsed > 0 && booking.customerAccountId) {
               await tx`
                 INSERT INTO points_ledger (account_id, delta, kind, booking_id)
@@ -111,9 +110,9 @@ async function insertOnce(booking: NewBooking): Promise<InsertResult> {
           }
           return await findReplay(tx, booking);
         } catch (error) {
-          // This person was taken a moment ago: try the next one.
+          // Энэ хүнийг саяхан авчихсан: дараагийнхыг оролдоно.
           if (isPgError(error, PG.exclusionViolation, "bookings_no_overlap")) break;
-          // Front-desk code already used (1 in ~33 million): draw another.
+          // Ресепшний код аль хэдийн ашиглагдсан (~33 саяас 1): өөрийг сугална.
           if (isPgError(error, PG.uniqueViolation, "bookings_code_key")) continue;
           throw error;
         }
@@ -123,7 +122,7 @@ async function insertOnce(booking: NewBooking): Promise<InsertResult> {
   });
 }
 
-/** The request was stored before: hand back that booking, but only to the same customer. */
+/** Хүсэлт өмнө хадгалагдсан: тэр захиалгыг буцаана, гэхдээ зөвхөн ижил үйлчлүүлэгчид. */
 async function findReplay(tx: postgres.TransactionSql, booking: NewBooking): Promise<InsertResult> {
   const [existing] = await tx<BookingRow[]>`
     SELECT id, code, staff_id AS "staffId", phone,
@@ -137,7 +136,7 @@ async function findReplay(tx: postgres.TransactionSql, booking: NewBooking): Pro
 
 export type TakenRange = { staffId: string; startsAt: Date; endsAt: Date };
 
-/** Confirmed bookings of a business that overlap [from, to); served by the overlap index. */
+/** Бизнесийн [from, to)-той давхцах баталгаажсан захиалгууд; давхцлын index үйлчилнэ. */
 export async function getTakenRanges(
   businessSlug: string,
   from: Date,
@@ -152,7 +151,7 @@ export async function getTakenRanges(
   `;
 }
 
-/** The same for several businesses in one query (the home page board). */
+/** Ижил зүйлийг хэд хэдэн бизнесийн хувьд нэг query-ээр (нүүр хуудасны самбар). */
 export async function getTakenRangesForMany(
   businessSlugs: readonly string[],
   from: Date,
@@ -170,10 +169,9 @@ export async function getTakenRangesForMany(
 }
 
 /**
- * Cancels a confirmed booking that has not started yet. The id is an
- * unguessable UUID and the phone must match as well. Cancelling frees the
- * time at once (the overlap rule only covers confirmed bookings), and any
- * points spent on it go back in the same statement.
+ * Хараахан эхлээгүй баталгаажсан захиалгыг цуцална. Id нь таах боломжгүй UUID
+ * бөгөөд утас ч таарах ёстой. Цуцлахад цаг шууд чөлөөлөгдөнө (давхцлын дүрэм зөвхөн
+ * баталгаажсан захиалгад хамаарна), зарцуулсан оноо нэг statement дотор буцна.
  */
 export async function cancelBookingRow(id: string, phone: string): Promise<boolean> {
   const [row] = await sql<{ cancelled: number }[]>`
@@ -188,9 +186,9 @@ export async function cancelBookingRow(id: string, phone: string): Promise<boole
 }
 
 /**
- * The refund half of a cancellation: a CTE over `cancelled` (rows with id,
- * customer_account_id, points_used). The ledger takes one refund per
- * booking, so running it twice cannot pay back twice.
+ * Цуцлалтын буцаалтын хэсэг: `cancelled` дээрх CTE (id, customer_account_id,
+ * points_used бүхий мөрүүд). Ledger захиалга бүрт нэг л буцаалт авдаг тул
+ * хоёр удаа ажиллуулсан ч хоёр удаа буцаахгүй.
  */
 export function refundCancelled(): postgres.PendingQuery<postgres.Row[]> {
   return sql`refunded AS (
@@ -203,9 +201,9 @@ export function refundCancelled(): postgres.PendingQuery<postgres.Row[]> {
 }
 
 /**
- * Whether a place takes bookings. Sample places that were never imported
- * have no row and are open; a stored place must be active (not pending,
- * rejected or suspended).
+ * Газар захиалга авдаг эсэх. Хэзээ ч импортлогдоогүй жишээ газар мөргүй тул
+ * нээлттэй; хадгалагдсан газар идэвхтэй байх ёстой (pending, rejected,
+ * suspended биш).
  */
 export async function isBookable(slug: string): Promise<boolean> {
   const [row] = await sql<{ status: string }[]>`SELECT status FROM businesses WHERE slug = ${slug}`;

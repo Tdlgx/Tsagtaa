@@ -3,11 +3,12 @@ import "server-only";
 import type postgres from "postgres";
 
 import { refundCancelled } from "@/features/booking/booking-db";
+import { SAMPLE_BUSINESSES } from "@/features/business/sample-businesses";
 import { hashPassword } from "@/lib/auth/password";
 import type { BusinessStatus, Role } from "@/lib/auth/session";
 import { isPgError, PG, sql } from "@/lib/db";
 
-/* Shapes ----------------------------------------------------------------------- */
+/* Бүтэц ----------------------------------------------------------------------- */
 
 export type ManagedBusiness = {
   id: string;
@@ -25,7 +26,7 @@ export type ManagedBusiness = {
   createdAt: Date;
   reviewedAt: Date | null;
   reviewNote: string | null;
-  /** The map pin, if set. */
+  /** Газрын зургийн цэг, тохируулсан бол. */
   latitude: number | null;
   longitude: number | null;
   hours: { weekday: number; opens: string; closes: string }[];
@@ -48,7 +49,7 @@ export type ManagedBooking = {
   note: string;
   status: "confirmed" | "cancelled";
   createdAt: Date;
-  /** ₮ of the price paid in points (Цагтаа covers it). */
+  /** Үнийн оноогоор төлсөн ₮ (Цагтаа нөхнө). */
   pointsUsed: number;
   attendance: Attendance | null;
 };
@@ -57,7 +58,7 @@ export type Attendance = "attended" | "no_show";
 
 export type Member = { accountId: string; name: string; phone: string; role: Role };
 
-/* One business ----------------------------------------------------------------- */
+/* Нэг бизнес ----------------------------------------------------------------- */
 
 export async function getManagedBusiness(slug: string): Promise<ManagedBusiness | null> {
   const [business] = await sql<Omit<ManagedBusiness, "hours" | "services" | "staff">[]>`
@@ -88,7 +89,7 @@ const BOOKING_COLUMNS = sql`
   phone, note, status, created_at AS "createdAt", points_used AS "pointsUsed", attendance
 `;
 
-/** Bookings of one place that start in [from, to), cancelled ones included. */
+/** Нэг газрын [from, to)-д эхлэх захиалгууд, цуцлагдсаныг оруулаад. */
 export async function getBusinessBookings(
   slug: string,
   from: Date,
@@ -109,6 +110,7 @@ export type BusinessStats = {
   total30: number;
 };
 
+/** Самбарын тоонууд: өнөөдрийн захиалга ба орлого, ирэх 7 хоног, сүүлийн 30 хоногийн цуцлалт. */
 export async function getBusinessStats(slug: string, dayStart: Date): Promise<BusinessStats> {
   const [stats] = await sql<BusinessStats[]>`
     SELECT
@@ -127,9 +129,9 @@ export async function getBusinessStats(slug: string, dayStart: Date): Promise<Bu
 }
 
 /**
- * A manager cancels on the customer's behalf; only bookings of their own place
- * that have not started (after that, it is "came" or "did not come"). Points
- * spent on it go back to the customer in the same statement.
+ * Менежер үйлчлүүлэгчийн өмнөөс цуцална; зөвхөн өөрийн газрын хараахан эхлээгүй
+ * захиалгыг (эхэлсний дараа "Ирсэн" эсвэл "Ирээгүй" болно). Зарцуулсан оноо
+ * нэг statement дотор үйлчлүүлэгчид буцна.
  */
 export async function cancelBusinessBooking(slug: string, bookingId: string): Promise<boolean> {
   const [row] = await sql<{ cancelled: number }[]>`
@@ -144,14 +146,14 @@ export async function cancelBusinessBooking(slug: string, bookingId: string): Pr
   return (row?.cancelled ?? 0) > 0;
 }
 
-/** How long after a visit the place can still mark it; then points settle on their own. */
+/** Айлчлалаас хойш газар хэр удаан тэмдэглэж чадах вэ; дараа нь оноо өөрөө шийдэгдэнэ. */
 export const ATTENDANCE_WINDOW_HOURS = 24;
 
 /**
- * The place marks whether the customer came, once, from the start of the
- * visit until a day after it ends. "Came" credits the promised points now;
- * "did not come" earns nothing and gives back any points spent. The ledger's
- * one-entry-per-booking rule makes a repeat harmless.
+ * Газар үйлчлүүлэгч ирсэн эсэхийг айлчлал эхэлснээс дууссанаас хойш нэг өдрийн
+ * дотор нэг удаа тэмдэглэнэ. "Ирсэн" амласан оноог одоо олгоно; "Ирээгүй" юу ч
+ * олгохгүй бөгөөд зарцуулсан оноог буцаана. Ledger-ийн захиалга бүрт нэг бичлэгийн
+ * дүрэм давталтыг хоргүй болгоно.
  */
 export async function markAttendance(
   slug: string,
@@ -186,7 +188,127 @@ export async function markAttendance(
   });
 }
 
-/* Team ------------------------------------------------------------------------- */
+/* Цагийн хуваарь, үйлчилгээ, ажилтан ------------------------------------------------------- */
+
+/**
+ * Админы импорт хүснэгтэд хуулсан ч жишээ газар кодоос жагсаагддаг тул тэр
+ * хуулбарыг засах нь үйлчлүүлэгчдийн харах зүйлийг өөрчлөхгүй.
+ */
+export function isSamplePlace(slug: string): boolean {
+  return SAMPLE_BUSINESSES.some((business) => business.slug === slug);
+}
+
+/**
+ * Ажлын цаг болон захиалгын торыг солино. Аль хэдийн хийсэн захиалгууд цагаа
+ * хадгална; шинэ цаг одооноос захиалж болох зүйлд хамаарна.
+ */
+export async function saveHours(
+  businessId: string,
+  hours: readonly { weekday: number; opens: string; closes: string }[],
+  slotMinutes: number,
+): Promise<void> {
+  await sql.begin(async (tx) => {
+    // Газрыг мөн lock хийдэг тул зэрэг хадгалж буй хоёр хүн нэг нэгээрээ хэрэгжинэ.
+    await tx`UPDATE businesses SET slot_minutes = ${slotMinutes} WHERE id = ${businessId}`;
+    await tx`DELETE FROM business_hours WHERE business_id = ${businessId}`;
+    if (hours.length > 0) {
+      await tx`INSERT INTO business_hours ${tx(
+        hours.map((item) => ({ business_id: businessId, ...item })),
+      )}`;
+    }
+  });
+}
+
+/** Үнийн жагсаалтыг солино. Захиалга хийгдсэн үеийнхээ нэр, хугацаа, үнийг хадгална. */
+export async function saveServices(
+  businessId: string,
+  services: readonly { name: string; duration: number; price: number }[],
+): Promise<void> {
+  await sql.begin(async (tx) => {
+    await tx`SELECT 1 FROM businesses WHERE id = ${businessId} FOR UPDATE`;
+    await tx`DELETE FROM services WHERE business_id = ${businessId}`;
+    await tx`INSERT INTO services ${tx(
+      services.map((service, position) => ({
+        business_id: businessId,
+        position,
+        name: service.name,
+        duration_min: service.duration,
+        price: service.price,
+      })),
+    )}`;
+  });
+}
+
+export type SaveStaffResult =
+  | { ok: true }
+  | { ok: false; reason: "has_bookings"; names: string[] }
+  | { ok: false; reason: "invalid" };
+
+/**
+ * Захиалгууд хүнийг position-оор нь заадаг ("<slug>-<position>") тул position хэзээ ч
+ * шилжихгүй, дахин ашиглагдахгүй: нэр солиход хадгалагдана, хасахад завсар үлдэнэ,
+ * шинэ хүн ямар ч захиалгад хэрэглэгдээгүй дугаар авна. Ирэх айлчлалтай хүнийг
+ * тэр захиалгууд цуцлагдах хүртэл хасах боломжгүй.
+ */
+export async function saveStaff(
+  business: { id: string; slug: string },
+  staff: readonly { position: number | null; name: string }[],
+): Promise<SaveStaffResult> {
+  return sql.begin(async (tx): Promise<SaveStaffResult> => {
+    await tx`SELECT 1 FROM businesses WHERE id = ${business.id} FOR UPDATE`;
+    const current = await tx<{ position: number; name: string }[]>`
+      SELECT position, name FROM staff WHERE business_id = ${business.id}
+    `;
+    const kept = staff.flatMap((member) => (member.position === null ? [] : [member.position]));
+    // Үлдээсэн position бүр нэг удаа, зөвхөн энэ газарт үнэхээр байгаа position-ууд.
+    if (
+      new Set(kept).size !== kept.length ||
+      kept.some((position) => !current.some((member) => member.position === position))
+    ) {
+      return { ok: false, reason: "invalid" };
+    }
+
+    const removed = current.filter((member) => !kept.includes(member.position));
+    if (removed.length > 0) {
+      const busy = await tx<{ staffId: string }[]>`
+        SELECT DISTINCT staff_id AS "staffId" FROM bookings
+        WHERE business_slug = ${business.slug} AND status = 'confirmed' AND ends_at > now()
+          AND staff_id IN ${tx(removed.map((member) => `${business.slug}-${member.position}`))}
+      `;
+      if (busy.length > 0) {
+        const ids = new Set(busy.map((row) => row.staffId));
+        return {
+          ok: false,
+          reason: "has_bookings",
+          names: removed
+            .filter((member) => ids.has(`${business.slug}-${member.position}`))
+            .map((member) => member.name),
+        };
+      }
+    }
+
+    // Хасагдсан хүний өнгөрсөн захиалгууд дугаарыг нь агуулсаар байна: түүнээс дээш эхэлнэ.
+    const [used] = await tx<{ max: number | null }[]>`
+      SELECT greatest(
+        (SELECT max(position) FROM staff WHERE business_id = ${business.id}),
+        (SELECT max(substring(staff_id FROM '-([0-9]+)$')::int)
+          FROM bookings WHERE business_slug = ${business.slug})
+      ) AS max
+    `;
+    let next = (used?.max ?? -1) + 1;
+    const rows = staff.map((member) => ({
+      business_id: business.id,
+      position: member.position ?? next++,
+      name: member.name,
+    }));
+    // Хамт устгаж, хамт оруулдаг тул хоёр нэрийг солиход unique index зөрчигдөхгүй.
+    await tx`DELETE FROM staff WHERE business_id = ${business.id}`;
+    await tx`INSERT INTO staff ${tx(rows)}`;
+    return { ok: true };
+  });
+}
+
+/* Баг ------------------------------------------------------------------------- */
 
 export async function getMembers(businessId: string): Promise<Member[]> {
   return sql<Member[]>`
@@ -202,10 +324,10 @@ export type AddMemberResult =
   | { ok: false; reason: "needs_password" | "already_member" | "owner_exists" };
 
 /**
- * Gives someone access to a place. A new phone gets an account with the
- * starting password given here (they can be told it in person); an existing
- * account just gains the role and keeps its own password. `afterAdd` runs in
- * the same transaction (the admin's audit entry), so both happen or neither.
+ * Хүнд газарт хандах эрх өгнө. Шинэ утсанд энд өгсөн анхны нууц үгтэй бүртгэл
+ * үүснэ (түүнд биечлэн хэлж болно); байгаа бүртгэл зөвхөн үүргийг авч, өөрийн нууц
+ * үгээ хадгална. `afterAdd` нэг transaction дотор ажилладаг (админы үйлдлийн түүх)
+ * тул хоёулаа болно, эсвэл аль нь ч болохгүй.
  */
 export async function addMember(
   businessId: string,
@@ -248,7 +370,7 @@ export async function addMember(
   });
 }
 
-/** Managers can be removed; the owner cannot (a place always keeps its owner). */
+/** Менежерийг хасаж болно; эзэмшигчийг болохгүй (газар үргэлж эзэмшигчтэй байна). */
 export async function removeManager(businessId: string, accountId: string): Promise<boolean> {
   const rows = await sql`
     DELETE FROM memberships
@@ -258,7 +380,7 @@ export async function removeManager(businessId: string, accountId: string): Prom
   return rows.length > 0;
 }
 
-/** "khaan-barber-2" → the staff row at position 2, or the raw id when unknown. */
+/** "khaan-barber-2" → position 2 дахь ажилтны мөр, мэдэгдэхгүй бол id-г өөрийг нь. */
 export function staffNameFor(
   staffId: string,
   slug: string,

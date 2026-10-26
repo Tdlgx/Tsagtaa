@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 export type TimeSlotStatus = "available" | "booked" | "past";
 
 /**
- * Visual states of a slot chip. Exported so static previews (e.g. the phone
- * mockup on the home page) can render the exact same look without inputs.
+ * Цагийн товчны харагдах төлөвүүд. Export хийсэн тул статик урьдчилсан харагдац
+ * (жишээ нь нүүр хуудсан дээрх утасны загвар) input-гүйгээр яг ижил харагдацыг гаргана.
  */
 export const timeSlotVariants = cva(
   [
@@ -37,17 +37,17 @@ const STATUS_LABEL: Record<Exclude<TimeSlotStatus, "available">, string> = {
 };
 
 type TimeSlotProps = Omit<ComponentProps<"input">, "type" | "value" | "children"> & {
-  /** Display time, e.g. "10:30". Also used as the radio value. */
+  /** Харуулах цаг, жишээ нь "10:30". Radio-гийн утга болж ч хэрэглэгдэнэ. */
   time: string;
   status?: TimeSlotStatus;
-  /** Screen-reader word for a slot that can't be chosen; defaults to Mongolian. */
+  /** Сонгох боломжгүй цагийн screen reader-ийн үг; анхдагч нь Монгол. */
   unavailableLabel?: string;
 };
 
 /**
- * One bookable time. It is a real radio button (visually hidden) wrapped in a
- * label, so arrow keys, forms and screen readers work with zero JavaScript.
- * Minimum 44×44px touch target.
+ * Захиалж болох нэг цаг. Label-д ороосон жинхэнэ radio товч (нүдэнд нуугдсан) тул
+ * сумтай товч, маягт, screen reader JavaScript огт хэрэггүйгээр ажиллана.
+ * Хүрэх талбай хамгийн багадаа 44×44px.
  */
 export function TimeSlot({
   time,
@@ -85,13 +85,13 @@ export function TimeSlot({
 }
 
 type TimeSlotGroupProps = {
-  /** Visible group title, e.g. "Өглөө". */
+  /** Харагдах бүлгийн гарчиг, жишээ нь "Өглөө". */
   legend: string;
   children: ReactNode;
   className?: string;
 };
 
-/** Grid of slots: 4 per row on phones (each ≥ 72px wide), 6 from 640px. */
+/** Цагуудын тор: утсан дээр мөрөнд 4 (тус бүр ≥ 72px өргөн), 640px-ээс 6. */
 export function TimeSlotGroup({ legend, children, className }: TimeSlotGroupProps): JSX.Element {
   return (
     <fieldset className={cn("min-w-0", className)}>

@@ -4,10 +4,10 @@ import { createLocalStore } from "@/lib/local-store";
 
 export type Profile = {
   name: string;
-  /** 8 digits, already normalized. */
+  /** 8 оронтой, аль хэдийн хэвшүүлсэн. */
   phone: string;
   email: string;
-  /** Square JPEG as a data URL (about 20–40 KB), or "" for none. Never leaves the device. */
+  /** Дөрвөлжин JPEG data URL (ойролцоогоор 20–40 KB), эсвэл байхгүй бол "". Төхөөрөмжөөс хэзээ ч гарахгүй. */
   avatar: string;
   reminders: { dayBefore: boolean; hourBefore: boolean };
   createdAt: string;
@@ -30,7 +30,7 @@ function parseProfile(raw: unknown): Profile {
     name: text(value.name),
     phone: text(value.phone),
     email: text(value.email),
-    // Only an image we made ourselves; anything else is dropped.
+    // Зөвхөн бидний өөрсдөө үүсгэсэн зураг; бусад бүхнийг хаяна.
     avatar: text(value.avatar).startsWith("data:image/") ? text(value.avatar) : "",
     reminders: {
       dayBefore: value.reminders?.dayBefore ?? true,
@@ -40,7 +40,7 @@ function parseProfile(raw: unknown): Profile {
   };
 }
 
-/** The customer's details on this device, one copy per account; they pre-fill the booking form. */
+/** Энэ төхөөрөмж дээрх үйлчлүүлэгчийн мэдээлэл, бүртгэл бүрт нэг хуулбар; захиалгын маягтыг урьдчилан бөглөнө. */
 const store = createLocalStore<Profile>("tsagtaa.profile.v1", EMPTY_PROFILE, parseProfile, {
   perAccount: true,
 });
@@ -53,6 +53,9 @@ export function readProfile(): Profile {
   return store.read();
 }
 
+/**
+ * Энэ төхөөрөмж дээрх профайлын талбаруудыг шинэчилнэ; анхны хадгалалтад үүссэн огноог тэмдэглэнэ.
+ */
 export function saveProfile(changes: Partial<Omit<Profile, "createdAt">>): void {
   const current = store.read();
   store.write({

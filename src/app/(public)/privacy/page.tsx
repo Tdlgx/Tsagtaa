@@ -13,9 +13,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * How personal data is handled, as required by Mongolia's Law on Personal
- * Data Protection. Describes the current build, where everything stays in the
- * browser; update it before bookings start reaching the server or the places.
+ * Хувь хүний мэдээллийг хэрхэн боловсруулдаг тухай, Монгол Улсын Хувь хүний
+ * мэдээлэл хамгаалах тухай хуулийн шаардлагаар. Бүх зүйл browser-т үлддэг одоогийн
+ * хувилбарыг тайлбарлана; захиалга сервер эсвэл газрууд руу очиж эхлэхээс өмнө шинэчилнэ.
  */
 export default async function PrivacyPage(): Promise<JSX.Element> {
   const { t } = await getI18n();

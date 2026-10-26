@@ -27,7 +27,7 @@ type BadgeTone = NonNullable<VariantProps<typeof badgeVariants>["tone"]>;
 
 type BadgeProps = ComponentProps<"span"> &
   VariantProps<typeof badgeVariants> & {
-    /** A 6px status dot in the badge's text color. */
+    /** Badge-ийн текстийн өнгөтэй 6px төлөвийн цэг. */
     dot?: boolean;
   };
 

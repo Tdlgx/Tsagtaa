@@ -22,20 +22,20 @@ const DEFAULT_LABELS: StepperLabels = {
 };
 
 type BookingStepperProps = {
-  /** Zero-based index of the step the user is on. */
+  /** Хэрэглэгчийн байгаа алхмын индекс (0-ээс эхэлнэ). */
   currentStep: number;
-  /** Step names; defaults to BOOKING_STEPS. A clinic says "Эмч" instead of "Ажилтан". */
+  /** Алхмын нэрс; анхдагч нь BOOKING_STEPS. Эмнэлэг "Ажилтан"-ы оронд "Эмч" гэнэ. */
   steps?: readonly string[];
-  /** Words around the steps, in the visitor's language; defaults to Mongolian. */
+  /** Алхмуудын эргэн тойрны үгс, зочны хэлээр; анхдагч нь Монгол. */
   labels?: StepperLabels;
-  /** When given, finished steps become buttons that go back to them. */
+  /** Өгвөл дууссан алхмууд тэр алхам руу буцдаг товч болно. */
   onStepSelect?: (index: number) => void;
   className?: string;
 };
 
 /**
- * Progress through the 4 booking steps. On phones only the circles are shown
- * plus one line naming the current step; labels appear from 640px.
+ * Захиалгын 4 алхмын явц. Утсан дээр зөвхөн дугуйнууд болон одоогийн алхмын
+ * нэрийг нэг мөрөөр харуулна; шошгууд 640px-ээс гарна.
  */
 export function BookingStepper({
   currentStep,

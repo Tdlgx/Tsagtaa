@@ -27,15 +27,15 @@ type ChoiceGroupProps = {
   value: string;
   choices: readonly Choice[];
   onChange: (value: string) => void;
-  /** "segmented": one capsule, equal parts. "chips": separate pills that may scroll. */
+  /** "segmented": нэг капсул, тэнцүү хэсгүүд. "chips": гүйлгэж болох тусдаа товчнууд. */
   look: "segmented" | "chips";
   className?: string;
 };
 
 /**
- * A single-choice filter built from native radio buttons, so Tab enters the
- * group, the arrow keys move inside it, and the form still submits without JS.
- * A chosen filter is filled with ink; blue is kept for actions and time slots.
+ * Native radio товчнуудаар хийсэн нэг сонголттой шүүлтүүр, ингэснээр Tab бүлэг рүү
+ * орж, сумтай товч дотор нь шилжиж, JS-гүйгээр ч маягт илгээгдэнэ.
+ * Сонгосон шүүлтүүр бараан өнгөөр дүүрнэ; цэнхэрийг үйлдэл, цагт зориулж үлдээсэн.
  */
 function ChoiceGroup({
   legend,
@@ -69,7 +69,7 @@ function ChoiceGroup({
             <span
               className={cn(
                 "flex cursor-pointer items-center justify-center gap-2 rounded-full text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors duration-150 ease-soft select-none is-hover:text-foreground",
-                // Hover must not dim the chosen option, so its text color is restated.
+                // Hover сонгосон сонголтыг бүдгэрүүлэх ёсгүй тул текстийн өнгийг дахин зааж өгнө.
                 "peer-checked:bg-foreground peer-checked:text-background peer-checked:is-hover:text-background",
                 "peer-focus-visible:ring-3 peer-focus-visible:ring-ring",
                 look === "segmented"
@@ -94,14 +94,14 @@ function ChoiceGroup({
 
 type SearchShellProps = {
   filters: SearchFilters;
-  /** Server-rendered results; dimmed while the next search loads. */
+  /** Сервер дээр render хийсэн үр дүн; дараагийн хайлт ачаалагдах үед бүдгэрнэ. */
   children: ReactNode;
 };
 
 /**
- * Search form + results. Filters live in the URL (shareable, back button
- * works). Choosing a filter navigates at once inside a transition, and
- * `useOptimistic` shows the new choice immediately while results load.
+ * Хайлтын маягт + үр дүн. Шүүлтүүрүүд URL-д хадгалагдана (хуваалцаж болно, буцах
+ * товч ажиллана). Шүүлтүүр сонгоход transition дотор шууд шилжиж, `useOptimistic`
+ * үр дүн ачаалагдах зуур шинэ сонголтыг шууд харуулна.
  */
 export function SearchShell({ filters, children }: SearchShellProps): JSX.Element {
   const t = useT();
@@ -109,8 +109,8 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
   const [isPending, startTransition] = useTransition();
   const [current, setCurrent] = useOptimistic(filters);
 
-  // The text box is edited freely and only applied on submit. When the URL
-  // changes from outside (e.g. "clear filters"), adopt the new query.
+  // Текстийн талбарыг чөлөөтэй засаж, зөвхөн илгээхэд хэрэгжүүлнэ. URL гаднаас
+  // өөрчлөгдвөл (жишээ нь "шүүлтүүр цэвэрлэх") шинэ query-г авна.
   const [draft, setDraft] = useState(filters.q);
   const [appliedQuery, setAppliedQuery] = useState(filters.q);
   if (appliedQuery !== filters.q) {
@@ -144,7 +144,7 @@ export function SearchShell({ filters, children }: SearchShellProps): JSX.Elemen
 
   return (
     <>
-      {/* Without JavaScript this is a plain GET form to the same URL. */}
+      {/* JavaScript-гүй үед энэ нь ижил URL руу илгээх энгийн GET маягт. */}
       <form
         action="/search"
         role="search"

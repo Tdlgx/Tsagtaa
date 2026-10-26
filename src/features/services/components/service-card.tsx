@@ -9,16 +9,16 @@ type ServiceCardProps = Omit<ComponentProps<"input">, "type" | "children"> & {
   title: string;
   description?: string;
   durationMinutes: number;
-  /** Price in tögrög. */
+  /** Төгрөгөөрх үнэ. */
   price: number;
-  /** "radio" when one service can be picked, "checkbox" for several. */
+  /** Нэг үйлчилгээ сонгох бол "radio", хэд хэдэн бол "checkbox". */
   selection?: "radio" | "checkbox";
 };
 
 /**
- * A selectable service. Like TimeSlot it wraps a native radio/checkbox, so the
- * whole card is one large, keyboard-friendly tap target.
- * Only phrasing elements (<span>) are used inside <label>, as HTML requires.
+ * Сонгож болох үйлчилгээ. TimeSlot-ийн адил native radio/checkbox-ыг ороодог тул
+ * бүх карт нэг том, гарт ээлтэй дарах талбай болно.
+ * HTML-ийн шаардлагын дагуу <label> дотор зөвхөн phrasing элемент (<span>) хэрэглэнэ.
  */
 export function ServiceCard({
   title,

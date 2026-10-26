@@ -31,10 +31,10 @@ type BasicsStepProps = { draft: RegistrationDraft; errors: StepErrors; t: Dictio
 const set = (change: Partial<RegistrationDraft>): void =>
   updateDraft((draft) => ({ ...draft, ...change }));
 
-/** "tsagtaa.mn/book/" in front of the address field. */
+/** Хаягийн талбарын өмнөх "tsagtaa.mn/book/". */
 const BOOK_PREFIX = `${new URL(APP_URL).host}/book/`;
 
-/** While typing an address: keep only what an address may contain. */
+/** Хаяг бичих явцад: хаягт байж болох тэмдэгтүүдийг л үлдээнэ. */
 function cleanSlugInput(value: string): string {
   return value
     .toLowerCase()
@@ -46,7 +46,7 @@ function cleanSlugInput(value: string): string {
 
 type SlugStatus = SlugCheck | { slug: string; status: "checking" };
 
-/** Asks the server whether the address is free, 400 ms after typing stops. */
+/** Бичихээ зогсоосноос 400 ms дараа хаяг сул эсэхийг серверээс асууна. */
 function useSlugCheck(slug: string): SlugStatus {
   const [result, setResult] = useState<SlugCheck | null>(null);
 
@@ -69,6 +69,10 @@ function useSlugCheck(slug: string): SlugStatus {
   return result;
 }
 
+/**
+ * Бүртгэлийн 2-р алхам: нэр, хаяг (slug, сул эсэхийг шууд шалгана), дүүрэг, байршил,
+ * утас, имэйл (алдааг санал болгоно), регистр, тайлбар, газрын зургийн цэг.
+ */
 export function BasicsStep({ draft, errors, t }: BasicsStepProps): JSX.Element {
   const words = t.register;
   const slugStatus = useSlugCheck(draft.slug);
@@ -90,7 +94,7 @@ export function BasicsStep({ draft, errors, t }: BasicsStepProps): JSX.Element {
           maxLength={80}
           onChange={(event) => {
             const name = event.target.value;
-            // The address follows the name until the owner edits it.
+            // Эзэмшигч өөрөө засах хүртэл хаяг нэрийг дагана.
             set(draft.slugEdited ? { name } : { name, slug: slugify(name) });
           }}
           aria-invalid={Boolean(errors.name)}
@@ -166,7 +170,7 @@ export function BasicsStep({ draft, errors, t }: BasicsStepProps): JSX.Element {
         </Field>
       </div>
 
-      {/* Optional, but a place with a pin shows up on the map. */}
+      {/* Заавал биш, гэхдээ цэгтэй газар газрын зураг дээр гарна. */}
       <Field>
         <Label id="reg-location-label">
           {words.location}{" "}

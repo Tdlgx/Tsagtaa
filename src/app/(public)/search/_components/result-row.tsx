@@ -18,9 +18,9 @@ import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import { formatMNT } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
-/** How many times are shown as buttons before "+N more". */
+/** "+N дахин" гарахаас өмнө хэдэн цагийг товч болгон харуулах вэ. */
 const VISIBLE_SLOTS = 6;
-/** Phones show fewer times per place, so the list stays scannable. */
+/** Утсан дээр газар бүрт цөөн цаг харуулна, ингэснээр жагсаалтыг гүйлгэж харахад амар. */
 const VISIBLE_SLOTS_PHONE = 4;
 const RULER = ["09:00", "12:00", "15:00", "18:00", "21:00"] as const;
 
@@ -35,9 +35,9 @@ type DayStripProps = {
 };
 
 /**
- * The whole working day as one thin bar: blue marks are open times, faded ones
- * fall outside the chosen part of the day, grey ones are already gone. A
- * saffron tick marks "now". Purely visual; the buttons below carry the data.
+ * Ажлын бүтэн өдрийг нэг нарийн зурвасаар: цэнхэр тэмдэг нь сул цаг, бүдэг нь
+ * сонгосон өдрийн хэсгээс гадуурх, саарал нь аль хэдийн дууссан. Гүргэм өнгийн
+ * зураас "одоо"-г заана. Зөвхөн дүрслэл; өгөгдлийг доорх товчнууд агуулна.
  */
 function DayStrip({ result, filters, nowMinutes }: DayStripProps): JSX.Element {
   const range = TIMES_OF_DAY.find((item) => item.value === filters.time);
@@ -96,7 +96,7 @@ function DayStrip({ result, filters, nowMinutes }: DayStripProps): JSX.Element {
 
 type EmptyDayNoteProps = { filters: SearchFilters; hasOutside: boolean; t: Dictionary };
 
-/** Why a place shows no times, plus the one change that would show some. */
+/** Газар яагаад цаггүй байгаа, мөн цаг харагдахаар болгох ганц өөрчлөлт. */
 function EmptyDayNote({ filters, hasOutside, t }: EmptyDayNoteProps): JSX.Element {
   const linkClass =
     "font-medium text-primary-strong underline-offset-4 outline-none hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring";
@@ -134,11 +134,12 @@ type ResultRowProps = {
   result: SearchResult;
   filters: SearchFilters;
   nowMinutes: number | null;
-  /** Marks this row's parts for the first-visit tour (only the first row). */
+  /** Анхны айлчлалын танилцуулгад энэ мөрийн хэсгүүдийг тэмдэглэнэ (зөвхөн эхний мөр). */
   tourAnchor?: boolean;
   locale: Locale;
 };
 
+/** Хайлтын нэг мөр: газрын мэдээлэл, өдрийн зурвас, захиалж болох цагуудын товчнууд. */
 export function ResultRow({
   result,
   filters,
@@ -188,7 +189,7 @@ export function ResultRow({
             </p>
           )}
         </div>
-        {/* Phones: one quiet line instead of two icon rows. */}
+        {/* Утас: хоёр мөр icon-ы оронд нэг тайван мөр. */}
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">
           <MapPin className="size-3.5 shrink-0" />
           <span className="truncate">

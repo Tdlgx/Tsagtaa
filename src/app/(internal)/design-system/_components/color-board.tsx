@@ -46,6 +46,7 @@ function RatioBadge({ ratio }: { ratio: number | null }): JSX.Element {
   );
 }
 
+/** Design system: өнгөний token бүрийг одоогийн утга, тодролын харьцаатай нь харуулна. */
 export function ColorBoard(): JSX.Element {
   const values = useTokenValues(ALL_VARS);
   const read = (name: CssVar): string => values?.get(name) ?? "";

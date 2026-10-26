@@ -9,9 +9,9 @@ import { LOCALE_LABELS, LOCALES, type Locale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
 /**
- * MN / EN switch. Native radio buttons (Tab in, arrows to switch), styled like
- * the theme toggle. The choice is saved in a cookie and the page re-renders on
- * the server in the new language, without a full reload.
+ * MN / EN солигч. Native radio товчнууд (Tab-аар орж, сумаар солино), theme
+ * солигчтой ижил загвартай. Сонголт cookie-д хадгалагдаж, хуудас бүтэн дахин
+ * ачаалахгүйгээр сервер дээр шинэ хэлээр дахин render хийгдэнэ.
  */
 export function LanguageToggle({ className }: { className?: string }): JSX.Element {
   const locale = useLocale();
@@ -19,7 +19,7 @@ export function LanguageToggle({ className }: { className?: string }): JSX.Eleme
   const router = useRouter();
   const name = useId();
   const [isPending, startTransition] = useTransition();
-  // Show the new choice at once, while the page re-renders.
+  // Хуудас дахин render хийгдэх зуур шинэ сонголтыг шууд харуулна.
   const [shown, setShown] = useOptimistic(locale);
 
   const choose = (next: Locale): void => {

@@ -2,9 +2,9 @@ import type { Locale } from "@/i18n/config";
 import { getZonedParts, type DateInput } from "@/lib/date";
 
 /**
- * Date words in each language, always on the Ulaanbaatar calendar. Built by
- * hand (not Intl with "mn-MN") so Node.js and browsers print the same text
- * and hydration never mismatches.
+ * Хэл тус бүрийн огнооны үгс, үргэлж Улаанбаатарын хуанлиар. Гараар бүтээсэн
+ * ("mn-MN"-тэй Intl биш), ингэснээр Node.js болон browser ижил текст хэвлэж,
+ * hydration хэзээ ч зөрөхгүй.
  */
 const WEEKDAYS: Record<Locale, readonly string[]> = {
   mn: ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"],

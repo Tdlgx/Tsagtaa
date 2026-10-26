@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const AREAS = ["all", "business", "member", "account", "points", "booking"] as const;
 type Area = (typeof AREAS)[number];
 
-/** Who on the team did what, newest first. Written with each change, never edited. */
+/** Багийн хэн юу хийсэн, шинэ нь эхэндээ. Өөрчлөлт бүртэй хамт бичигдэж, хэзээ ч засагдахгүй. */
 export default async function ActivityPage(
   props: PageProps<"/admin/activity">,
 ): Promise<JSX.Element> {

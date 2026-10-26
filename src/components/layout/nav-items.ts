@@ -2,14 +2,14 @@ import { CalendarDays, House, Search, UserRound, type LucideIcon } from "lucide-
 
 export type NavItem = {
   href: string;
-  /** Key into the `nav` dictionary section. */
+  /** `nav` толь бичгийн хэсгийн түлхүүр. */
   labelKey: "home" | "search" | "bookings" | "profile";
   icon: LucideIcon;
 };
 
 /**
- * Main navigation for customers. The same list feeds the desktop header and the
- * mobile bottom bar. Pages other than "/" are built in later steps.
+ * Үйлчлүүлэгчийн үндсэн цэс. Нэг жагсаалт компьютерийн header болон утасны доод
+ * цэсийг хоёуланг тэжээнэ. "/"-ээс бусад хуудсыг дараагийн шатуудад хийнэ.
  */
 export const MAIN_NAV: readonly NavItem[] = [
   { href: "/", labelKey: "home", icon: House },

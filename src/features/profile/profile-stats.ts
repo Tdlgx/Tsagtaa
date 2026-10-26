@@ -10,13 +10,13 @@ export type PlaceSummary = {
   name: string;
   category: BusinessCategorySlug;
   visits: number;
-  /** Start of the most recent non-cancelled booking. */
+  /** Хамгийн сүүлийн цуцлагдаагүй захиалгын эхлэх цаг. */
   lastAt: string;
 };
 
 export type BadgeId = "first" | "regular" | "explorer" | "reliable";
 
-/** Progress towards one badge; its title and description live in the dictionaries. */
+/** Нэг тэмдэг рүү чиглэсэн ахиц; нэр, тайлбар нь толь бичгүүдэд байдаг. */
 export type Badge = {
   id: BadgeId;
   /** 0–1 */
@@ -30,9 +30,9 @@ export type ProfileStats = {
   upcoming: number;
   completed: number;
   cancelled: number;
-  /** Tögrög spent on completed bookings. */
+  /** Дууссан захиалгад зарцуулсан төгрөг. */
   spent: number;
-  /** Tögrög booked but not yet used. */
+  /** Захиалсан ч хараахан ашиглаагүй төгрөг. */
   planned: number;
   byGroup: { group: CategoryGroupSlug; count: number }[];
   places: PlaceSummary[];
@@ -47,7 +47,7 @@ function badge(id: BadgeId, current: number, goal: number): Badge {
   };
 }
 
-/** Everything the profile page shows, derived from the bookings on this device. */
+/** Профайл хуудасны харуулдаг бүх зүйл, энэ төхөөрөмж дээрх захиалгуудаас гаргасан. */
 export function getProfileStats(bookings: readonly Booking[], now: number): ProfileStats {
   const phases = bookings.map((booking) => ({ booking, phase: getBookingPhase(booking, now) }));
   const active = phases.filter(({ phase }) => phase !== "cancelled").map(({ booking }) => booking);

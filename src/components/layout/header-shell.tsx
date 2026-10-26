@@ -7,16 +7,16 @@ import { cn } from "@/lib/utils";
 
 type HeaderShellProps = {
   children: ReactNode;
-  /** Preview a state regardless of scroll position (used on /design-system). */
+  /** Гүйлгэлтийн байрлалаас үл хамааран төлөвийг урьдчилан харуулна (/design-system-д ашиглана). */
   forceScrolled?: boolean;
   sticky?: boolean;
   className?: string;
 };
 
 /**
- * Header background. At the top of the page it is transparent; once the page
- * scrolls, a blurred translucent layer with a hairline fades in. Only the
- * layer's opacity animates.
+ * Header-ийн дэвсгэр. Хуудасны дээд хэсэгт тунгалаг; хуудсыг гүйлгэмэгц бүдгэрүүлсэн
+ * хагас тунгалаг давхарга нарийн шугамтайгаар аажуухан гарч ирнэ. Зөвхөн давхаргын
+ * тунгалаг байдал анимэйшн хийгдэнэ.
  */
 export function HeaderShell({
   children,
@@ -31,9 +31,9 @@ export function HeaderShell({
     <header
       data-scrolled={isScrolled}
       className={cn(
-        // z-40 on a positioned element already creates a stacking context.
-        // Do not add `isolate`: in Chrome it becomes a "backdrop root" and the
-        // blur below would see nothing to blur.
+        // Байрлалтай элемент дээрх z-40 аль хэдийн stacking context үүсгэдэг.
+        // `isolate` бүү нэм: Chrome дээр тэр нь "backdrop root" болж, доорх blur
+        // бүдгэрүүлэх юмгүй болно.
         "z-40",
         sticky ? "sticky top-0" : "relative",
         "before:absolute before:inset-0 before:-z-10 before:border-b before:border-border before:bg-background/80 before:opacity-0 before:backdrop-blur-md before:transition-opacity before:duration-250 before:ease-soft",

@@ -20,6 +20,7 @@ import Link from "next/link";
 import { Switch } from "radix-ui";
 import { useState, type JSX, type ReactNode } from "react";
 
+import { AccountEmail } from "@/app/(public)/profile/_components/account-email";
 import { ClearDataDialog } from "@/app/(public)/profile/_components/clear-data-dialog";
 import {
   AccountStrip,
@@ -54,7 +55,7 @@ import { formatMNT } from "@/lib/currency";
 import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
-/** One fill per kind of place, used by the breakdown bar and its legend. */
+/** Газрын төрөл бүрт нэг өнгө, задаргааны зурвас болон тайлбарт хэрэглэнэ. */
 const GROUP_FILL: Record<CategoryGroupSlug, string> = {
   salon: "bg-primary",
   clinic: "bg-success",
@@ -64,7 +65,7 @@ const GROUP_FILL: Record<CategoryGroupSlug, string> = {
   vet: "bg-muted-foreground",
 };
 
-/** `account` is the signed-in customer (points), or null; the rest lives in this browser. */
+/** `account` нь нэвтэрсэн үйлчлүүлэгч (оноо) эсвэл null; бусад нь энэ browser-т хадгалагдана. */
 export function ProfileView({ account }: { account: ProfileAccount | null }): JSX.Element {
   const locale = useLocale();
   const t = useT();
@@ -74,12 +75,17 @@ export function ProfileView({ account }: { account: ProfileAccount | null }): JS
   const [editing, setEditing] = useState(false);
 
   if (!stored || !bookings || now === null) return <ProfileSkeleton />;
-  // This account's own copy starts empty; its name and phone come from the account.
+  // Энэ бүртгэлийн өөрийн хуулбар хоосноос эхэлнэ; нэр, утас, имэйл нь бүртгэлээс ирнэ.
   const profile = account
-    ? { ...stored, name: stored.name || account.name, phone: stored.phone || account.phone }
+    ? {
+        ...stored,
+        name: stored.name || account.name,
+        phone: stored.phone || account.phone,
+        email: stored.email || account.email || "",
+      }
     : stored;
 
-  // Place names in the visitor's language; the stored bookings stay as they are.
+  // Газрын нэрсийг зочны хэлээр харуулна; хадгалсан захиалгууд хэвээрээ.
   const stats = getProfileStats(
     bookings.map((booking) => localizeBooking(booking, locale)),
     now,
@@ -96,7 +102,7 @@ export function ProfileView({ account }: { account: ProfileAccount | null }): JS
   return (
     <div className="grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-12">
       <h1 className="sr-only">{t.profile.title}</h1>
-      {/* Left: who you are + settings -------------------------------------- */}
+      {/* Зүүн: та хэн бэ + тохиргоо -------------------------------------- */}
       <div className="flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
         <section
           aria-labelledby="profile-title"
@@ -160,13 +166,16 @@ export function ProfileView({ account }: { account: ProfileAccount | null }): JS
         </section>
 
         {account ? <AccountStrip account={account} /> : null}
+        {account ? (
+          <AccountEmail email={account.email} pendingEmail={account.pendingEmail} />
+        ) : null}
         <Settings profile={profile} t={t} />
       </div>
 
-      {/* Right: what you've done ----------------------------------------------- */}
+      {/* Баруун: юу хийсэн бэ ----------------------------------------------- */}
       <div className="flex min-w-0 flex-col gap-10">
         <PointsSection account={account} />
-        {/* Four zeros say nothing: the numbers appear with the first booking. */}
+        {/* Дөрвөн тэг юу ч хэлэхгүй: тоонууд эхний захиалгатай хамт гарч ирнэ. */}
         {stats.total > 0 ? <StatGrid stats={stats} t={t} /> : null}
         {stats.byGroup.length > 0 ? <Breakdown stats={stats} t={t} /> : null}
         <Places stats={stats} now={now} t={t} locale={locale} />
@@ -349,7 +358,7 @@ function StatGrid({ stats, t }: { stats: ProfileStats; t: Dictionary }): JSX.Ele
   );
 }
 
-/** Share of bookings per kind of place, as one stacked bar. */
+/** Газрын төрөл тус бүрийн захиалгын хувийг нэг давхарласан зурвасаар харуулна. */
 function Breakdown({ stats, t }: { stats: ProfileStats; t: Dictionary }): JSX.Element {
   const total = stats.byGroup.reduce((sum, item) => sum + item.count, 0);
 
@@ -462,7 +471,7 @@ function Badges({ stats, t }: { stats: ProfileStats; t: Dictionary }): JSX.Eleme
                 earned ? "border-primary-strong/30 bg-primary-soft" : "border-border bg-surface",
               )}
             >
-              {/* Progress ring around the medal. */}
+              {/* Медалийн эргэн тойрны ахицын цагираг. */}
               <span
                 className="relative flex size-16 items-center justify-center rounded-full"
                 style={{

@@ -6,18 +6,18 @@ import { transliterate } from "@/i18n/transliterate";
 
 export type StaffMember = {
   id: string;
-  /** Display name in the visitor's language. */
+  /** Зочны хэл дээрх харуулах нэр. */
   name: string;
-  /** Stored (Mongolian) name; what a booking saves. */
+  /** Хадгалсан (Монгол) нэр; захиалгад хадгалагдах утга. */
   canonicalName: string;
   role: string;
-  /** Open start times this person can take; a subset of the business's times. */
+  /** Энэ хүний авч болох сул эхлэх цагууд; бизнесийн цагуудын дэд олонлог. */
   open: { today: readonly string[]; tomorrow: readonly string[] };
 };
 
 const SALON_NAMES = ["Сарнай", "Номин", "Анужин", "Хулан", "Оюунаа"] as const;
 
-/** Who can be picked at each kind of place. Step labels and roles live in the dictionaries. */
+/** Газрын төрөл бүрт хэнийг сонгож болох вэ. Алхмын шошго, үүргүүд толь бичгүүдэд байдаг. */
 const STAFF_NAMES: Record<BusinessCategorySlug, readonly string[]> = {
   hair: SALON_NAMES,
   barber: ["Тэмүүлэн", "Билгүүн", "Мөнх-Эрдэнэ"],
@@ -31,7 +31,7 @@ const STAFF_NAMES: Record<BusinessCategorySlug, readonly string[]> = {
   vet: ["Др. Мөнхзул", "Др. Отгонбаяр"],
 };
 
-/** Up to 3 people per place; the slug picks a stable starting point in the name list. */
+/** Газар бүрт 3 хүртэл хүн; slug нь нэрсийн жагсаалтын тогтвортой эхлэх цэгийг сонгоно. */
 const MAX_STAFF = 3;
 
 function seed(text: string): number {
@@ -39,9 +39,9 @@ function seed(text: string): number {
 }
 
 /**
- * Sample staff for a business, until real staff come from the database. Each
- * person takes a share of the open times (half or two thirds); together they
- * cover all of them, so "no preference" always shows the full list.
+ * Жинхэнэ ажилтнууд DB-ээс ирэх хүртэл бизнесийн жишээ ажилтнууд. Хүн бүр сул
+ * цагуудын тодорхой хэсгийг (хагас эсвэл гуравны хоёр) авна; хамтдаа бүгдийг нь
+ * хамардаг тул "Хамаагүй" үргэлж бүтэн жагсаалтыг харуулна.
  */
 export function getSampleStaff(business: SampleBusiness, locale: Locale): StaffMember[] {
   const names = STAFF_NAMES[business.category];
@@ -67,9 +67,9 @@ export function getSampleStaff(business: SampleBusiness, locale: Locale): StaffM
 }
 
 /**
- * Who can be booked at a place: its real staff for a registered place,
- * generated sample staff for a sample one. Real staff can each take any of
- * the open times; who is actually free is decided by the bookings.
+ * Газарт хэнийг захиалж болох вэ: бүртгэлтэй газарт жинхэнэ ажилтнууд, жишээ газарт
+ * үүсгэсэн жишээ ажилтнууд. Жинхэнэ ажилтан бүр дурын сул цагийг авч болно; хэн
+ * үнэхээр сул байгааг захиалгууд шийднэ.
  */
 export function getStaff(business: SampleBusiness, locale: Locale): StaffMember[] {
   if (!business.staff) return getSampleStaff(business, locale);

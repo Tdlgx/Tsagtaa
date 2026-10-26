@@ -39,7 +39,7 @@ import { cn } from "@/lib/utils";
 
 const ANY_STAFF = "any";
 
-/** Avatar tints, cycled per person so faces are told apart at a glance. */
+/** Avatar-ын өнгөнүүд, хүн бүрт ээлжлэн өгнө. Ингэснээр хүмүүсийг шууд ялгана. */
 const AVATAR_TONES = [
   "bg-primary-soft text-primary-strong",
   "bg-sun-soft text-sun-strong",
@@ -49,28 +49,28 @@ const AVATAR_TONES = [
 type SlotStatus = "available" | "booked" | "past";
 type DaySlot = { time: string; start: number; status: SlotStatus };
 
-/** Points rules, and the signed-in customer (null when signed out). */
+/** Онооны дүрмүүд болон нэвтэрсэн үйлчлүүлэгч (нэвтрээгүй бол null). */
 export type BookingPoints = {
   settings: LoyaltySettings;
   customer: { name: string; phone: string; balance: number } | null;
 };
 
 type BookingFlowProps = {
-  /** Stored (Mongolian) data: what the booking saves. Display text is localized here. */
+  /** Хадгалагдсан (Монгол) өгөгдөл: захиалгад хадгалагдах утга. Харуулах текстийг энд орчуулна. */
   business: SampleBusiness;
   initial: { day: SearchDay; time: string; serviceIndex: number | null };
-  /** Server time when the page was rendered: hides times that already passed today. */
+  /** Хуудсыг render хийсэн серверийн цаг: өнөөдөр өнгөрсөн цагуудыг нууна. */
   clock: Pick<SearchClock, "nowMinutes" | "todayLabel" | "tomorrowLabel">;
-  /** Times already booked in the database, per person. */
+  /** DB-д аль хэдийн захиалагдсан цагууд, хүн бүрээр. */
   taken: readonly TakenSlot[];
-  /** null: points are off or could not be loaded. */
+  /** null: оноо унтраалттай эсвэл ачаалж чадаагүй. */
   points: BookingPoints | null;
 };
 
 /**
- * The 4-step booking: service → who → time → contact details. Every choice
- * stays editable from the summary, and a time picked on the search page
- * arrives preselected.
+ * 4 алхамт захиалга: үйлчилгээ → хэн → цаг → холбоо барих мэдээлэл. Сонголт бүрийг
+ * хураангуйгаас засах боломжтой, хайлтын хуудсаас сонгосон цаг урьдчилан
+ * сонгогдсон байдлаар ирнэ.
  */
 export function BookingFlow({
   business: canonical,
@@ -97,14 +97,14 @@ export function BookingFlow({
   const [errors, setErrors] = useState<{ name?: string; phone?: string; consent?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<Booking | null>(null);
-  // Times lost to someone faster while this page was open; the refreshed page
-  // brings them too, this just shows them without waiting for it.
+  // Энэ хуудас нээлттэй байх хооронд өөр хүн түрүүлж авсан цагууд; шинэчлэгдсэн
+  // хуудас ч тэднийг авчирна, энэ нь зөвхөн хүлээлгүйгээр шууд харуулна.
   const [lost, setLost] = useState<TakenSlot[]>([]);
   const [slotTaken, setSlotTaken] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  // Points the customer chose to spend; trimmed below to what this service allows.
+  // Үйлчлүүлэгчийн зарцуулахаар сонгосон оноо; доор энэ үйлчилгээнд зөвшөөрөгдөх хэмжээнд тааруулна.
   const [pointsWanted, setPointsWanted] = useState(0);
-  // One id per booking attempt: a double click or a retry is stored once.
+  // Захиалгын оролдлого бүрт нэг id: давхар дарах эсвэл дахин оролдлого нэг л удаа хадгалагдана.
   const [requestId] = useState(() => crypto.randomUUID());
   const router = useRouter();
   const topRef = useRef<HTMLDivElement>(null);
@@ -120,7 +120,7 @@ export function BookingFlow({
   const total = service ? service.price - pointsUsed : null;
   const allTaken = [...taken, ...lost];
 
-  /** On duty at `slotTime` and not booked for the whole service. */
+  /** `slotTime` цагт ажиллаж байгаа, үйлчилгээний бүх хугацаанд захиалгагүй. */
   const isFree = (member: StaffMember, forDay: SearchDay, slotTime: string): boolean =>
     member.open[forDay].includes(slotTime) &&
     !isTaken(allTaken, member.id, forDay, toMinutes(slotTime), service?.duration ?? 0);
@@ -136,7 +136,7 @@ export function BookingFlow({
   const slotsFor = (forDay: SearchDay): DaySlot[] => {
     const open = new Set(openFor(staffId, forDay));
     const duration = service?.duration ?? 0;
-    // Half-hour grid plus any off-grid open times, so the day reads as a full schedule.
+    // Хагас цагийн тор дээр тор гадуурх сул цагуудыг нэмнэ, ингэснээр өдөр бүтэн хуваарь мэт харагдана.
     const grid = new Set<string>(open);
     for (let minute = DAY_START; minute < DAY_END; minute += 30) grid.add(toClock(minute));
 
@@ -144,7 +144,7 @@ export function BookingFlow({
       .map((slotTime): DaySlot => {
         const start = toMinutes(slotTime);
         const isPast = forDay === "today" && start <= clock.nowMinutes;
-        // The service must end by closing time (a registered place's own, or the schedule's end).
+        // Үйлчилгээ хаах цагаас өмнө дуусах ёстой (бүртгэлтэй газрынх өөрийнх нь, эсвэл хуваарийн төгсгөл).
         const fits = start + duration <= closingMinutes(canonical, forDay);
         const status: SlotStatus = isPast
           ? "past"
@@ -165,14 +165,14 @@ export function BookingFlow({
 
   const goTo = (next: number): void => {
     setStep(next);
-    // Returning customers: fill in what the account or the profile already knows.
+    // Буцаж ирсэн үйлчлүүлэгч: бүртгэл эсвэл профайлд байгаа мэдээллийг бөглөнө.
     if (next === steps.length - 1) {
       const profile = readProfile();
       const known = customer ?? profile;
       if (!name && known.name) setName(known.name);
       if (!phone && known.phone) setPhone(formatPhone(known.phone));
     }
-    // Bring the step into view and move focus to its heading for screen readers.
+    // Алхмыг харагдах хүрээнд оруулж, screen reader-т зориулж focus-ийг гарчиг руу шилжүүлнэ.
     requestAnimationFrame(() => {
       const top = topRef.current?.getBoundingClientRect().top ?? 0;
       if (top < 0) topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -192,7 +192,7 @@ export function BookingFlow({
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    // Enter on an earlier step means "next", not "book".
+    // Өмнөх алхам дээр Enter дарах нь "захиалах" биш, "дараах" гэсэн утгатай.
     if (step < steps.length - 1) {
       if (canContinue) goTo(step + 1);
       return;
@@ -204,7 +204,7 @@ export function BookingFlow({
       consent: consent ? undefined : t.book.errors.consent,
     };
     setErrors(nextErrors);
-    // Take the customer to the first problem, clear of the sticky action bar.
+    // Үйлчлүүлэгчийг эхний алдаа руу, наалттай товчны мөрнөөс давуулж аваачна.
     const firstInvalid = (["name", "phone", "consent"] as const).find((key) => nextErrors[key]);
     if (firstInvalid) {
       const field = document.getElementById(`booking-${firstInvalid}`);
@@ -223,7 +223,7 @@ export function BookingFlow({
 
     setSubmitting(true);
     setSubmitError(null);
-    // The server checks everything again; the database guarantees the time is not taken twice.
+    // Сервер бүгдийг дахин шалгана; цагийг хоёр удаа авахгүй гэдгийг DB баталгаажуулна.
     const result = await createBookingAction({
       requestId,
       slug: canonical.slug,
@@ -234,15 +234,15 @@ export function BookingFlow({
       name: name.trim(),
       phone: normalized,
       note: note.trim(),
-      consent: true, // checked above
+      consent: true, // дээр шалгасан
       points: pointsUsed,
     } satisfies CreateBookingInput);
     setSubmitting(false);
 
     if (!result.ok) {
       if (result.error === "slot_taken" || result.error === "unavailable") {
-        // Someone was faster. Mark the time as gone for the people who could
-        // have taken it, refresh the schedule, and send the customer back to pick again.
+        // Өөр хүн түрүүлсэн. Тэр цагийг авч болох байсан хүмүүст "дууссан" гэж тэмдэглэж,
+        // хуваарийг шинэчлээд үйлчлүүлэгчийг дахин сонгохоор буцаана.
         const start = toMinutes(time);
         const end = start + (service?.duration ?? 30);
         setLost((prev) => [
@@ -258,7 +258,7 @@ export function BookingFlow({
         return;
       }
       if (result.error === "points") {
-        // The balance changed (spent elsewhere): show the fresh one and let them choose again.
+        // Үлдэгдэл өөрчлөгдсөн (өөр газар зарцуулсан): шинэ үлдэгдлийг харуулж, дахин сонгуулна.
         setPointsWanted(0);
         setSubmitError(t.book.errors.points);
         router.refresh();
@@ -270,7 +270,7 @@ export function BookingFlow({
 
     const { booking } = result;
     addBooking(booking);
-    // First booking on this device: remember the details for next time.
+    // Энэ төхөөрөмж дээрх анхны захиалга: дараагийн удаад зориулж мэдээллийг санана.
     if (!readProfile().phone) saveProfile({ name: booking.customerName, phone: normalized });
     setDone(booking);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -303,7 +303,7 @@ export function BookingFlow({
           className="min-w-0"
           aria-labelledby="booking-step-title"
         >
-          {/* Re-keyed per step, so each one slides in. */}
+          {/* Алхам бүрт шинэ key өгдөг тул алхам бүр гулсаж орж ирнэ. */}
           <div
             key={step}
             className="animate-in duration-300 ease-soft fade-in slide-in-from-right-4"
@@ -504,7 +504,7 @@ export function BookingFlow({
                   />
                   <FieldHint id="booking-note-hint">{t.book.noteHint}</FieldHint>
                 </Field>
-                {/* Consent before processing (Law on Personal Data Protection); never pre-ticked. */}
+                {/* Боловсруулахаас өмнө зөвшөөрөл (Хувь хүний мэдээлэл хамгаалах тухай хууль); урьдчилан чагтлахгүй. */}
                 <Field>
                   <div className="flex items-start gap-3">
                     <input
@@ -566,7 +566,7 @@ export function BookingFlow({
             ) : null}
           </div>
 
-          {/* Action bar: sticks above the phone tab bar, sits inline on desktop. */}
+          {/* Үйлдлийн мөр: утсан дээр доод цэсний дээр наалдана, компьютер дээр мөрөндөө байрлана. */}
           <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mt-8 md:bottom-4">
             <div className="flex items-center gap-3 rounded-xl border border-border bg-surface/90 p-2 pl-4 shadow-lg backdrop-blur-md">
               <div className="min-w-0 flex-1">
@@ -761,7 +761,7 @@ type ChoiceCardProps = {
   className?: string;
 };
 
-/** A radio button drawn as a card; the whole card is the click target. */
+/** Карт хэлбэрээр зурсан radio товч; картын аль ч хэсэгт дарж болно. */
 function ChoiceCard({
   name,
   checked,
@@ -787,7 +787,7 @@ function ChoiceCard({
         )}
       >
         {children}
-        {/* Radio dot: hollow when idle, filled lime with an ink centre when chosen. */}
+        {/* Radio цэг: сул үед хөндий, сонгосон үед бэхэн төвтэй шар-ногоон дүүргэлттэй. */}
         <span
           aria-hidden
           className={cn(
@@ -835,13 +835,13 @@ type SummaryRow = {
 type SummaryProps = {
   rows: readonly SummaryRow[];
   total: number | null;
-  /** Paid in points, already taken off `total`. */
+  /** Оноогоор төлсөн хэсэг, `total`-аас аль хэдийн хасагдсан. */
   discount: number;
   currentStep: number;
   t: Dictionary;
 };
 
-/** Receipt of the choices so far. Sticky on desktop; on phones it follows the form. */
+/** Одоог хүртэлх сонголтуудын баримт. Компьютер дээр наалттай; утсан дээр маягтын араас явна. */
 function Summary({ rows, total, discount, currentStep, t }: SummaryProps): JSX.Element {
   return (
     <aside aria-label={t.book.summary.label} className="lg:sticky lg:top-24 lg:self-start">

@@ -14,14 +14,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.auth.metaTitle, robots: { index: false } };
 }
 
-/** One sign-in for everyone: customers, the people who run places, and the Цагтаа team. */
+/** Бүх хүнд нэг нэвтрэх хуудас: үйлчлүүлэгч, газар эрхлэгч, Цагтаагийн баг. */
 export default async function LoginPage(props: PageProps<"/login">): Promise<JSX.Element> {
   const { t } = await getI18n();
   const params = await props.searchParams;
   const nextParam = Array.isArray(params.next) ? params.next[0] : params.next;
   const next = safeNext(nextParam, "");
   const account = await getCurrentAccount();
-  // Already signed in: straight on to where they were going.
+  // Аль хэдийн нэвтэрсэн бол очих гэж байсан газар руу нь шууд явуулна.
   if (account) {
     redirect(
       safeNext(
